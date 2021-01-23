@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/root/sticky_link
+WorkingDirectory=/var/www/sticky_link
 ExecStart=uwsgi --ini deploy/production.ini
 ExecStop=uwsgi --stop /var/www/sticky_link/deploy/wsgi_master.pid
 
