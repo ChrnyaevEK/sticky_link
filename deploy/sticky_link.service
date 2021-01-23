@@ -6,7 +6,8 @@ After=network.target
 User=www-data
 Group=www-data
 WorkingDirectory=/var/www/sticky_link
-ExecStart=sh /var/www/sticky_link/deploy/env.sh && uwsgi --ini /var/www/sticky_link/deploy/production.ini
+ExecStartPre=sh /var/www/sticky_link/deploy/env.sh
+ExecStart=uwsgi --ini /var/www/sticky_link/deploy/production.ini
 ExecStop=uwsgi --stop /var/www/sticky_link/deploy/uwsgi_master.pid
 
 [Install]
