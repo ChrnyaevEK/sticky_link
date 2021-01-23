@@ -26,7 +26,7 @@ SECRET_KEY = 'hvj(em8e@a3dnmkxtf1*1qk%-)o9ev)hg0##q)gz)e9_kd)1w$'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['toptools.tech', 'www.toptools.tech']
 
 
 # Application definition
