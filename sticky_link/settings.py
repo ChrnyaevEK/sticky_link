@@ -26,7 +26,7 @@ SECRET_KEY = 'hvj(em8e@a3dnmkxtf1*1qk%-)o9ev)hg0##q)gz)e9_kd)1w$'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['toptools.tech', 'www.toptools.tech']
+ALLOWED_HOSTS = ['toptools.tech', 'www.toptools.tech', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -55,7 +55,9 @@ ROOT_URLCONF = 'sticky_link.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            'templates'
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
