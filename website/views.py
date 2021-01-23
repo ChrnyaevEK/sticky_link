@@ -2,5 +2,5 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 
-def welcome(request):
-    return HttpResponse(render(request, 'website/welcome.html', {}))
+def index(request):
+    return HttpResponse(render(request, 'website/index.html', {}))
