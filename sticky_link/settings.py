@@ -9,9 +9,9 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
-from pathlib import Path
 import os
+from pathlib import Path
+from sticky_link import env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,11 +19,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', False)
+SECRET_KEY = env.SECRET_KEY
+DEBUG = env.DEBUG
 
 ALLOWED_HOSTS = ['toptools.tech', 'www.toptools.tech', '127.0.0.1', 'localhost']
 
@@ -76,10 +73,10 @@ WSGI_APPLICATION = 'sticky_link.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django_mongodb_engine',
-        'NAME': os.getenv('MONGO_DATABASE'),
-        'USERNAME': os.getenv('MONGO_USERNAME'),
-        'PASSWORD': os.getenv('MONGO_PASSWORD'),
-        'HOST': os.getenv('MONGO_HOST'),
+        'NAME': env.MONGO_DATABASE,
+        'USERNAME': env.MONGO_USERNAME,
+        'PASSWORD': env.MONGO_PASSWORD,
+        'HOST': env.MONGO_HOST,
     }
 }
 

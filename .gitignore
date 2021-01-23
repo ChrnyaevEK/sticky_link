@@ -1,1 +1,2 @@
-/deploy/env.sh
+/deploy/run-dev.sh
+/sticky_link/env.py
