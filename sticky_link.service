@@ -1,5 +1,5 @@
 [Unit]
-Description=Gunicorn instance to serve sticky_link project
+Description= Serve sticky_link project
 After=network.target
 
 [Service]
