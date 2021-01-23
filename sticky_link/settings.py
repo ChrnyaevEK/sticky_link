@@ -20,10 +20,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'hvj(em8e@a3dnmkxtf1*1qk%-)o9ev)hg0##q)gz)e9_kd)1w$'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', False)
 
 ALLOWED_HOSTS = ['toptools.tech', 'www.toptools.tech', '127.0.0.1', 'localhost']
 
@@ -76,7 +76,10 @@ WSGI_APPLICATION = 'sticky_link.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django_mongodb_engine',
-        'NAME': 'my_database'
+        'NAME': os.getenv('MONGO_DATABASE'),
+        'USERNAME': os.getenv('MONGO_USERNAME'),
+        'PASSWORD': os.getenv('MONGO_PASSWORD'),
+        'HOST': os.getenv('MONGO_HOST'),
     }
 }
 
