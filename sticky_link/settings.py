@@ -72,11 +72,8 @@ WSGI_APPLICATION = 'sticky_link.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django_mongodb_engine',
-        'NAME': env.MONGO_DATABASE,
-        'USERNAME': env.MONGO_USERNAME,
-        'PASSWORD': env.MONGO_PASSWORD,
-        'HOST': env.MONGO_HOST,
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'mydatabase',
     }
 }
 
