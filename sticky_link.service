@@ -6,8 +6,7 @@ After=network.target
 User=www-data
 Group=www-data
 WorkingDirectory=/root/sticky_link
-Environment="PATH=/root/sticky_link/venv/bin"
-ExecStart=/root/sticky_link/venv/bin/gunicorn --workers 3 --bind unix:sticky_link.sock -m 007 wsgi:app
+ExecStart=uwsgi --ini production.ini
 
 [Install]
 WantedBy=multi-user.target
