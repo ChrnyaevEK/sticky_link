@@ -7,7 +7,7 @@ User=www-data
 Group=www-data
 WorkingDirectory=/var/www/sticky_link
 ExecStart=uwsgi --ini deploy/production.ini
-ExecStop=uwsgi --stop /var/www/sticky_link/deploy/wsgi_master.pid
+ExecStop=uwsgi --stop /var/www/sticky_link/deploy/uwsgi_master.pid
 
 [Install]
 WantedBy=multi-user.target
