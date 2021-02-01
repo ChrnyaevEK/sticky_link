@@ -4,7 +4,7 @@
     Relay on ID's given by default
 """
 from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, BaseValidator
 
 
 class Settings:
@@ -53,6 +53,9 @@ class Widget(Common):
     ])
     left = models.IntegerField(verbose_name='Offset left from parent', default=0, validators=[MinValueValidator(0)])
     top = models.IntegerField(verbose_name='Offset top from parent', default=0, validators=[MinValueValidator(0)])
+    background_color = models.CharField(max_length=10, choices=Settings.colors,
+                                        default=Settings.default_background_color)
+    text_color = models.CharField(max_length=10, choices=Settings.colors, default=Settings.default_text_color)
 
     class Meta:
         abstract = True
@@ -60,7 +63,32 @@ class Widget(Common):
 
 class SimpleText(Widget):
     max_length = 2000
-    text_content = models.TextField(verbose_name='Text content of widget', max_length=max_length)
-    font_color = models.CharField(max_length=10, choices=Settings.colors, default=Settings.default_text_color)
-    background_color = models.CharField(max_length=10, choices=Settings.colors,
-                                        default=Settings.default_background_color)
+    text_content = models.TextField(verbose_name='Text content of widget', max_length=max_length, null=True, blank=True)
+
+
+class RichText(Widget):
+    text_color = None  # Color is set by markdown
+    max_length = 2000
+    text_content = models.TextField(verbose_name='Text content of widget', max_length=max_length, null=True, blank=True)
+    show_source = models.BooleanField(default=True)
+
+
+class URL(Widget):
+    href = models.URLField(null=True, blank=True)
+
+
+class SimpleListValidator(BaseValidator):
+    max_items_amount = 20
+    max_item_length = 100
+
+    def compare(self, a, b):
+        # Check type, items amount and length of each item
+        isinstance(a, list) and len(a) <= self.max_items_amount and all([len(i) <= self.max_item_length for i in a])
+
+
+class SimpleList(Widget):
+    max_title_length = 100
+    max_description_length = 200
+    title = models.CharField(max_length=max_title_length)
+    description = models.CharField(max_length=max_description_length)
+    items = models.JSONField(default=list, validators=[SimpleListValidator(None)])
