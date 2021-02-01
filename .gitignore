@@ -1,5 +1,6 @@
 /deploy/run-dev.sh
 /sticky_link/env.py
+/sticky_link/log.txt
 .DS_Store
 node_modules
 /templates/application/dist
