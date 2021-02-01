@@ -28,6 +28,7 @@ ALLOWED_HOSTS = ['toptools.tech', 'www.toptools.tech', '127.0.0.1', 'localhost']
 
 INSTALLED_APPS = [
     'application',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

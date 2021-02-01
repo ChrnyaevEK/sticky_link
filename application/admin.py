@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from application.models import *
+from application import models
 
-admin.site.register(Wall)
-admin.site.register(SimpleTextWidget)
+admin.site.register(models.Wall)
+admin.site.register(models.SimpleText)
