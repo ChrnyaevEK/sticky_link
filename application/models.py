@@ -20,6 +20,7 @@ class Settings:
     )
     default_background_color = 'white'
     default_text_color = 'black'
+    default_z_index = 0
     max_widget_width = 2000
     min_widget_width = 200
     max_widget_height = 2000
@@ -51,6 +52,8 @@ class Widget(Common):
     height = models.IntegerField(verbose_name='Widget height', default=Settings.min_widget_height, validators=[
         MinValueValidator(Settings.min_widget_height), MaxValueValidator(Settings.max_widget_height)
     ])
+    z_index = models.IntegerField(verbose_name='Widget z index(stack position)', default=Settings.default_z_index,
+                                  validators=[MinValueValidator(Settings.default_z_index)])
     left = models.IntegerField(verbose_name='Offset left from parent', default=0, validators=[MinValueValidator(0)])
     top = models.IntegerField(verbose_name='Offset top from parent', default=0, validators=[MinValueValidator(0)])
     background_color = models.CharField(max_length=10, choices=Settings.colors,
