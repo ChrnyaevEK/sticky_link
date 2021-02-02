@@ -1,8 +1,8 @@
-/deploy/run-dev.sh
-/deploy/sticky_link.sock
-/deploy/uwsgi_master.pid
-/sticky_link/env.py
-/sticky_link/log.txt
+deploy/run-dev.sh
+deploy/sticky_link.sock
+deploy/uwsgi_master.pid
+sticky_link/env.py
+sticky_link/log.txt
 .DS_Store
 node_modules
 /templates/application/dist
