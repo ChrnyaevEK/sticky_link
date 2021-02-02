@@ -40,6 +40,7 @@ class Common(models.Model):
 
 
 class Wall(Common):
+    type = 'wall'
     title = models.CharField(verbose_name='Wall title', max_length=200)
     description = models.CharField(verbose_name='Wall description', max_length=500, blank=True, null=True)
 
@@ -65,11 +66,13 @@ class Widget(Common):
 
 
 class SimpleText(Widget):
+    type = 'simple_text'
     max_length = 2000
     text_content = models.TextField(verbose_name='Text content of widget', max_length=max_length, null=True, blank=True)
 
 
 class RichText(Widget):
+    type = 'rich_text'
     text_color = None  # Color is set by markdown
     max_length = 2000
     text_content = models.TextField(verbose_name='Text content of widget', max_length=max_length, null=True, blank=True)
@@ -77,6 +80,7 @@ class RichText(Widget):
 
 
 class URL(Widget):
+    type = 'url'
     href = models.URLField(null=True, blank=True)
 
 
@@ -90,6 +94,7 @@ class SimpleListValidator(BaseValidator):
 
 
 class SimpleList(Widget):
+    type = 'simple_list'
     max_title_length = 100
     max_description_length = 200
     title = models.CharField(max_length=max_title_length)

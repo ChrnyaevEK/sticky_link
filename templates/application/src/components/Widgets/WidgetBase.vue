@@ -6,10 +6,10 @@
         class="widget rounded bg-white"
         ref="resizable"
         :dragSelector="_('#sidebar')"
-        :width="width"
-        :minWidth="minWidth"
-        :height="height"
-        :minHeight="minHeight"
+        :width="widget.width"
+        :minWidth="widget.minWidth"
+        :height="widget.height"
+        :minHeight="widget.minHeight"
     >
         <div class="d-flex justify-content-between control-area">
             <div class="content mx-1">
@@ -41,72 +41,17 @@
     export default {
         name: "WidgetBase",
         props: {
-            id: {
-                type: Number,
+            widget: {
+                type: Object,
                 required: true,
-            },
-            width: {
-                type: Number,
-                default: 200, // Fallback value
-            },
-            minWidth: {
-                type: Number,
-                default: 200, // Fallback value
-            },
-            height: {
-                type: Number,
-                default: 100, // Fallback value
-            },
-            minHeight: {
-                type: Number,
-                default: 100, // Fallback value
-            },
-            zIndex: {
-                // TODO
-                type: Number,
-                required: false,
-            },
-            left: {
-                // TODO
-                type: Number,
-                required: false,
-            },
-            top: {
-                // TODO
-                type: Number,
-                required: false,
-            },
-            textColor: {
-                // TODO
-                type: String,
-                required: false,
-            },
-            backgroundColor: {
-                // TODO
-                type: String,
-                required: false,
-            },
-            dateOfCreation: {
-                // TODO
-                type: String,
-                required: false,
-            },
-            lastUpdate: {
-                // TODO
-                type: String,
-                required: false,
             },
         },
         created: function() {
-            registerIdSystem(this); // Create _ function to generate ids
+            registerIdSystem(this, this.widget.type, this.widget.id); // Create _ function to generate ids
         },
         methods: {
-            onResizeEnd: function(eventName, left, top, width, height) {
-                console.log(eventName, left, top, width, height);
-            },
-            onDragEnd: function(eventName, left, top, width, height) {
-                console.log(eventName, left, top, width, height);
-            },
+            onResizeEnd: function() {},
+            onDragEnd: function() {},
         },
         components: {
             VueResizable,

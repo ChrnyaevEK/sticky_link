@@ -1,13 +1,13 @@
 import $ from "jquery";
-function generateId(property) {
-    return `${property}-${this.id}`;
+function generateId(property, type, id) {
+    return `${property}-${type}-${id}`;
 }
 
 export class API {
     constructor(urlName, id) {
         this.urlName = urlName;
         this.id = id;
-        this.baseUrl = 'http://127.0.0.1:8000/'
+        this.baseUrl = "http://127.0.0.1:8000/";
     }
     ajax(settings) {
         return $.ajax(settings);
@@ -29,9 +29,9 @@ export class API {
     }
 }
 
-export function registerIdSystem(vm) {
+export function registerIdSystem(vm, type, id) {
     vm._ = function(property) {
-        return generateId.call(vm, property);
+        return generateId.call(vm, property, type, id);
     };
 }
 

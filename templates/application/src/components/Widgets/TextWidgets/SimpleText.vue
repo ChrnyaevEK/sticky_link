@@ -1,7 +1,5 @@
 <template>
-    <WidgetBase v-bind="{ ...$props, ...$attrs }">
-
-    </WidgetBase>
+    <WidgetBase v-bind="{ ...$props, ...$attrs }"></WidgetBase>
 </template>
 
 <script>
@@ -10,13 +8,9 @@
     export default {
         name: "SimpleText",
         props: {
-            max_length: {
-                type: Number,
-                required: false,
-            },
-            text_content: {
-                type: String,
-                required: false,
+            widget: {
+                type: Object,
+                required: true,
             },
         },
         components: {
