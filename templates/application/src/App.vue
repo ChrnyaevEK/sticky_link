@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Wall></Wall>
+        <Wall :id="1"></Wall>
     </div>
 </template>
 

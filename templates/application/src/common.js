@@ -7,20 +7,23 @@ export class API {
     constructor(urlName, id) {
         this.urlName = urlName;
         this.id = id;
+        this.baseUrl = 'http://127.0.0.1:8000/'
     }
     ajax(settings) {
         return $.ajax(settings);
     }
     retrieve() {
         return this.ajax({
+            crossDomain: true,
             type: "GET",
-            url: `${this.urlName}/${this.id}/`,
+            url: `${this.baseUrl}${this.urlName}/${this.id}/`,
         });
     }
     create(data) {
         return this.ajax({
+            crossDomain: true,
             type: "POST",
-            url: `${this.urlName}/`,
+            url: `${this.baseUrl}${this.urlName}/`,
             data,
         });
     }
