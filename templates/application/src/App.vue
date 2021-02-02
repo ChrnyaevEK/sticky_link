@@ -1,15 +1,15 @@
 <template>
     <div>
-        <Workspace></Workspace>
+        <Wall></Wall>
     </div>
 </template>
 
 <script>
-import Workspace from "./components/Workspace.vue";
+import Wall from "./components/Wall";
 export default {
     name: "App",
     components: {
-        Workspace,
+        Wall,
     },
 };
 </script>

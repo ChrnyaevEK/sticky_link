@@ -16,7 +16,7 @@ class Settings:
         ('warning', 'Warning'),
         ('info', 'Info'),
         ('white', 'White'),
-        ('black', 'White'),
+        ('black', 'Black'),
     )
     default_background_color = 'white'
     default_text_color = 'black'

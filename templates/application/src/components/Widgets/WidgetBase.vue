@@ -6,18 +6,16 @@
         class="widget rounded bg-white"
         ref="resizable"
         :dragSelector="_('#sidebar')"
-        :width="220"
-        :minWidth="220"
-        :height="100"
-        :minHeight="100"
+        :width="width"
+        :minWidth="minWidth"
+        :height="height"
+        :minHeight="minHeight"
     >
         <div class="d-flex justify-content-between control-area">
             <div class="content mx-1">
                 <slot name="content">
                     <div class="content-empty d-flex align-items-center justify-content-center">
-                        <div class="text-secondary">
-                            Nothing is here yet... <i class="far fa-frown"></i>
-                        </div>
+                        <div class="text-secondary">Nothing is here yet... <i class="far fa-frown"></i></div>
                     </div>
                 </slot>
             </div>
@@ -37,14 +35,66 @@
 </template>
 
 <script>
+    // Front end is absolutely passive
     import VueResizable from "vue-resizable";
     import { registerIdSystem } from "../../common.js";
     export default {
         name: "WidgetBase",
         props: {
             id: {
-                type: String,
+                type: Number,
                 required: true,
+            },
+            width: {
+                type: Number,
+                default: 200, // Fallback value
+            },
+            minWidth: {
+                type: Number,
+                default: 200, // Fallback value
+            },
+            height: {
+                type: Number,
+                default: 100, // Fallback value
+            },
+            minHeight: {
+                type: Number,
+                default: 100, // Fallback value
+            },
+            zIndex: {
+                // TODO
+                type: Number,
+                required: false,
+            },
+            left: {
+                // TODO
+                type: Number,
+                required: false,
+            },
+            top: {
+                // TODO
+                type: Number,
+                required: false,
+            },
+            textColor: {
+                // TODO
+                type: String,
+                required: false,
+            },
+            backgroundColor: {
+                // TODO
+                type: String,
+                required: false,
+            },
+            dateOfCreation: {
+                // TODO
+                type: String,
+                required: false,
+            },
+            lastUpdate: {
+                // TODO
+                type: String,
+                required: false,
             },
         },
         created: function() {

@@ -1,15 +1,22 @@
 <template>
-    <WidgetBase :id="id"></WidgetBase>
+    <WidgetBase v-bind="{ ...$props, ...$attrs }">
+
+    </WidgetBase>
 </template>
 
 <script>
     import WidgetBase from "../WidgetBase.vue";
+    // import API from "../../../common.js";
     export default {
-        name: "SimpleTextWidget",
+        name: "SimpleText",
         props: {
-            id: {
+            max_length: {
+                type: Number,
+                required: false,
+            },
+            text_content: {
                 type: String,
-                required: true,
+                required: false,
             },
         },
         components: {
