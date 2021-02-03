@@ -1,7 +1,5 @@
 <template>
-    <div>
-        <Wall :id="1"></Wall>
-    </div>
+    <Wall :id="1"></Wall>
 </template>
 
 <script>
