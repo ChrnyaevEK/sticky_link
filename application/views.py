@@ -23,6 +23,7 @@ class WallViewSet(viewsets.ModelViewSet):
         return JsonResponse({
             'wall': self.serializer_class(wall).data,
             'widgets': widgets,
+            'settings': serializers.ObjectSerializer(models.Settings).data
         })
 
 

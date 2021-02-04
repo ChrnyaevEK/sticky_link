@@ -12,7 +12,7 @@
                     <div id="text-widgets-body" class="collapse in" role="tabpanel" aria-labelledby="text-widgets-header">
                         <div class="card-body p-2 row">
                             <div class="col-10" title="Textarea with minimum format options">Simple text</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></div>
+                            <a @click.stop="addBlankWidget(SimpleText)" class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></a>
                         </div>
                         <div class="card-body p-2 row">
                             <div class="col-10" title="Textarea with Markdown support">Rich text (markdown)</div>
@@ -130,20 +130,20 @@
             </div>
         </div>
         <div class="col-12 col-md-10" id="wall-widget-list">
-            <SimpleText v-for="widget of simpleTextWidgets" :key="widget.id" :widget="widget"> </SimpleText>
+            <SimpleText v-for="widget of filterWidgets(SimpleText)" :key="widget.id" :widget="widget"> </SimpleText>
         </div>
     </div>
 </template>
 
 <script>
     import SimpleText from "./Widgets/View/SimpleText";
-    import { API, registerIdSystem } from "../common.js";
+    import { API, registerIdSystem, Shared } from "../common.js";
     export default {
         name: "Wall",
         components: {
             SimpleText,
         },
-        created: function() {
+        created() {
             registerIdSystem(this, this.wall.type, this.wall.id);
             this.initiate();
         },
@@ -153,30 +153,40 @@
                 required: true,
             },
         },
-        computed: {
-            simpleTextWidgets: function() {
+        data() {
+            var vm = this;
+            return {
+                API: new API("wall", vm.id),
+                wall: {},
+                widgets: [],
+                SimpleText,
+            };
+        },
+        methods: {
+            initiate() {
+                this.API.retrieve().then((response) => {
+                    this.wall = response.wall;
+                    this.widgets = response.widgets;
+                    Shared.$set(Shared, "settings", response.settings);
+                });
+            },
+            filterWidgets(klass){
                 try {
-                    return this.wall.widgets.filter(function(w) {
-                        return w.type == "simple_text";
+                    return this.widgets.filter(function(w) {
+                        return w.type == klass.type;
                     });
                 } catch (error) {
                     return [];
                 }
             },
-        },
-        data: function() {
-            var vm = this;
-            return {
-                API: new API("wall", vm.id),
-                wall: {},
-            };
-        },
-        methods: {
-            initiate: function() {
-                this.API.retrieve().then((response) => {
-                    this.wall = response;
-                });
-            },
+            addBlankWidget(klass){
+                var wAPI = new API(klass.type)
+                wAPI.create({
+                    wall: this.id
+                }).then((response)=>{
+                    this.widgets.push(response)
+                })
+            }
         },
     };
 </script>

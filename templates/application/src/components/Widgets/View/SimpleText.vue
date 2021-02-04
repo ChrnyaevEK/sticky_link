@@ -5,7 +5,15 @@
                 <span class="flex-grow-1 text-truncate text-wrap text-break">
                     {{ widget.text_content }}
                 </span>
-                <span class="text-right text-secondary">{{ widget.text_content ? widget.text_content.length : 0 }}/{{ widget.max_length }}</span>
+            </div>
+        </template>
+        <template slot="options">
+            <div class="form-group">
+                <label :for="_('left')" class="w-100 d-flex justify-content-between"
+                    >Content of widget
+                    <span class="text-right text-secondary">{{ widget.text_content ? widget.text_content.length : 0 }}/{{ widget.max_length }}</span>
+                </label>
+                <textarea id="_('text_content')" class="form-control" v-model="widget.text_content" :aria-describedby="_('textContentHelp')" :maxlength="widget.max_length" rows="10"></textarea>
             </div>
         </template>
     </WidgetBase>
@@ -13,15 +21,23 @@
 
 <script>
     import WidgetBase from "../WidgetBase.vue";
-    // import API from "../../../common.js";
+    import { registerIdSystem } from "../../../common.js";
     export default {
+        type: 'simple_text',
         name: "SimpleText",
         template: "#simple-text-widget",
+        data(){
+            return {
+            }
+        },
         props: {
             widget: {
                 type: Object,
                 required: true,
             },
+        },
+        created() {
+            registerIdSystem(this, this.widget.type, this.widget.id); // Create _ function to generate ids
         },
         components: {
             WidgetBase,

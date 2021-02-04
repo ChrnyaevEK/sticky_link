@@ -3,7 +3,7 @@
         @resize:end="onResizeEnd"
         @drag:end="onDragEnd"
         :fitParent="true"
-        class="widget rounded"
+        class="widget"
         ref="resizable"
         dragSelector=".control-area"
         :width="widget.width"
@@ -12,10 +12,9 @@
         :minHeight="widget.minHeight"
         :top="widget.top"
         :left="widget.left"
-        :class="`bg-${widget.background_color} text-${widget.text_color}`"
     >
         <div @click.stop.prevent @dblclick="onOptionsRequest" class="h-100 w-100">
-            <div class="content px-2 control-area">
+            <div class="content px-2 control-area" :style="`z-index: ${widget.z_index};`" :class="`bg-${widget.background_color} text-${widget.text_color}`">
                 <slot name="content">
                     <div class="content-empty d-flex align-items-center justify-content-center">
                         <div>Nothing is here yet... <i class="far fa-frown"></i></div>
@@ -32,34 +31,48 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                            <form class="form-inline">
-                                <div class="form-group w-50">
-                                    <label :for="_('width')">Width</label>
-                                    <input class="form-control" v-model="widget.width" :aria-describedby="_('widthHelp')" type="number" name="width" :id="_('width')" step="1">
-                                </div>
-                                <div class="form-group w-50">
-                                    <label :for="_('height')">Height</label>
-                                    <input class="form-control" v-model="widget.height" :aria-describedby="_('heightHelp')" type="number" name="height" :id="_('height')" step="1">
-                                </div>
-                            </form>
-                            <form class="form-inline">
-                                <div class="form-group w-50">
-                                    <label :for="_('left')">Left offset</label>
-                                    <input class="form-control" v-model="widget.left" :aria-describedby="_('leftHelp')" type="number" name="left" :id="_('left')" step="1">
-                                </div>
-                                <div class="form-group w-50">
-                                    <label :for="_('top')">Top offset</label>
-                                    <input class="form-control" v-model="widget.top" :aria-describedby="_('topHelp')" type="number" name="top" :id="_('top')" step="1">
-                                </div>
-                            </form>
                             <form>
-
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-12 col-md-6">
+                                            <label :for="_('width')">Width</label>
+                                            <input class="form-control" v-model.number="widget.width" :aria-describedby="_('widthHelp')" type="number" name="width" :id="_('width')" step="1" />
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <label :for="_('height')">Height</label>
+                                            <input class="form-control" v-model.number="widget.height" :aria-describedby="_('heightHelp')" type="number" name="height" :id="_('height')" step="1" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12 col-md-6">
+                                            <label :for="_('left')">Left offset</label>
+                                            <input class="form-control" v-model.number="widget.left" :aria-describedby="_('leftHelp')" type="number" name="left" :id="_('left')" step="1" />
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <label :for="_('top')">Top offset</label>
+                                            <input class="form-control" v-model.number="widget.top" :aria-describedby="_('topHelp')" type="number" name="top" :id="_('top')" step="1" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12 col-md-6">
+                                            <label :for="_('z_index')">Z-Index (overlay)</label>
+                                            <input class="form-control" v-model.number="widget.z_index" :aria-describedby="_('ZIndexHelp')" type="number" name="z_index" :id="_('z_index')" step="1" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label :for="_('background_color')">Background color</label>
+                                    <v-select :id="_('background_color')" v-model="widget.background_color" :reduce="(val) => val.code" :options="colorOptions"></v-select>
+                                </div>
+                                <div class="form-group">
+                                    <label :for="_('text_color')">Text color</label>
+                                    <v-select :id="_('text_color')" v-model="widget.text_color" :reduce="(val) => val.code" :options="colorOptions"></v-select>
+                                </div>
                                 <slot name="options"></slot>
                             </form>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary">Save</button>
                         </div>
                     </div>
                 </div>
@@ -71,8 +84,10 @@
 <script>
     // Front end is absolutely passive
     import VueResizable from "vue-resizable";
-    import { registerIdSystem, WidgetManager } from "../../common.js";
+    import { registerIdSystem, WidgetManager, Shared } from "../../common.js";
+    import vSelect from "vue-select";
     import $ from "jquery";
+
     export default {
         name: "WidgetBase",
         props: {
@@ -87,6 +102,7 @@
             return {
                 manager: new WidgetManager(vm.widget.type, vm.widget.id),
                 optionsModal: this._("options"),
+                Shared: Shared,
             };
         },
         methods: {
@@ -101,19 +117,31 @@
                 this.widget.top = event.top;
             },
             onOptionsRequest: function() {
-                $(`#${this.optionsModal}`).modal('show');
+                $(`#${this.optionsModal}`).modal("show");
             },
         },
         components: {
             VueResizable,
+            vSelect,
         },
         watch: {
             widget: {
                 handler: function() {
                     this.manager.updated(this.widget);
-                    this.$refs.resizable.restoreSize()
                 },
                 deep: true,
+            },
+        },
+        computed: {
+            colorOptions() {
+                var res = [];
+                for (var opt of Shared.settings.colors) {
+                    res.push({
+                        label: opt[1],
+                        code: opt[0],
+                    });
+                }
+                return res;
             },
         },
     };
@@ -131,6 +159,7 @@
     .widget .control-area {
         width: 100%;
         height: 100%;
+        position: absolute;
     }
     .widget .content,
     .widget .content-empty {

@@ -8,16 +8,16 @@ from django.core.validators import MaxValueValidator, MinValueValidator, BaseVal
 
 
 class Settings:
-    colors = (
-        ('primary', 'Primary'),
-        ('secondary', 'Secondary'),
-        ('success', 'Success'),
-        ('danger', 'Danger'),
-        ('warning', 'Warning'),
-        ('info', 'Info'),
-        ('white', 'White'),
-        ('black', 'Black'),
-    )
+    colors = [
+        ['primary', 'Primary'],
+        ['secondary', 'Secondary'],
+        ['success', 'Success'],
+        ['danger', 'Danger'],
+        ['warning', 'Warning'],
+        ['info', 'Info'],
+        ['white', 'White'],
+        ['black', 'Black'],
+    ]
     default_background_color = 'white'
     default_text_color = 'black'
     default_z_index = 0
