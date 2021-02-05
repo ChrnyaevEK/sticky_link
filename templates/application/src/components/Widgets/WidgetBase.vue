@@ -7,9 +7,7 @@
         ref="resizable"
         dragSelector=".control-area"
         :width="widget.width"
-        :minWidth="widget.minWidth"
         :height="widget.height"
-        :minHeight="widget.minHeight"
         :top="widget.top"
         :left="widget.left"
     >

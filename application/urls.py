@@ -10,5 +10,7 @@ router.register('url', views.URLViewSet)
 router.register('simple_list', views.SimpleListViewSet)
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('api/', include(router.urls), name="api"),
+    path('app/enter/', views.Enter.as_view(), name="enter"),
+    path('app/leave/', views.Leave.as_view(), name="leave"),
 ]

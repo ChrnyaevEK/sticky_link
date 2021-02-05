@@ -4,7 +4,7 @@
     Relay on ID's given by default
 """
 from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator, BaseValidator
+from django.core.validators import BaseValidator
 
 
 class Settings:
@@ -21,10 +21,8 @@ class Settings:
     default_background_color = 'white'
     default_text_color = 'black'
     default_z_index = 0
-    max_widget_width = 2000
-    min_widget_width = 200
-    max_widget_height = 2000
-    min_widget_height = 100
+    default_widget_width = 200
+    default_widget_height = 100
 
 
 class Common(models.Model):
@@ -47,16 +45,13 @@ class Wall(Common):
 
 class Widget(Common):
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
-    width = models.IntegerField(verbose_name='Widget width', default=Settings.min_widget_width, validators=[
-        MinValueValidator(Settings.min_widget_width), MaxValueValidator(Settings.max_widget_width)
-    ])
-    height = models.IntegerField(verbose_name='Widget height', default=Settings.min_widget_height, validators=[
-        MinValueValidator(Settings.min_widget_height), MaxValueValidator(Settings.max_widget_height)
-    ])
-    z_index = models.IntegerField(verbose_name='Widget z index(stack position)', default=Settings.default_z_index,
-                                  validators=[MinValueValidator(Settings.default_z_index)])
-    left = models.IntegerField(verbose_name='Offset left from parent', default=0, validators=[MinValueValidator(0)])
-    top = models.IntegerField(verbose_name='Offset top from parent', default=0, validators=[MinValueValidator(0)])
+    width = models.IntegerField(verbose_name='Widget width', default=Settings.default_widget_width)
+    height = models.IntegerField(verbose_name='Widget height', default=Settings.default_widget_height)
+    z_index = models.IntegerField(verbose_name='Widget z index(stack position)', default=Settings.default_z_index)
+    left = models.IntegerField(verbose_name='Offset left from parent', default=0)
+    top = models.IntegerField(verbose_name='Offset top from parent', default=0)
+
+    # TODO - html color
     background_color = models.CharField(max_length=10, choices=Settings.colors,
                                         default=Settings.default_background_color)
     text_color = models.CharField(max_length=10, choices=Settings.colors, default=Settings.default_text_color)
@@ -74,8 +69,7 @@ class SimpleText(Widget):
 class RichText(Widget):
     type = 'rich_text'
     text_color = None  # Color is set by markdown
-    max_length = 2000
-    text_content = models.TextField(verbose_name='Text content of widget', max_length=max_length, null=True, blank=True)
+    text_content = models.TextField(verbose_name='Text content of widget', null=True, blank=True)
     show_source = models.BooleanField(default=True)
 
 

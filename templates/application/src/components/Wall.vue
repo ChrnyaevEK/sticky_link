@@ -1,5 +1,5 @@
 <template>
-    <div class="flex-grow-1 row">
+    <div class="flex-grow-1 row w-100">
         <div class="col-12 col-md-2">
             <div class="font-weight-bold p-2">Widgets</div>
             <div id="wall-widget-selector" role="tablist" aria-multiselectable="true" class="border-top border-bottom">

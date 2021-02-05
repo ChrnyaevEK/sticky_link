@@ -11,9 +11,8 @@
             <div class="form-group">
                 <label :for="_('left')" class="w-100 d-flex justify-content-between"
                     >Content of widget
-                    <span class="text-right text-secondary">{{ widget.text_content ? widget.text_content.length : 0 }}/{{ widget.max_length }}</span>
                 </label>
-                <textarea id="_('text_content')" class="form-control" v-model="widget.text_content" :aria-describedby="_('textContentHelp')" :maxlength="widget.max_length" rows="10"></textarea>
+                <textarea id="_('text_content')" class="form-control" v-model="widget.text_content" :aria-describedby="_('textContentHelp')" rows="10"></textarea>
             </div>
         </template>
     </WidgetBase>
