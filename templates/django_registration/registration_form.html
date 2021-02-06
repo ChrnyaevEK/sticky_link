@@ -1,30 +1,18 @@
-{% extends 'website/header_footer.html' %} 
+{% extends 'website/index.html' %} 
 {% load static %} 
 
-{% block css %}
-<link rel="stylesheet" href="{% static 'css/auth.css' %}" type="text/css" />
-{% endblock %} 
-
 {% block content %} 
-<div class="d-flex flex-column justify-content-center align-items-center w-100 h-100">
+<div class="d-flex justify-content-center align-items-center w-100 h-100">
     <div class="col-12 col-md-6">
         {% if user.is_authenticated %}
         <span> Please <a href="{% url 'logout' %}">log out</a> in order to create a new account</span>
         {% else %}
         {% if form.errors %}
-            {% for error in form.errors %}
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <span>{{ error | escape }}</span>
-            </div>
+            {% for err in form.errors.values %}
+            <span class="text-danger">{{ err | escape }}</span>
             {% endfor %}
         {% endif %}
-        <script>
-          $(".alert").alert();
-        </script>
-        <form method="POST" action="{% url 'login' %}" >
+        <form method="POST" action="{% url 'django_registration_register' %}" autocomplete="on" >
             {% csrf_token %}
             <div class="form-group">
                 <label for="user-name">User name</label>
@@ -35,10 +23,11 @@
                     autofocus
                     maxlength="150"
                     class="form-control"
+                    autocomplete="username"
                     aria-describedby="UserNameHelp"
                     required
                 />
-                <small id="UserNameHelp" class="text-muted">Choose your user name</small>
+                <small id="UserNameHelp" class="text-muted">User name may contain any word character along with the following set of additional characters .(dot) @(at) +(plus) -(minus)</small>
             </div>
             <div class="form-group">
                 <label for="email">E-mail</label>
@@ -47,20 +36,23 @@
             </div>
             <div class="form-group">
                 <label for="password1">Password</label>
-                <input type="password1" name="password1" id="password1" class="form-control" aria-describedby="Password1NameHelp" />
+                <input type="password" name="password1" id="password1" autocomplete="new-password" class="form-control" aria-describedby="Password1NameHelp" required />
                 <small id="Password1NameHelp" class="text-muted">Submit password</small>
             </div>
             <div class="form-group">
                 <label for="password2">Password conformation</label>
-                <input type="password2" name="password2" id="password2" class="form-control"aria-describedby="Password2NameHelp" />
-                <small id="Password2NameHelp" class="text-muted">Confirm password</small>
+                <input type="password" name="password2" id="password2" autocomplete="new-password" class="form-control"aria-describedby="Password2NameHelp" required />
+                <small id="Password2NameHelp" class="text-muted">Enter the same password as before, for verification.</small>
             </div>
             <div class="form-group">
                 <button type="submit" class="btn form-control btn-light border">Sign up</button>
-                <input type="hidden" name="next" value="{{ next }}">
             </div>
         </form>
         {% endif %}
     </div>
 </div>
+<script>
+
+
+</script>
 {% endblock %}

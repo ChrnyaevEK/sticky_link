@@ -1,29 +1,17 @@
-{% extends 'website/header_footer.html' %} 
+{% extends 'website/index.html' %} 
 {% load static %} 
 
-{% block css %}
-<link rel="stylesheet" href="{% static 'css/auth.css' %}" type="text/css" />
-{% endblock %} 
-
 {% block content %} 
-{% with title="Sticky link" %} 
-
-<div class="d-flex flex-column justify-content-center align-items-center w-100 h-100">
+<div class="d-flex justify-content-center align-items-center w-100 h-100">
     <div class="col-12 col-md-6">
         {% if form.errors %}
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-            <span>That did not work. Please try again.</span>
-        </div>
+            {% for err in form.errors.values %}
+            <span class="text-danger">{{ err | escape }}</span>
+            {% endfor %}
         {% endif %}
 
         {% if next %}
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+        <div class="text-danger">
             {% if user.is_authenticated %}
             <span> Your account doesn't have access to this page. To proceed, please login with an account that has access. </span>
             {% else %}
@@ -31,10 +19,6 @@
             {% endif %}
         </div>
         {% endif %}
-
-        <script>
-          $(".alert").alert();
-        </script>
         <form method="POST" action="{% url 'login' %}" >
             {% csrf_token %}
             <div class="form-group">
@@ -59,10 +43,9 @@
             </div>
             <div class="form-group">
                 <button type="submit" class="btn form-control btn-light border">Login</button>
-                <input type="hidden" name="next" value="{{ next }}">
+                <input type="hidden" name="next" value="{% url 'website' %}">
             </div>
         </form>
     </div>
 </div>
-{% endwith %} 
 {% endblock %}

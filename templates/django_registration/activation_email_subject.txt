@@ -1,0 +1,1 @@
+Activation link for {{user.username}} at {{site.domain}}!

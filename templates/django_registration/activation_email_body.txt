@@ -1,0 +1,1 @@
+In order to activate your {{site.name}} account, please, follow the activation link: {{scheme}}://{{stite.domain}}/accounts/activate/{{activation_key}}/ . If the link does not work, just copy-paste it to address line in your browser.

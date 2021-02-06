@@ -1,9 +1,12 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from sticky_link import env
 
 
 def index(request):
-    return HttpResponse(render(request, 'website/index.html', {
-        'env': env,
-    }))
+    return HttpResponse(render(request, 'website/website.html', {}))
+
+
+@login_required
+def profile(request):
+    return HttpResponse(render(request, 'website/profile.html', {}))

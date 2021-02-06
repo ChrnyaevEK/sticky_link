@@ -1,0 +1,35 @@
+{% extends 'website/index.html' %}
+
+{% block title %} {{user.username}} @ Sticky Link {% endblock %} 
+
+{% block content %}
+<div class="pt-3">
+    <div class="form-group">
+        <label>User name</label>
+        <p class="form-control">{{user.username}}</p>
+    </div>
+    <div class="form-group">
+        <label>E-mail</label>
+        <p class="form-control">{{user.email}}</p>
+    </div>
+    {% if user.first_name %}
+    <div class="form-group">
+        <label>First name</label>
+        <p class="form-control">{{user.first_name}}</p>
+    </div>
+    {% endif %}
+    {% if user.last_name %}
+    <div class="form-group">
+        <label>Last name</label>
+        <p class="form-control">{{user.last_name}}</p>
+    </div>
+    {% endif %}
+    <hr>
+    <div class="d-flex justify-content-end">
+        <a href="{% url 'logout' %}" class="px-3">Log out</a>
+        <a href="{% url 'password_change' %}" class="px-3">Change password</a>
+    </div>
+</div>
+
+
+{% endblock %}

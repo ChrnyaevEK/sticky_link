@@ -13,7 +13,7 @@ auth_urlpatterns = [
     path(
         'logout/',
         auth_views.LogoutView.as_view(
-            template_name="django_authentication/logout.html"
+            template_name="website/website.html"
         ),
         name='logout'
     ),
@@ -34,7 +34,9 @@ auth_urlpatterns = [
     path(
         'password_reset/',
         auth_views.PasswordResetView.as_view(
-            template_name="django_authentication/password_reset.html"
+            template_name="django_authentication/password_reset.html",
+            email_template_name="django_authentication/password_reset_email.txt",
+            subject_template_name="django_authentication/password_reset_subject.txt",
         ),
         name='password_reset'
     ),
