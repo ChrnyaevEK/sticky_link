@@ -1,0 +1,18 @@
+{% extends 'website/header_footer.html' %} 
+{% load static %} 
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}" type="text/css" />
+{% endblock %} 
+
+{% block content %} 
+<div class="d-flex flex-column justify-content-center align-items-center text-center align-middle w-100 h-100">
+    <p>Registration completed!</p>
+    <p>To <strong>activate</strong> your account follow the conformation link, we sent to supplied e-mail.</p>
+    <p>
+        <a class="px-2" href="{% url 'index' %}">Home</a>
+        <a class="px-2" href="{ url 'login' }">Login</a>
+        <a href="https://en.wikipedia.org/wiki/Special:Random" target="_blank">Random Wikipedia article</a>
+    </p>
+</div>
+{% endblock %}

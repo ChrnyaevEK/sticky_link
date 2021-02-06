@@ -13,7 +13,7 @@ export class API {
     constructor(urlName, id) {
         this.urlName = urlName;
         this.id = id;
-        this.baseUrl = "http://127.0.0.1:8000"; // TODO remove
+        this.baseUrl = "http://127.0.0.1:8000/app/api"; // TODO remove
     }
     ajax(settings) {
         return $.ajax(settings);
@@ -22,14 +22,14 @@ export class API {
         return this.ajax({
             crossDomain: true,
             type: "GET",
-            url: `${this.baseUrl}/api/${this.urlName}/${this.id}/`,
+            url: `${this.baseUrl}/${this.urlName}/${this.id}/`,
         });
     }
     create(data) {
         return this.ajax({
             crossDomain: true,
             type: "POST",
-            url: `${this.baseUrl}/api/${this.urlName}/`,
+            url: `${this.baseUrl}/${this.urlName}/`,
             contentType: "application/json",
             data: JSON.stringify(data),
         });
@@ -39,7 +39,7 @@ export class API {
         return this.ajax({
             crossDomain: true,
             type: "PUT",
-            url: `${this.baseUrl}/api/${this.urlName}/${this.id}/`,
+            url: `${this.baseUrl}/${this.urlName}/${this.id}/`,
             contentType: "application/json",
             data: JSON.stringify(data),
         });

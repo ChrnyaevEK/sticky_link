@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     'application',
     'rest_framework',
     'corsheaders',
+    'livereload',
+    'django_registration',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -123,3 +125,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),  # General static files
     os.path.join(BASE_DIR, "templates/application/dist/static"),  # Application bundles
 ]
+
+# Registration settings
+ACCOUNT_ACTIVATION_DAYS = 7
+REGISTRATION_OPEN = True
