@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from application import models
+from django.contrib.auth.models import User
 
 
 class ObjectSerializer(serializers.BaseSerializer):
@@ -43,6 +44,12 @@ class ObjectSerializer(serializers.BaseSerializer):
                     # Force anything else to its string representation.
                     output[attribute_name] = str(attribute)
             return output
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'id']
 
 
 class WallSerializer(serializers.ModelSerializer):

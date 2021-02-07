@@ -1,10 +1,8 @@
 <template id="simple-text-widget">
     <WidgetBase v-bind="{ ...$props, ...$attrs }">
         <template slot="content">
-            <div class="d-flex flex-column h-100">
-                <span class="flex-grow-1 text-truncate text-wrap text-break">
-                    {{ widget.text_content }}
-                </span>
+            <div class="d-flex flex-column h-100 w-drag">
+                <span class="flex-grow-1 text-truncate text-wrap text-break">{{ widget.text_content }}</span>
             </div>
         </template>
         <template slot="options">
@@ -19,8 +17,8 @@
 </template>
 
 <script>
-    import WidgetBase from "../WidgetBase.vue";
-    import { registerIdSystem } from "../../../common.js";
+    import WidgetBase from "./WidgetBase";
+    import { registerIdSystem } from "../../common.js";
     export default {
         type: 'simple_text',
         name: "SimpleText",

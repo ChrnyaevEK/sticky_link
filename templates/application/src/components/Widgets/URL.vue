@@ -1,8 +1,10 @@
 <template id="url-widget">
     <WidgetBase v-bind="{ ...$props, ...$attrs }">
         <template slot="content">
-            <div class="w-100 h-100">
-                <a :href="widget.href" target="_blank" class="text-break" :style="`color: ${widget.text_color};`">{{widget.text || widget.href}}</a>    
+            <div class="w-100 h-100 w-drag d-flex justify-content-center align-items-center">
+                <span class="p-2 border rounded" @click="openHref">
+                    <a :href="widget.href" target="_blank" class="text-break" :style="`color: ${widget.text_color};`">{{widget.text || widget.href}}</a>    
+                </span>
             </div>
         </template>
         <template slot="options">
@@ -23,8 +25,8 @@
 </template>
 
 <script>
-    import WidgetBase from "../WidgetBase.vue";
-    import { registerIdSystem } from "../../../common.js";
+    import WidgetBase from "./WidgetBase.vue";
+    import { registerIdSystem } from "../../common.js";
     export default {
         type: 'url',
         name: "URL",
@@ -41,5 +43,10 @@
         components: {
             WidgetBase,
         },
+        methods: {
+            openHref(){
+                window.open(this.widget.href, '_blank');
+            }
+        }
     };
 </script>

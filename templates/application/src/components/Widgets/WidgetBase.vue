@@ -5,14 +5,18 @@
         :fitParent="true"
         class="widget"
         ref="resizable"
-        dragSelector=".control-area"
+        dragSelector=".w-drag"
         :width="widget.width"
         :height="widget.height"
         :top="widget.top"
         :left="widget.left"
     >
-        <div @dblclick="onOptionsRequest" :style="`z-index: ${widget.z_index}; background-color: ${widget.background_color}; color: ${widget.text_color};`" :class="`h-100 w-100`">
-            <div class="content px-2 control-area" @click.stop>
+        <div @dblclick="onOptionsRequest" class="h-100 w-100">
+            <div
+                class="content p-1 control-area"
+                @click.stop
+                :style="`z-index: ${widget.z_index}; background-color: ${widget.background_color}; color: ${widget.text_color}; font-size:${widget.font_size}px; font-weight:${widget.font_weight};`"
+            >
                 <slot name="content">
                     <div class="content-empty d-flex align-items-center justify-content-center">
                         <div>Nothing is here yet... <i class="far fa-frown"></i></div>
@@ -33,27 +37,55 @@
                                 <div class="row">
                                     <div class="col-12 col-md-6">
                                         <label :for="_('width')">Width</label>
-                                        <input class="form-control" v-model.number="widget.width" :aria-describedby="_('widthHelp')" type="number" name="width" :id="_('width')" step="1" />
+                                        <input class="form-control" v-model.number="widget.width" :aria-describedby="_('widthHelp')" type="number" :id="_('width')" step="1" />
                                     </div>
                                     <div class="col-12 col-md-6">
                                         <label :for="_('height')">Height</label>
-                                        <input class="form-control" v-model.number="widget.height" :aria-describedby="_('heightHelp')" type="number" name="height" :id="_('height')" step="1" />
+                                        <input class="form-control" v-model.number="widget.height" :aria-describedby="_('heightHelp')" type="number" :id="_('height')" step="1" />
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-12 col-md-6">
                                         <label :for="_('left')">Left offset</label>
-                                        <input class="form-control" v-model.number="widget.left" :aria-describedby="_('leftHelp')" type="number" name="left" :id="_('left')" step="1" />
+                                        <input class="form-control" v-model.number="widget.left" :aria-describedby="_('leftHelp')" type="number" :id="_('left')" step="1" />
                                     </div>
                                     <div class="col-12 col-md-6">
                                         <label :for="_('top')">Top offset</label>
-                                        <input class="form-control" v-model.number="widget.top" :aria-describedby="_('topHelp')" type="number" name="top" :id="_('top')" step="1" />
+                                        <input class="form-control" v-model.number="widget.top" :aria-describedby="_('topHelp')" type="number" :id="_('top')" step="1" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <label :for="_('z_index')">Z-Index (overlay)</label>
+                                        <input class="form-control" v-model.number="widget.z_index" :aria-describedby="_('ZIndexHelp')" type="number" :id="_('z_index')" step="1" />
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-12 col-md-6">
-                                        <label :for="_('z_index')">Z-Index (overlay)</label>
-                                        <input class="form-control" v-model.number="widget.z_index" :aria-describedby="_('ZIndexHelp')" type="number" name="z_index" :id="_('z_index')" step="1" />
+                                        <label :for="_('font_size')">Font size</label>
+                                        <input
+                                            class="form-control"
+                                            v-model.number="widget.font_size"
+                                            :aria-describedby="_('fontSizeHelp')"
+                                            type="number"
+                                            :id="_('font_size')"
+                                            step="1"
+                                            :min="Shared.settings.min_font_size"
+                                            :max="Shared.settings.max_font_size"
+                                        />
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label :for="_('font_weight')">Font weight</label>
+                                        <input
+                                            class="form-control"
+                                            v-model.number="widget.font_weight"
+                                            :aria-describedby="_('fontWeightHelp')"
+                                            type="number"
+                                            :id="_('font_weight')"
+                                            step="100"
+                                            :min="Shared.settings.min_font_weight"
+                                            :max="Shared.settings.max_font_weight"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -137,7 +169,7 @@
                 if (confirm("Are you sure?")) {
                     $(`#${this.optionsModal}`).modal("hide");
                     Shared.$emit("deleteRequest", this.widget);
-                    this.manager.delete()
+                    this.manager.delete();
                 }
             },
         },
@@ -161,7 +193,7 @@
         margin: 0;
         padding: 0;
         border-style: solid;
-        border-width: 0px 1px 1px 0px;
+        border-width: 1px 0px 1px 0px;
         border-color: #dadada;
     }
     .widget .control-area {

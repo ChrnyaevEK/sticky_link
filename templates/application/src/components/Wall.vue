@@ -48,17 +48,17 @@
                         </a>
                     </div>
                     <div id="interactive-elements-body" class="collapse in" role="tabpanel" aria-labelledby="interactive-elements-header">
-                        <div class="card-body p-2 row">
+                        <!-- <div class="card-body p-2 row">
                             <div class="col-10" title="Programmable button">Action button</div>
                             <div class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></div>
-                        </div>
+                        </div> -->
                         <div class="card-body p-2 row">
                             <div class="col-10" title="Simple numeric counter, that remember the last state and allows only addition and subtraction">Counter</div>
                             <a @click.stop="addBlankWidget(Counter)" class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></a>
                         </div>
                         <div class="card-body p-2 row">
                             <div class="col-10" title="List of items">Simple list</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></div>
+                            <a @click.stop="addBlankWidget(SimpleList)" class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></a>
                         </div>
                     </div>
                 </div>
@@ -128,30 +128,37 @@
                     </div>
                 </div>
             </div>-->
-        </div> 
+            <Profile></Profile>
+        </div>
         <div class="col-12 col-md-10" id="wall-widget-list">
             <SimpleText v-for="widget of filterWidgets(SimpleText)" :key="widget.type + widget.id" :widget="widget"> </SimpleText>
             <URL v-for="widget of filterWidgets(URL)" :key="widget.type + widget.id" :widget="widget"> </URL>
             <Counter v-for="widget of filterWidgets(Counter)" :key="widget.type + widget.id" :widget="widget"> </Counter>
+            <SimpleList v-for="widget of filterWidgets(SimpleList)" :key="widget.type + widget.id" :widget="widget"> </SimpleList>
         </div>
     </div>
 </template>
 
 <script>
-    import SimpleText from "./Widgets/View/SimpleText";
-    import URL from "./Widgets/View/URL";
-    import Counter from "./Widgets/View/Counter";
+    import SimpleText from "./Widgets/SimpleText";
+    import URL from "./Widgets/URL";
+    import Counter from "./Widgets/Counter";
+    import SimpleList from "./Widgets/SimpleList";
+    import Profile from "./Profile";
     import { API, registerIdSystem, Shared } from "../common.js";
+    var components = {
+        SimpleText,
+        URL,
+        Counter,
+        SimpleList,
+        Profile,
+    };
     export default {
         name: "Wall",
-        components: {
-            SimpleText,
-            URL,
-            Counter,
-        },
+        components,
         created() {
             registerIdSystem(this, this.wall.type, this.wall.id);
-            Shared.$on('deleteRequest', this.onDeleteRequest)
+            Shared.$on("deleteRequest", this.onDeleteRequest);
             this.retrieve();
         },
         props: {
@@ -166,20 +173,18 @@
                 API: new API("wall", vm.id),
                 wall: {},
                 widgets: [],
-                SimpleText,
-                URL,
-                Counter,
+                ...components
             };
         },
         methods: {
             retrieve() {
-                this.API.retrieve().then((response) => {
-                    this.wall = response.wall;
-                    this.widgets = response.widgets;
-                    Shared.$set(Shared, "settings", response.settings);
-                });
+                // this.API.retrieve().then((response) => {
+                //     this.wall = response.wall;
+                //     this.widgets = response.widgets;
+                // });
+                Shared.init()
             },
-            filterWidgets(klass){
+            filterWidgets(klass) {
                 try {
                     return this.widgets.filter(function(w) {
                         return w.type == klass.type;
@@ -188,17 +193,17 @@
                     return [];
                 }
             },
-            addBlankWidget(klass){
-                var wAPI = new API(klass.type)
+            addBlankWidget(klass) {
+                var wAPI = new API(klass.type);
                 wAPI.create({
-                    wall: this.id
-                }).then((response)=>{
-                    this.widgets.push(response)
-                })
+                    wall: this.id,
+                }).then((response) => {
+                    this.widgets.push(response);
+                });
             },
-            onDeleteRequest(widget){
-                this.widgets.splice(this.widgets.indexOf(widget), 1)
-            }
+            onDeleteRequest(widget) {
+                this.widgets.splice(this.widgets.indexOf(widget), 1);
+            },
         },
     };
 </script>
