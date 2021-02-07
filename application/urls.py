@@ -8,6 +8,7 @@ router.register('simple_text', views.SimpleTextViewSet)
 router.register('rich_text', views.RichTextViewSet)
 router.register('url', views.URLViewSet)
 router.register('simple_list', views.SimpleListViewSet)
+router.register('counter', views.CounterViewSet)
 
 urlpatterns = [
     path('', views.Enter.as_view(), name="application"),

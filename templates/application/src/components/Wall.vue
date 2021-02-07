@@ -14,21 +14,17 @@
                             <div class="col-10" title="Textarea with minimum format options">Simple text</div>
                             <a @click.stop="addBlankWidget(SimpleText)" class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></a>
                         </div>
-                        <div class="card-body p-2 row">
+                        <!-- <div class="card-body p-2 row">
                             <div class="col-10" title="Textarea with Markdown support">Rich text (markdown)</div>
                             <div class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></div>
-                        </div>
+                        </div> -->
                         <div class="card-body p-2 row">
                             <div class="col-10" title="Active link">URL</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></div>
-                        </div>
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="List of items">Simple list</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></div>
+                            <a @click.stop="addBlankWidget(URL)" class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></a>
                         </div>
                     </div>
                 </div>
-                <div class="card border-0">
+                <!-- <div class="card border-0">
                     <div class="card-header p-2 bg-light" role="tab" id="support-elements-header" title="Help to form layout and divide information into to logical groups">
                         <a data-toggle="collapse" data-parent="#wall-widget-selector" href="#support-elements-body" aria-expanded="true" aria-controls="support-elements-body">
                             Support elements
@@ -44,7 +40,7 @@
                             <div class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></div>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <div class="card border-0">
                     <div class="card-header p-2 bg-light" role="tab" id="interactive-elements-header" title="Elements to interact with user">
                         <a data-toggle="collapse" data-parent="#wall-widget-selector" href="#interactive-elements-body" aria-expanded="true" aria-controls="interactive-elements-body">
@@ -58,12 +54,16 @@
                         </div>
                         <div class="card-body p-2 row">
                             <div class="col-10" title="Simple numeric counter, that remember the last state and allows only addition and subtraction">Counter</div>
+                            <a @click.stop="addBlankWidget(Counter)" class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></a>
+                        </div>
+                        <div class="card-body p-2 row">
+                            <div class="col-10" title="List of items">Simple list</div>
                             <div class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="font-weight-bold p-2">Global setup</div>
+            <!-- <div class="font-weight-bold p-2">Global setup</div>
             <div id="wall-global-setup-selector" role="tablist" aria-multiselectable="true" class="border-top border-bottom">
                 <div class="card border-0">
                     <div class="card-header p-2 bg-light" role="tab" id="event-header" title="Executed when certain event fired (events are setup up latter)">
@@ -127,25 +127,32 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </div>-->
+        </div> 
         <div class="col-12 col-md-10" id="wall-widget-list">
-            <SimpleText v-for="widget of filterWidgets(SimpleText)" :key="widget.id" :widget="widget"> </SimpleText>
+            <SimpleText v-for="widget of filterWidgets(SimpleText)" :key="widget.type + widget.id" :widget="widget"> </SimpleText>
+            <URL v-for="widget of filterWidgets(URL)" :key="widget.type + widget.id" :widget="widget"> </URL>
+            <Counter v-for="widget of filterWidgets(Counter)" :key="widget.type + widget.id" :widget="widget"> </Counter>
         </div>
     </div>
 </template>
 
 <script>
     import SimpleText from "./Widgets/View/SimpleText";
+    import URL from "./Widgets/View/URL";
+    import Counter from "./Widgets/View/Counter";
     import { API, registerIdSystem, Shared } from "../common.js";
     export default {
         name: "Wall",
         components: {
             SimpleText,
+            URL,
+            Counter,
         },
         created() {
             registerIdSystem(this, this.wall.type, this.wall.id);
-            this.initiate();
+            Shared.$on('deleteRequest', this.onDeleteRequest)
+            this.retrieve();
         },
         props: {
             id: {
@@ -160,10 +167,12 @@
                 wall: {},
                 widgets: [],
                 SimpleText,
+                URL,
+                Counter,
             };
         },
         methods: {
-            initiate() {
+            retrieve() {
                 this.API.retrieve().then((response) => {
                     this.wall = response.wall;
                     this.widgets = response.widgets;
@@ -186,6 +195,9 @@
                 }).then((response)=>{
                     this.widgets.push(response)
                 })
+            },
+            onDeleteRequest(widget){
+                this.widgets.splice(this.widgets.indexOf(widget), 1)
             }
         },
     };

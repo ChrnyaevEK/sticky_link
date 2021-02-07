@@ -84,3 +84,11 @@ class SimpleListSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.SimpleList
         fields = '__all__'
+
+
+class CounterSerializer(serializers.ModelSerializer):
+    type = serializers.ReadOnlyField(default=models.Counter.type)
+
+    class Meta:
+        model = models.Counter
+        fields = '__all__'

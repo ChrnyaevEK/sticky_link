@@ -5,21 +5,12 @@
 """
 from django.db import models
 from django.core.validators import BaseValidator
+import re
 
 
 class Settings:
-    colors = [
-        ['primary', 'Primary'],
-        ['secondary', 'Secondary'],
-        ['success', 'Success'],
-        ['danger', 'Danger'],
-        ['warning', 'Warning'],
-        ['info', 'Info'],
-        ['white', 'White'],
-        ['black', 'Black'],
-    ]
-    default_background_color = 'white'
-    default_text_color = 'black'
+    default_background_color = '#ffffff'
+    default_text_color = '#000000'
     default_z_index = 0
     default_widget_width = 200
     default_widget_height = 100
@@ -43,6 +34,13 @@ class Wall(Common):
     description = models.CharField(verbose_name='Wall description', max_length=500, blank=True, null=True)
 
 
+class ColorValidator(BaseValidator):
+    regex = re.compile(r'^#[0-9a-fA-F]{8}$|#[0-9a-fA-F]{6}$|#[0-9a-fA-F]{4}$|#[0-9a-fA-F]{3}$')  # ARGB hex color
+
+    def compare(self, a, b):
+        return self.regex.match(a)
+
+
 class Widget(Common):
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
     width = models.IntegerField(verbose_name='Widget width', default=Settings.default_widget_width)
@@ -51,10 +49,9 @@ class Widget(Common):
     left = models.IntegerField(verbose_name='Offset left from parent', default=0)
     top = models.IntegerField(verbose_name='Offset top from parent', default=0)
 
-    # TODO - html color
-    background_color = models.CharField(max_length=10, choices=Settings.colors,
+    background_color = models.CharField(max_length=9, validators=[ColorValidator],
                                         default=Settings.default_background_color)
-    text_color = models.CharField(max_length=10, choices=Settings.colors, default=Settings.default_text_color)
+    text_color = models.CharField(max_length=9, validators=[ColorValidator], default=Settings.default_text_color)
 
     class Meta:
         abstract = True
@@ -75,7 +72,9 @@ class RichText(Widget):
 
 class URL(Widget):
     type = 'url'
+    max_length = 100
     href = models.URLField(null=True, blank=True)
+    text = models.CharField(max_length=max_length, null=True, blank=True)
 
 
 class SimpleListValidator(BaseValidator):
@@ -94,3 +93,10 @@ class SimpleList(Widget):
     title = models.CharField(max_length=max_title_length)
     description = models.CharField(max_length=max_description_length)
     items = models.JSONField(default=list, validators=[SimpleListValidator(None)])
+
+
+class Counter(Widget):
+    type = 'counter'
+    max_length = 200
+    title = models.CharField(max_length=max_length, blank=True, null=True)
+    value = models.BigIntegerField(default=0)

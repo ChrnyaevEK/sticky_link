@@ -39,6 +39,7 @@ class WallViewSet(viewsets.ModelViewSet):
                 (models.RichText, serializers.RichTextSerializer),
                 (models.URL, serializers.URLSerializer),
                 (models.SimpleList, serializers.SimpleListSerializer),
+                (models.Counter, serializers.CounterSerializer),
         ):
             for widget in model.objects.filter(wall=wall):
                 widgets.append(serializer(widget).data)
@@ -75,3 +76,10 @@ class SimpleListViewSet(viewsets.ModelViewSet):
     permission_classes = [] if env.DEBUG else [IsAuthenticated]
     queryset = models.SimpleList.objects.all()
     serializer_class = serializers.SimpleListSerializer
+
+
+class CounterViewSet(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [] if env.DEBUG else [IsAuthenticated]
+    queryset = models.Counter.objects.all()
+    serializer_class = serializers.CounterSerializer

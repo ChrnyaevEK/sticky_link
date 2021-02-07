@@ -1,18 +1,22 @@
-<template id="simple-text-widget">
+<template id="url-widget">
     <WidgetBase v-bind="{ ...$props, ...$attrs }">
         <template slot="content">
-            <div class="d-flex flex-column h-100">
-                <span class="flex-grow-1 text-truncate text-wrap text-break">
-                    {{ widget.text_content }}
-                </span>
+            <div class="w-100 h-100">
+                <a :href="widget.href" target="_blank" class="text-break" :style="`color: ${widget.text_color};`">{{widget.text || widget.href}}</a>    
             </div>
         </template>
         <template slot="options">
             <div class="form-group">
-                <label :for="_('text_content')"
-                    >Content of widget
+                <label :for="_('href')"
+                    >URL address
                 </label>
-                <textarea id="_('text_content')" class="form-control" v-model="widget.text_content" :aria-describedby="_('textContentHelp')" rows="10"></textarea>
+                <input id="_('href')" class="form-control" v-model="widget.href" :aria-describedby="_('hrefHelp')" />
+            </div>
+            <div class="form-group">
+                <label :for="_('text')"
+                    >URL text
+                </label>
+                <input id="_('text')" class="form-control" v-model="widget.text" :aria-describedby="_('textHelp')" />
             </div>
         </template>
     </WidgetBase>
@@ -22,9 +26,9 @@
     import WidgetBase from "../WidgetBase.vue";
     import { registerIdSystem } from "../../../common.js";
     export default {
-        type: 'simple_text',
-        name: "SimpleText",
-        template: "#simple-text-widget",
+        type: 'url',
+        name: "URL",
+        template: "#url-widget",
         props: {
             widget: {
                 type: Object,

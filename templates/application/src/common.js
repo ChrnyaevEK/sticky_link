@@ -34,7 +34,6 @@ export class API {
             data: JSON.stringify(data),
         });
     }
-
     update(data) {
         return this.ajax({
             crossDomain: true,
@@ -44,21 +43,31 @@ export class API {
             data: JSON.stringify(data),
         });
     }
+    delete(){
+        return this.ajax({
+            crossDomain: true,
+            type: "DELETE",
+            url: `${this.baseUrl}/${this.urlName}/${this.id}/`,
+        });
+    }
 }
 
 export class WidgetManager extends API {
-    constructor(...api) {
-        super(...api);
+    // Push data about widget at certain rate (so we do not spam server)
+    constructor(urlName, id, resolve, reject) {
+        super(urlName, id);
+        this.reject = reject  // Will vbe passed as reject function to promise
+        this.resolve = resolve  // Will vbe passed as resolve function to promise
         this.lastState = null;
         this.refreshRate = 1000; // ms
-        this.intervalId = setInterval(() => {
+        this.intervalId = setInterval(() => {  // Grab last state and push it to server
             if (this.lastState !== null) {
-                this.update(this.lastState);
+                this.update(this.lastState).then(resolve, reject)
                 this.lastState = null;
             }
         }, this.refreshRate);
     }
-    updated(state) {
+    updated(state) {  // Set last state
         this.lastState = deepCopy(state);
     }
 }
