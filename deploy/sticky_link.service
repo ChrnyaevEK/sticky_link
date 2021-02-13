@@ -1,6 +1,7 @@
 [Unit]
 Description= Serve sticky_link project
 After=network.target
+Type=idle
 
 [Service]
 User=www-data
