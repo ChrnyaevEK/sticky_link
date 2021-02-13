@@ -1,11 +1,10 @@
 <template>
-    <Wall :id="1"></Wall>
+    <Wall></Wall>
 </template>
 
 <script>
 import Wall from "./components/Wall";
 export default {
-    name: "App",
     components: {
         Wall,
     },

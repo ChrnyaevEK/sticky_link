@@ -21,7 +21,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = env.SECRET_KEY
 DEBUG = env.DEBUG
-
 ALLOWED_HOSTS = ['toptools.tech', 'www.toptools.tech', '127.0.0.1', 'localhost']
 CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
@@ -137,3 +136,20 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = env.EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = env.EMAIL_HOST_PASSWORD
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication'
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+if env.DEBUG:
+    def get_user():
+        from django.contrib.auth.models import User
+        return User.objects.get(username="dev_user1")  # Choose any dev user
+
+
+    REST_FRAMEWORK['UNAUTHENTICATED_USER'] = get_user

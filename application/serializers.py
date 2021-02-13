@@ -47,13 +47,25 @@ class ObjectSerializer(serializers.BaseSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    settings = serializers.SerializerMethodField(source='get_settings')
+
+    def get_queryset(self):
+        return models.User.objects.filter(pk=self.request.user.id)
+
+    @staticmethod
+    def get_settings(request):
+        return ObjectSerializer(models.Settings).data
+
     class Meta:
         model = User
-        fields = ['username', 'email', 'id']
+        fields = ['username', 'email', 'id', 'settings']
 
 
 class WallSerializer(serializers.ModelSerializer):
     type = serializers.ReadOnlyField(default=models.Wall.type)
+    owner = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
 
     class Meta:
         model = models.Wall

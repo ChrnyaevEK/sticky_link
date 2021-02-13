@@ -1,136 +1,112 @@
 <template>
     <div class="flex-grow-1 row w-100">
         <div class="col-12 col-md-2">
-            <div class="font-weight-bold p-2">Widgets</div>
-            <div id="wall-widget-selector" role="tablist" aria-multiselectable="true" class="border-top border-bottom">
-                <div class="card border-0">
-                    <div class="card-header p-2 bg-light" role="tab" id="text-widgets-header" title="Help to place text information">
-                        <a data-toggle="collapse" data-parent="#wall-widget-selector" href="#text-widgets-body" aria-expanded="true" aria-controls="text-widgets-body">
-                            Text widgets
-                        </a>
-                    </div>
-                    <div id="text-widgets-body" class="collapse in" role="tabpanel" aria-labelledby="text-widgets-header">
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="Textarea with minimum format options">Simple text</div>
-                            <a @click.stop="addBlankWidget(SimpleText)" class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></a>
+            <div class="d-flex justify-content-between">
+                <small class="text-secondary px-2">{{ Shared.user.username }}</small>
+                <small v-show="Shared.saving"><strong class="text-secondary">Saving...</strong></small>
+                <small v-show="Shared.saved"><strong class="text-success">Saved!</strong></small>
+            </div>
+
+            <div id="wall-widget-selector" role="tablist" aria-multiselectable="true" v-if="currentWall !== undefined">
+                <div class="card m-1">
+                    <span class="text-secondary px-2">Textual</span>
+                    <div id="text-widgets-body" role="tabpanel" aria-labelledby="text-widgets-header">
+                        <div class="d-flex justify-content-between align-items-center px-2">
+                            <div title="Textarea with minimum format options">Simple text</div>
+                            <a @click.stop="addBlankWidget(SimpleText)" class="btn bg-light"><i class="fas fa-plus"></i></a>
                         </div>
-                        <!-- <div class="card-body p-2 row">
-                            <div class="col-10" title="Textarea with Markdown support">Rich text (markdown)</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></div>
-                        </div> -->
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="Active link">URL</div>
-                            <a @click.stop="addBlankWidget(URL)" class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></a>
+                        <div class="d-flex justify-content-between align-items-center px-2">
+                            <div title="Active link">URL</div>
+                            <a @click.stop="addBlankWidget(URL)" class="btn bg-light"><i class="fas fa-plus"></i></a>
                         </div>
                     </div>
                 </div>
-                <!-- <div class="card border-0">
-                    <div class="card-header p-2 bg-light" role="tab" id="support-elements-header" title="Help to form layout and divide information into to logical groups">
-                        <a data-toggle="collapse" data-parent="#wall-widget-selector" href="#support-elements-body" aria-expanded="true" aria-controls="support-elements-body">
-                            Support elements
-                        </a>
-                    </div>
-                    <div id="support-elements-body" class="collapse in" role="tabpanel" aria-labelledby="support-elements-header">
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="Blank card with a lot of customization available. Primary used as a background">Card</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></div>
+                <div class="card m-1">
+                    <span class="text-secondary px-2">Interactive</span>
+                    <div id="interactive-elements-body" role="tabpanel" aria-labelledby="interactive-elements-header">
+                        <div class="d-flex justify-content-between align-items-center px-2">
+                            <div title="Simple numeric counter, that remember the last state and allows only addition and subtraction">Counter</div>
+                            <a @click.stop="addBlankWidget(Counter)" class="btn bg-light"><i class="fas fa-plus"></i></a>
                         </div>
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="A line that divides data to form logical groups">Divider</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></div>
-                        </div>
-                    </div>
-                </div> -->
-                <div class="card border-0">
-                    <div class="card-header p-2 bg-light" role="tab" id="interactive-elements-header" title="Elements to interact with user">
-                        <a data-toggle="collapse" data-parent="#wall-widget-selector" href="#interactive-elements-body" aria-expanded="true" aria-controls="interactive-elements-body">
-                            Interactive elements
-                        </a>
-                    </div>
-                    <div id="interactive-elements-body" class="collapse in" role="tabpanel" aria-labelledby="interactive-elements-header">
-                        <!-- <div class="card-body p-2 row">
-                            <div class="col-10" title="Programmable button">Action button</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></div>
-                        </div> -->
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="Simple numeric counter, that remember the last state and allows only addition and subtraction">Counter</div>
-                            <a @click.stop="addBlankWidget(Counter)" class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></a>
-                        </div>
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="List of items">Simple list</div>
-                            <a @click.stop="addBlankWidget(SimpleList)" class="col-2 btn bg-light p-0"><i class="fas fa-plus"></i></a>
+                        <div class="d-flex justify-content-between align-items-center px-2">
+                            <div title="List of items">Simple list</div>
+                            <a @click.stop="addBlankWidget(SimpleList)" class="btn bg-light"><i class="fas fa-plus"></i></a>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- <div class="font-weight-bold p-2">Global setup</div>
-            <div id="wall-global-setup-selector" role="tablist" aria-multiselectable="true" class="border-top border-bottom">
-                <div class="card border-0">
-                    <div class="card-header p-2 bg-light" role="tab" id="event-header" title="Executed when certain event fired (events are setup up latter)">
-                        <a data-toggle="collapse" data-parent="#wall-widget-selector" href="#event-body" aria-expanded="true" aria-controls="event-body">
-                            Event dependent actions
-                        </a>
+            <div class="small px-2 text-secondary" v-else>
+                <hr>
+                <p>
+                    Widgets are not available. Select or create a wall to use widgets
+                </p>
+            </div>
+            <div class="card p-1 mx-1 my-3">
+                <div class="d-flex justify-content-between align-items-center px-2">
+                    <div title="Create new wall">Wall</div>
+                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#new-wall-modal">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <hr />
+                <div v-if="walls.length" class="d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center p-1" v-for="wall of walls" :key="wall.id">
+                        <a
+                            @click.stop.prevent="initWall(wall.id)"
+                            href="#"
+                            :title="wall.description"
+                            class="text-break"
+                            :class="currentWall !== undefined && wall.id == currentWall.id ? 'text-primary' : 'text-secondary'"
+                            >{{ wall.title }}</a
+                        >
+                        <a @click.stop.prevent="deleteWall(wall.id)" class="btn text-danger" title="Delete wall"><i class="fas fa-times"></i></a>
                     </div>
-                    <div id="event-body" class="collapse in" role="tabpanel" aria-labelledby="event-header">
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="Call supplied URL with occasional payload">Webhook</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-chevron-right"></i></div>
-                        </div>
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="Redirect visitor to another page (Caution! A visitor may not see the content of this page)">Redirect</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-chevron-right"></i></div>
-                        </div>
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="Show popup">Popup</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-chevron-right"></i></div>
-                        </div>
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="Lock page and ask for a password to continue">Lock page</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-chevron-right"></i></div>
-                        </div>
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="Make widget visible or usable">Discover widget</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-chevron-right"></i></div>
-                        </div>
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="Execute a custom JavaScript code in a separate iFrame">JavaScript</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-chevron-right"></i></div>
+                </div>
+                <div v-else>
+                    <small class="text-info">No walls yet... Use <strong>+</strong> button to create one!</small>
+                </div>
+                <div class="modal fade" id="new-wall-modal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">New wall</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-danger" role="alert" v-show="error"><strong>Error</strong> {{ error }}</div>
+                                <div class="form-group">
+                                    <label for="new-wall-title" class="label">Title</label>
+                                    <input class="form-control" v-model="newWall.title" aria-describedby="newWallTitleHelp" id="new-wall-title" :maxlength="Shared.settings.max_wall_title_length" />
+                                    <small id="newWallTitleHelp" class="form-text text-muted" v-if="Shared.settings">
+                                        Max title length is {{ newWall.title.length }}/{{ Shared.settings.max_wall_title_length }} symbols</small
+                                    >
+                                </div>
+                                <div class="form-group">
+                                    <label for="new-wall-description" class="label">Description</label>
+                                    <input
+                                        class="form-control"
+                                        v-model="newWall.description"
+                                        aria-describedby="newWallDescriptionHelp"
+                                        id="new-wall-description"
+                                        :maxlength="Shared.settings.max_wall_description_length"
+                                    />
+                                    <small id="newWallDescriptionHelp" class="form-text text-muted" v-if="Shared.settings">
+                                        Max description length is {{ newWall.description.length }}/{{ Shared.settings.max_wall_description_length }} symbols
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button @click.stop="createWall" type="button" class="btn btn-primary">Create</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="card border-0">
-                    <div class="card-header p-2 bg-light" role="tab" id="layout-header" title="Setup elements positions for different screen widths (layouts)">
-                        <a data-toggle="collapse" data-parent="#wall-widget-selector" href="#layout-body" aria-expanded="true" aria-controls="layout-body">
-                            Layout
-                        </a>
-                    </div>
-                    <div id="layout-body" class="collapse in" role="tabpanel" aria-labelledby="layout-header">
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="General settings for layout">General settings</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-chevron-right"></i></div>
-                        </div>
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="Less than 576px">Extra small</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-chevron-right"></i></div>
-                        </div>
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="More or equal to 540px">Small</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-chevron-right"></i></div>
-                        </div>
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="More or equal to 720px">Medium</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-chevron-right"></i></div>
-                        </div>
-                        <div class="card-body p-2 row">
-                            <div class="col-10" title="More or equal to 960px">Large</div>
-                            <div class="col-2 btn bg-light p-0"><i class="fas fa-chevron-right"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>-->
-            <Profile></Profile>
+            </div>
         </div>
-        <div class="col-12 col-md-10" id="wall-widget-list">
+        <div class="col-12 col-md-10" id="wall-widget-list" v-if="currentWall !== undefined">
             <SimpleText v-for="widget of filterWidgets(SimpleText)" :key="widget.type + widget.id" :widget="widget"> </SimpleText>
             <URL v-for="widget of filterWidgets(URL)" :key="widget.type + widget.id" :widget="widget"> </URL>
             <Counter v-for="widget of filterWidgets(Counter)" :key="widget.type + widget.id" :widget="widget"> </Counter>
@@ -144,45 +120,73 @@
     import URL from "./Widgets/URL";
     import Counter from "./Widgets/Counter";
     import SimpleList from "./Widgets/SimpleList";
-    import Profile from "./Profile";
-    import { API, registerIdSystem, Shared } from "../common.js";
+    import { API, Shared } from "../common.js";
     var components = {
         SimpleText,
         URL,
         Counter,
         SimpleList,
-        Profile,
     };
     export default {
-        name: "Wall",
         components,
         created() {
-            registerIdSystem(this, this.wall.type, this.wall.id);
+            Shared.init();
             Shared.$on("deleteRequest", this.onDeleteRequest);
-            this.retrieve();
-        },
-        props: {
-            id: {
-                type: Number,
-                required: true,
-            },
+            this.resetNewWall();
+            this.initWalls();
         },
         data() {
-            var vm = this;
             return {
-                API: new API("wall", vm.id),
-                wall: {},
-                widgets: [],
-                ...components
+                Shared,
+                type: "wall",
+                api: undefined,
+                currentWall: undefined,
+                walls: [],
+                newWall: undefined,
+                widgets: undefined,
+                error: undefined, // Error msg
+                ...components,
             };
         },
         methods: {
-            retrieve() {
-                // this.API.retrieve().then((response) => {
-                //     this.wall = response.wall;
-                //     this.widgets = response.widgets;
-                // });
-                Shared.init()
+            initWall(wall_id) {
+                new API(this.type, wall_id).retrieve().then((response) => {
+                    this.api = new API(response.wall.type, response.wall.id);
+                    this.currentWall = response.wall;
+                    this.widgets = response.widgets;
+                });
+            },
+            initWalls() {
+                new API(this.type).list().then((response) => {
+                    this.walls = response;
+                });
+            },
+            createWall() {
+                new API(this.type).create(this.newWall).then((response) => {
+                    this.api = new API(response.type, response.id);
+                    this.currentWall = response;
+                    this.widgets = [];
+                    this.resetNewWall();
+                    this.initWalls();
+                });
+            },
+            resetNewWall() {
+                this.newWall = {
+                    title: "",
+                    description: "",
+                };
+            },
+            deleteWall(wall_id) {
+                if (confirm("Are you sure? Wall will be permanently removed!")) {
+                    new API(this.type, wall_id).delete().then(() => {
+                        this.initWalls();
+                        if (this.currentWall !== undefined && wall_id == this.currentWall.id) {
+                            this.api = undefined;
+                            this.currentWall = undefined;
+                            this.widgets = undefined;
+                        }
+                    });
+                }
             },
             filterWidgets(klass) {
                 try {
@@ -194,12 +198,15 @@
                 }
             },
             addBlankWidget(klass) {
-                var wAPI = new API(klass.type);
-                wAPI.create({
-                    wall: this.id,
-                }).then((response) => {
-                    this.widgets.push(response);
-                });
+                if (this.currentWall !== undefined) {
+                    new API(klass.type)
+                        .create({
+                            wall: this.currentWall.id,
+                        })
+                        .then((response) => {
+                            this.widgets.push(response);
+                        });
+                }
             },
             onDeleteRequest(widget) {
                 this.widgets.splice(this.widgets.indexOf(widget), 1);

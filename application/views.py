@@ -1,11 +1,7 @@
 from application import models
 from application import serializers
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from django.http import JsonResponse, Http404
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.permissions import IsAuthenticated
-from sticky_link import env
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views import View
@@ -20,34 +16,18 @@ class Enter(View):
         return HttpResponse(render(request, self.template))
 
 
-# Exit point - resolve on exit redirections
-class Leave(View):
-    def get(self, request):
-        pass
+class UserView(ReadOnlyModelViewSet):
+    serializer_class = serializers.UserSerializer
 
-
-class ProfileView(View):
-    @staticmethod
-    def get(request):
-        if request.user.is_authenticated:
-            return JsonResponse({
-                'user': serializers.UserSerializer(request.user).data,
-                'settings': serializers.ObjectSerializer(models.Settings).data
-            })
-        else:
-            raise Http404
+    def get_queryset(self):
+        return models.User.objects.filter(pk=self.request.user.id)
 
 
 class WallViewSet(ModelViewSet):
     serializer_class = serializers.WallSerializer
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [] if env.DEBUG else [IsAuthenticated]
 
     def get_queryset(self):
-        if self.request.user.is_authenticated:
-            return models.Wall.objects.filter(owner=self.request.user) | self.request.user.related_walls.all()
-        else:
-            return models.Wall.objects.filter(allowed_anonymous=True)
+        return models.Wall.objects.filter(owner=self.request.user)  # | self.request.user.related_walls.all()
 
     def retrieve(self, request, pk=None, *args, **kwargs):
         query = self.get_queryset()
@@ -76,51 +56,27 @@ class WallViewSet(ModelViewSet):
                 'widgets': widgets,
             })
 
-    # def list(self, request, *args, **kwargs) - default behaviour
-
-    # def create(self, request, *args, **kwargs) - default behaviour
-
-    def update(self, request, pk=None, *args, **kwargs):
-        # Do nothing (yet)
-        pass
-
-    def partial_update(self, request, pk=None, *args, **kwargs):
-        # Do nothing (yet)
-        pass
-
-    # def destroy(self, request, pk=None, *args, **kwargs) - default behaviour
-
 
 class SimpleTextViewSet(ModelViewSet):
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [] if env.DEBUG else [IsAuthenticated]
     queryset = models.SimpleText.objects.all()
     serializer_class = serializers.SimpleTextSerializer
 
 
 class RichTextViewSet(ModelViewSet):
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [] if env.DEBUG else [IsAuthenticated]
     queryset = models.RichText.objects.all()
     serializer_class = serializers.RichTextSerializer
 
 
 class URLViewSet(ModelViewSet):
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [] if env.DEBUG else [IsAuthenticated]
     queryset = models.URL.objects.all()
     serializer_class = serializers.URLSerializer
 
 
 class SimpleListViewSet(ModelViewSet):
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [] if env.DEBUG else [IsAuthenticated]
     queryset = models.SimpleList.objects.all()
     serializer_class = serializers.SimpleListSerializer
 
 
 class CounterViewSet(ModelViewSet):
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
-    permission_classes = [] if env.DEBUG else [IsAuthenticated]
     queryset = models.Counter.objects.all()
     serializer_class = serializers.CounterSerializer

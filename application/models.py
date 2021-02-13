@@ -21,6 +21,9 @@ class Settings:
     default_font_weight = 400
     min_font_weight = 100
     max_font_weight = 900
+    max_wall_title_length = 200
+    default_wall_title = 'Untitled'
+    max_wall_description_length = 500
 
     default_widget_width = 200
     default_widget_height = 100
@@ -43,9 +46,10 @@ class Wall(Common):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     allowed_users = models.ManyToManyField(User, verbose_name='List of allowed users',
                                            related_name='related_walls', blank=True)
-    allowed_anonymous = models.BooleanField(verbose_name='Anonymous user may interact with data', default=False)
-    title = models.CharField(verbose_name='Wall title', max_length=200)
-    description = models.CharField(verbose_name='Wall description', max_length=500, blank=True, null=True)
+    title = models.CharField(verbose_name='Wall title', max_length=Settings.max_wall_title_length,
+                             default=Settings.default_wall_title)
+    description = models.CharField(verbose_name='Wall description', max_length=Settings.max_wall_description_length,
+                                   blank=True, null=True)
 
 
 class ColorValidator(BaseValidator):

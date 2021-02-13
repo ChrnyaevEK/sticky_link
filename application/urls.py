@@ -9,10 +9,9 @@ router.register('rich_text', views.RichTextViewSet)
 router.register('url', views.URLViewSet)
 router.register('simple_list', views.SimpleListViewSet)
 router.register('counter', views.CounterViewSet)
+router.register('user', views.UserView, basename='user')
 
 urlpatterns = [
     path('', views.Enter.as_view(), name="application"),
     path('api/', include(router.urls), name="api"),
-    path('profile/', views.ProfileView.as_view(), name="profile"),
-    path('leave/', views.Leave.as_view(), name="leave"),
 ]

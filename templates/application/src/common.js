@@ -6,25 +6,41 @@ function generateId(property, type, id) {
 }
 export var Shared = new Vue({
     data: {
-        settings: {},  // Settings object (models.Settings)
+        settings: {}, // Settings object (models.Settings)
         user: {
-            username: 'Unknown',
-            email: 'Unknown',
-            id: 'Unknown'
+            username: undefined,
+            email: undefined,
         },
+        saving: false,  // Global saving indicator
+        saved: false,  // Global safe indicator
+        savedTimeoutId: undefined,
+        savedTimeoutDuration: 2000,  // ms, until property will be unset
     },
     methods: {
-        init(){
-            var api = new API()
-            return api.ajax({
-                crossDomain: true,
-                type: "GET",
-                contentType: "application/json",
-                url: `${api.baseUrl}app/profile/`,
-            }).then((response)=>{
-                this.$set(this, 'settings', response.settings)
-                this.$set(this, 'user', response.user)
-            })
+        init() {
+            var api = new API("user");
+            return api.list().then((response) => {
+                var user = response.pop();
+                this.$set(this, "user", user);
+                this.$set(this, "settings", user.settings);
+            });
+        },
+    },
+    watch: {
+        saved(val){
+            if (val){
+                this.saving = false
+                if (this.savedTimeoutId) clearTimeout(this.savedTimeoutId)
+                this.savedTimeoutId = setTimeout(()=>{
+                    this.saved = false
+                    this.savedTimeoutId = undefined
+                }, this.savedTimeoutDuration)                
+            }
+        },
+        saving(val){
+            if (val){
+                this.saved = false
+            }
         }
     }
 });
@@ -32,7 +48,7 @@ export class API {
     constructor(urlName, id) {
         this.urlName = urlName;
         this.id = id;
-        this.baseUrl = "http://127.0.0.1:8000/"; // TODO remove
+        this.baseUrl = "http://127.0.0.1:8000/app/api/"; // TODO remove
     }
     ajax(settings) {
         return $.ajax(settings);
@@ -41,14 +57,21 @@ export class API {
         return this.ajax({
             crossDomain: true,
             type: "GET",
-            url: `${this.baseUrl}app/api/${this.urlName}/${this.id}/`,
+            url: `${this.baseUrl}${this.urlName}/${this.id}/`,
+        });
+    }
+    list() {
+        return this.ajax({
+            crossDomain: true,
+            type: "GET",
+            url: `${this.baseUrl}${this.urlName}/`,
         });
     }
     create(data) {
         return this.ajax({
             crossDomain: true,
             type: "POST",
-            url: `${this.baseUrl}app/api/${this.urlName}/`,
+            url: `${this.baseUrl}${this.urlName}/`,
             contentType: "application/json",
             data: JSON.stringify(data),
         });
@@ -57,16 +80,16 @@ export class API {
         return this.ajax({
             crossDomain: true,
             type: "PUT",
-            url: `${this.baseUrl}app/api/${this.urlName}/${this.id}/`,
+            url: `${this.baseUrl}${this.urlName}/${this.id}/`,
             contentType: "application/json",
             data: JSON.stringify(data),
         });
     }
-    delete(){
+    delete() {
         return this.ajax({
             crossDomain: true,
             type: "DELETE",
-            url: `${this.baseUrl}app/api/${this.urlName}/${this.id}/`,
+            url: `${this.baseUrl}${this.urlName}/${this.id}/`,
         });
     }
 }
@@ -75,18 +98,22 @@ export class WidgetManager extends API {
     // Push data about widget at certain rate (so we do not spam server)
     constructor(urlName, id, resolve, reject) {
         super(urlName, id);
-        this.reject = reject  // Will vbe passed as reject function to promise
-        this.resolve = resolve  // Will vbe passed as resolve function to promise
         this.lastState = null;
         this.refreshRate = 1000; // ms
-        this.intervalId = setInterval(() => {  // Grab last state and push it to server
+        this.intervalId = setInterval(() => {
+            // Grab last state and push it to server
             if (this.lastState !== null) {
-                this.update(this.lastState).then(resolve, reject)
+                Shared.saving = true
+                this.update(this.lastState).then(()=>{
+                    Shared.saved = true
+                    resolve()
+                }, reject);
                 this.lastState = null;
             }
         }, this.refreshRate);
     }
-    updated(state) {  // Set last state
+    updated(state) {
+        // Set last state
         this.lastState = deepCopy(state);
     }
 }
