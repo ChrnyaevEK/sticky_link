@@ -48,7 +48,8 @@ export class API {
     constructor(urlName, id) {
         this.urlName = urlName;
         this.id = id;
-        this.baseUrl = "http://127.0.0.1:8000/app/api/"; // TODO remove
+        // this.baseUrl = "http://127.0.0.1:8000/app/api/"; // TODO remove
+        this.baseUrl = "/app/api/"; // TODO remove
     }
     ajax(settings) {
         return $.ajax(settings);
