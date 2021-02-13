@@ -1,4 +1,4 @@
 module.exports = {
-  assetsDir: 'static',
   filenameHashing: false,
+  assetsDir: '../../../static/application'
 }
