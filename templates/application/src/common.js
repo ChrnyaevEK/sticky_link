@@ -48,9 +48,9 @@ export class API {
     constructor(urlName, id) {
         this.urlName = urlName;
         this.id = id;
-        this.baseUrl = "http://127.0.0.1:8000/app/api/"; // TODO remove
+        // this.baseUrl = "http://127.0.0.1:8000/app/api/"; // TODO remove
         this.baseUrl = "/app/api/"; // TODO remove
-        // this.csrfCookieName = 'csrftoken'
+        this.csrfCookieName = 'csrftoken'
         this.csrfToken = this.getCookie(this.csrfCookieName)
     }
     getCookie(name) {
