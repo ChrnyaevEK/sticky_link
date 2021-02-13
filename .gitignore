@@ -26,3 +26,5 @@ pnpm-debug.log*
 *.sln
 *.sw?
 /venv/
+/static/application/
+/templates/application/dist/
