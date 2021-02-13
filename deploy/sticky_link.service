@@ -1,7 +1,6 @@
 [Unit]
 Description= Serve sticky_link project
 After=network.target
-Type=oneshot
 
 [Service]
 User=www-data
