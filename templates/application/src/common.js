@@ -48,11 +48,33 @@ export class API {
     constructor(urlName, id) {
         this.urlName = urlName;
         this.id = id;
-        // this.baseUrl = "http://127.0.0.1:8000/app/api/"; // TODO remove
+        this.baseUrl = "http://127.0.0.1:8000/app/api/"; // TODO remove
         this.baseUrl = "/app/api/"; // TODO remove
+        // this.csrfCookieName = 'csrftoken'
+        this.csrfToken = this.getCookie(this.csrfCookieName)
+    }
+    getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
     ajax(settings) {
-        return $.ajax(settings);
+        var token = this.csrfToken
+        return $.ajax({
+            headers: {
+                'X-CSRFToken': token
+            },
+            ...settings
+        });
     }
     retrieve() {
         return this.ajax({
