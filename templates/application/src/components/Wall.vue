@@ -75,7 +75,7 @@
                                 <div class="alert alert-danger" role="alert" v-show="error"><strong>Error</strong> {{ error }}</div>
                                 <div class="form-group">
                                     <label for="new-wall-title" class="label">Title</label>
-                                    <input class="form-control" v-model="newWall.title" aria-describedby="newWallTitleHelp" id="new-wall-title" :maxlength="Shared.settings.max_wall_title_length" />
+                                    <input class="form-control" v-model="newWall.title" aria-describedby="newWallTitleHelp" autofocus id="new-wall-title" :maxlength="Shared.settings.max_wall_title_length" />
                                     <small id="newWallTitleHelp" class="form-text text-muted" v-if="Shared.settings">
                                         Max title length is {{ newWall.title.length }}/{{ Shared.settings.max_wall_title_length }} symbols</small
                                     >

@@ -193,7 +193,7 @@
         margin: 0;
         padding: 0;
         border-style: solid;
-        border-width: 1px 0px 1px 0px;
+        border-width: 1px;
         border-color: #dadada;
     }
     .widget .control-area {
