@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = env.SECRET_KEY
 DEBUG = env.DEBUG
-ALLOWED_HOSTS = ['toptools.tech', 'www.toptools.tech', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['sticky-link.tech', 'www.sticky-link.tech', '127.0.0.1', 'localhost']
 CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
 
