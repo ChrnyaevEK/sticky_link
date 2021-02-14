@@ -4,25 +4,25 @@
 {% block content %} 
 <div class="d-flex justify-content-center align-items-center w-100 h-100">
     <div class="col-12 col-md-6">
-        {% if form.errors %}
-            {% for err in form.errors.values %}
-            <span class="text-danger">{{ err | escape }}</span>
-            {% endfor %}
-        {% endif %}
 
         {% if next %}
         <div class="text-danger">
             {% if user.is_authenticated %}
             <span> Your account doesn't have access to this page. To proceed, please login with an account that has access. </span>
             {% else %}
-            <span> Please login to see this page. </span>
+            <span> Sorry, that did not work... </span>
             {% endif %}
         </div>
         {% endif %}
         <form method="POST" action="{% url 'login' %}" >
             {% csrf_token %}
             <div class="form-group">
-                <label for="user-name">Login</label>
+                <label for="user-name">
+                    Login
+                    {% if form.errors.username %}                    
+                        <span class="text-danger">{{ form.errors.username.as_text }}</span>
+                    {% endif %}
+                </label>
                 <input
                     type="text"
                     name="username"
@@ -33,13 +33,27 @@
                     maxlength="150"
                     class="form-control"
                     aria-describedby="UserNameHelp"
+                    required
                 />
-                <small id="UserNameHelp" class="text-muted">Submit your user name or email</small>
+                <small id="UserNameHelp" class="text-muted">Enter username or e-mail</small>
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" name="password" id="password" class="form-control" autocomplete="current-password" aria-describedby="UserNameHelp" />
-                <small id="UserNameHelp" class="text-muted">Submit password</small>
+                <label for="password">
+                    Password
+                    {% if form.errors.password %}                    
+                        <span class="text-danger">{{ form.errors.password.as_text  }}</span>
+                    {% endif %}
+                </label>
+                <input 
+                    type="password" 
+                    name="password" 
+                    id="password" 
+                    class="form-control" 
+                    autocomplete="current-password" 
+                    aria-describedby="UserNameHelp" 
+                    required
+                    />
+                <small id="UserNameHelp" class="text-muted">Enter password</small>
             </div>
             <div class="form-group">
                 <button type="submit" class="btn form-control btn-light border">Login</button>

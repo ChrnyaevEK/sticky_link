@@ -1,4 +1,5 @@
 module.exports = {
   filenameHashing: false,
-  assetsDir: '../../../static/application'
+  assetsDir: 'static',
+  publicPath: '/app/'
 }

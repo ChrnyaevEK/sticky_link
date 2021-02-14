@@ -10,7 +10,7 @@
                 <label :for="_('text_content')"
                     >Content of widget
                 </label>
-                <textarea id="_('text_content')" class="form-control" v-model="widget.text_content" :aria-describedby="_('textContentHelp')" rows="10"></textarea>
+                <textarea :id="_('text_content')" class="form-control" v-model="widget.text_content" :aria-describedby="_('textContentHelp')" rows="10"></textarea>
             </div>
         </template>
     </WidgetBase>

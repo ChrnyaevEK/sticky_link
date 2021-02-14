@@ -1,6 +1,8 @@
 from rest_framework import routers
 from django.urls import path, include
 from application import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 router = routers.DefaultRouter()
 router.register('wall', views.WallViewSet, basename='wall')
@@ -14,4 +16,4 @@ router.register('user', views.UserView, basename='user')
 urlpatterns = [
     path('', views.Enter.as_view(), name="application"),
     path('api/', include(router.urls), name="api"),
-]
+] + static(settings.STATIC_URL, document_root='templates/application/dist/static')

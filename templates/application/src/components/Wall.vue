@@ -1,11 +1,11 @@
 <template>
     <div class="flex-grow-1 row w-100">
         <div class="col-12 col-md-2">
-            <div class="d-flex justify-content-between">
-                <small class="text-secondary px-2">{{ Shared.user.username }}</small>
+            <p class="d-flex justify-content-between p-2">
+                <small class="text-secondary">Auto save</small>
                 <small v-show="Shared.saving"><strong class="text-secondary">Saving...</strong></small>
                 <small v-show="Shared.saved"><strong class="text-success">Saved!</strong></small>
-            </div>
+            </p>
 
             <div id="wall-widget-selector" role="tablist" aria-multiselectable="true" v-if="currentWall !== undefined">
                 <div class="card m-1">
@@ -35,12 +35,9 @@
                     </div>
                 </div>
             </div>
-            <div class="small px-2 text-secondary" v-else>
-                <hr>
-                <p>
-                    Widgets are not available. Select or create a wall to use widgets
-                </p>
-            </div>
+            <p class="small px-2 text-info" v-else>
+                Widgets are not available. Select or create a wall to use widgets
+            </p>
             <div class="card p-1 mx-1 my-3">
                 <div class="d-flex justify-content-between align-items-center px-2">
                     <div title="Create new wall">Wall</div>
@@ -202,6 +199,8 @@
                     new API(klass.type)
                         .create({
                             wall: this.currentWall.id,
+                            top: 0,
+                            left: 0,
                         })
                         .then((response) => {
                             this.widgets.push(response);

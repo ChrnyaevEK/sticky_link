@@ -13,8 +13,12 @@ server {
         # alias /path/to/your/mysite/media;
     # }
 
-    location /static {
+    location /static {  # Django static files
         alias /var/www/sticky_link/static;
+    }
+
+    location /app/static {  # Static files for app
+        alias /var/www/sticky_link/templates/application/static;
     }
 
     location / {

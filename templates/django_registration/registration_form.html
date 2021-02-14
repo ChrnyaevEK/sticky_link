@@ -7,15 +7,15 @@
         {% if user.is_authenticated %}
         <span> Please <a href="{% url 'logout' %}">log out</a> in order to create a new account</span>
         {% else %}
-        {% if form.errors %}
-            {% for err in form.errors.values %}
-            <span class="text-danger">{{ err | escape }}</span>
-            {% endfor %}
-        {% endif %}
         <form method="POST" action="{% url 'django_registration_register' %}" autocomplete="on" >
             {% csrf_token %}
             <div class="form-group">
-                <label for="user-name">User name</label>
+                <label for="user-name">
+                    User name
+                    {% if form.errors.username %}                    
+                        <span class="text-danger">{{ form.errors.username.as_text  }}</span>
+                    {% endif %}
+                </label>
                 <input
                     type="text"
                     name="username"
@@ -27,20 +27,35 @@
                     aria-describedby="UserNameHelp"
                     required
                 />
-                <small id="UserNameHelp" class="text-muted">User name may contain any word character along with the following set of additional characters .(dot) @(at) +(plus) -(minus)</small>
+                <small id="UserNameHelp" class="text-muted">User name may contain any word character along with the following set of additional characters .(dot) @(at) +(plus) -(dash)</small>
             </div>
             <div class="form-group">
-                <label for="email">E-mail</label>
+                <label for="email">
+                    E-mail
+                    {% if form.errors.email %}                    
+                        <span class="text-danger">{{ form.errors.email.as_text  }}</span>
+                    {% endif %}
+                </label>
                 <input type="email" name="email" id="email" class="form-control" aria-describedby="EmailHelp" required/>
                 <small id="EmailHelp" class="text-muted">Submit your e-mail</small>
             </div>
             <div class="form-group">
-                <label for="password1">Password</label>
+                <label for="password1">
+                    Password
+                    {% if form.errors.password1 %}                    
+                        <span class="text-danger">{{ form.errors.password1.as_text  }}</span>
+                    {% endif %}
+                </label>
                 <input type="password" name="password1" id="password1" autocomplete="new-password" class="form-control" aria-describedby="Password1NameHelp" required />
                 <small id="Password1NameHelp" class="text-muted">Submit password</small>
             </div>
             <div class="form-group">
-                <label for="password2">Password conformation</label>
+                <label for="password2">
+                    Password conformation
+                    {% if form.errors.password2 %}                    
+                        <span class="text-danger">{{ form.errors.password2.as_text  }}</span>
+                    {% endif %}
+                </label>
                 <input type="password" name="password2" id="password2" autocomplete="new-password" class="form-control"aria-describedby="Password2NameHelp" required />
                 <small id="Password2NameHelp" class="text-muted">Enter the same password as before, for verification.</small>
             </div>

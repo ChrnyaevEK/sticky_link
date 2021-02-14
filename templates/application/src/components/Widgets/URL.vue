@@ -12,13 +12,13 @@
                 <label :for="_('href')"
                     >URL address
                 </label>
-                <input id="_('href')" class="form-control" v-model="widget.href" :aria-describedby="_('hrefHelp')" />
+                <input :id="_('href')" class="form-control" v-model="widget.href" :aria-describedby="_('hrefHelp')" />
             </div>
             <div class="form-group">
                 <label :for="_('text')"
                     >URL text
                 </label>
-                <input id="_('text')" class="form-control" v-model="widget.text" :aria-describedby="_('textHelp')" />
+                <input :id="_('text')" class="form-control" v-model="widget.text" :aria-describedby="_('textHelp')" />
             </div>
         </template>
     </WidgetBase>

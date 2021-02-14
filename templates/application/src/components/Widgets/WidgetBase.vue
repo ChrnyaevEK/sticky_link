@@ -189,7 +189,7 @@
 
 <style scoped>
     .widget {
-        position: absolute;
+        position: absolute !important;
         margin: 0;
         padding: 0;
         border-style: solid;
