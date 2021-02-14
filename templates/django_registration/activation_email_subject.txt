@@ -1,1 +1,1 @@
-Activation link for {{user.username}} at {{site.domain}}!
+Activation link for {{user.username}} at "{{site.name}}"!

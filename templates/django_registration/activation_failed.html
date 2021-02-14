@@ -3,22 +3,17 @@
 
 {% block content %} 
 <div class="d-flex justify-content-center align-items-center text-center align-middle w-100 h-100">
-    <p>
-        We are sorry, an <strong>error</strong> happened during activation. 
-    </p>
-    <p>
-        <div class="alert alert-danger" role="alert">
-            <strong>Error</strong>
-            {% if activation_error.code == 'already_activated' %}
-            <span>{{activation_error.message}}</span>
-            {% elif activation_error.code == 'bad_username' %}
-            <span>{{activation_error.message}} Try another user name.</span>
-            {% elif activation_error.code == 'expired' %}
-            <span>{{activation_error.message}} Try to register once again.</span>
-            {% elif activation_error.code == 'invalid_key' %}
-            <span>{{activation_error.message}}</span>
-            {% endif %}
-        </div>
+    <p class="text-danger">
+        <strong>Error</strong>
+        {% if activation_error.code == 'already_activated' %}
+        <span>{{activation_error.message}}</span>
+        {% elif activation_error.code == 'bad_username' %}
+        <span>{{activation_error.message}} Try another user name.</span>
+        {% elif activation_error.code == 'expired' %}
+        <span>{{activation_error.message}} Try to register once again.</span>
+        {% elif activation_error.code == 'invalid_key' %}
+        <span>{{activation_error.message}}</span>
+        {% endif %}
     </p>
 </div>
 {% endblock %}

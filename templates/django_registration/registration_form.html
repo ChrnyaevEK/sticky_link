@@ -3,7 +3,7 @@
 
 {% block content %} 
 <div class="d-flex justify-content-center align-items-center w-100 h-100">
-    <div class="col-12 col-md-6">
+    <div class="col-12 col-md-6 d-flex justify-content-center">
         {% if user.is_authenticated %}
         <span> Please <a href="{% url 'logout' %}">log out</a> in order to create a new account</span>
         {% else %}
@@ -27,7 +27,7 @@
                     aria-describedby="UserNameHelp"
                     required
                 />
-                <small id="UserNameHelp" class="text-muted">User name may contain any word character along with the following set of additional characters .(dot) @(at) +(plus) -(dash)</small>
+                <small id="UserNameHelp" class="text-muted">User name may contain any word character along with the following set of additional @/./+/-/_ characters. </small>
             </div>
             <div class="form-group">
                 <label for="email">
@@ -37,7 +37,7 @@
                     {% endif %}
                 </label>
                 <input type="email" name="email" id="email" class="form-control" aria-describedby="EmailHelp" required/>
-                <small id="EmailHelp" class="text-muted">Submit your e-mail</small>
+                <small id="EmailHelp" class="text-muted">Enter your e-mail (you will receive a conformation mail after registration)</small>
             </div>
             <div class="form-group">
                 <label for="password1">

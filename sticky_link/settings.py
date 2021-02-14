@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 ]
 
 MIDDLEWARE = [
@@ -152,3 +153,6 @@ if env.DEBUG:
 
 
     REST_FRAMEWORK['UNAUTHENTICATED_USER'] = get_user
+
+# Site settings
+SITE_ID = 1
