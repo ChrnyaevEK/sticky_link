@@ -18,7 +18,7 @@ server {
     }
 
     location /app/static {  # Static files for app
-        alias /var/www/sticky_link/templates/application/static;
+        alias /var/www/sticky_link/templates/application/dist/static;
     }
 
     location / {
