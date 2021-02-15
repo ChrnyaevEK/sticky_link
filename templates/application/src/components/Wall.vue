@@ -22,7 +22,7 @@
                     </div>
                 </div>
                 <div class="card m-1">
-                    <span class="text-secondary px-2">Interactiverrrrrr</span>
+                    <span class="text-secondary px-2">Interactive</span>
                     <div id="interactive-elements-body" role="tabpanel" aria-labelledby="interactive-elements-header">
                         <div class="d-flex justify-content-between align-items-center p-2">
                             <div title="Simple numeric counter, that remember the last state and allows only addition and subtraction">Counter</div>
