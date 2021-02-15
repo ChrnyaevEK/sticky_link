@@ -16,7 +16,7 @@
                 </div>
                 <div class="form-group">
                     <div class="d-flex">
-                        <input @dblclick.stop type="text" id="_('item-input')" v-model="item" @keyup.enter="addItem" class="form-control" />
+                        <input @dblclick.stop type="text" :id="_('item-input')" v-model="item" @keyup.enter="addItem" class="form-control" />
                         <a @click.stop="addItem" class="col-2 btn w-drag"><i class="fas fa-plus"></i></a>
                     </div>
                 </div>
