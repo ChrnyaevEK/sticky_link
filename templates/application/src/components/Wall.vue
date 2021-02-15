@@ -11,11 +11,11 @@
                 <div class="card m-1">
                     <span class="text-secondary px-2">Textual</span>
                     <div id="text-widgets-body" role="tabpanel" aria-labelledby="text-widgets-header">
-                        <div class="d-flex justify-content-between align-items-center px-2">
+                        <div class="d-flex justify-content-between align-items-center p-2">
                             <div title="Textarea with minimum format options">Simple text</div>
                             <a @click.stop="addBlankWidget(SimpleText)" class="btn bg-light"><i class="fas fa-plus"></i></a>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center px-2">
+                        <div class="d-flex justify-content-between align-items-center p-2">
                             <div title="Active link">URL</div>
                             <a @click.stop="addBlankWidget(URL)" class="btn bg-light"><i class="fas fa-plus"></i></a>
                         </div>
@@ -24,11 +24,11 @@
                 <div class="card m-1">
                     <span class="text-secondary px-2">Interactive</span>
                     <div id="interactive-elements-body" role="tabpanel" aria-labelledby="interactive-elements-header">
-                        <div class="d-flex justify-content-between align-items-center px-2">
+                        <div class="d-flex justify-content-between align-items-center p-2">
                             <div title="Simple numeric counter, that remember the last state and allows only addition and subtraction">Counter</div>
                             <a @click.stop="addBlankWidget(Counter)" class="btn bg-light"><i class="fas fa-plus"></i></a>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center px-2">
+                        <div class="d-flex justify-content-between align-items-center p-2">
                             <div title="List of items">Simple list</div>
                             <a @click.stop="addBlankWidget(SimpleList)" class="btn bg-light"><i class="fas fa-plus"></i></a>
                         </div>
@@ -39,7 +39,7 @@
                 Widgets are not available. Select or create a wall to use widgets
             </p>
             <div class="card p-1 mx-1 my-3">
-                <div class="d-flex justify-content-between align-items-center px-2">
+                <div class="d-flex justify-content-between align-items-center p-2">
                     <div title="Create new wall">Wall</div>
                     <button type="button" class="btn btn-light" data-toggle="modal" data-target="#new-wall-modal">
                         <i class="fas fa-plus"></i>
