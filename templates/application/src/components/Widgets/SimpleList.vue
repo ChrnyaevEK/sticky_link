@@ -4,20 +4,20 @@
             <div class="d-flex flex-column h-100 w-100">
                 <span class="w-100 text">{{ widget.title }}</span>
                 <small class="w-100 text">{{ widget.description }}</small>
-                <div class="form-group w-drag h-100 overflow-auto">
+                <div class="form-group h-100 overflow-auto">
                     <div class="border p-1 my-1" v-for="(val, i) of widget.items" :key="i">
                         <div class="d-flex text-break">
                             <span class="w-100">
                                 {{ val }}
                             </span>
-                            <a @click.stop="removeItem(i)" class="col-2 btn w-drag"><i class="fas fa-times"></i></a>
+                            <a @click.stop="removeItem(i)" class="col-2 btn"><i class="fas fa-times"></i></a>
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="d-flex">
                         <input @dblclick.stop type="text" :id="_('item-input')" v-model="item" @keyup.enter="addItem" class="form-control" />
-                        <a @click.stop="addItem" class="col-2 btn w-drag"><i class="fas fa-plus"></i></a>
+                        <a @click.stop="addItem" class="col-2 btn"><i class="fas fa-plus"></i></a>
                     </div>
                 </div>
             </div>

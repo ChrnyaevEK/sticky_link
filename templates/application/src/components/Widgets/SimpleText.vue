@@ -1,7 +1,7 @@
 <template id="simple-text-widget">
     <WidgetBase v-bind="{ ...$props, ...$attrs }">
         <template slot="content">
-            <div class="d-flex flex-column h-100 w-drag">
+            <div class="d-flex flex-column h-100">
                 <span class="flex-grow-1 text-truncate text-wrap text-break">{{ widget.text_content }}</span>
             </div>
         </template>
@@ -10,7 +10,7 @@
                 <label :for="_('text_content')"
                     >Content of widget
                 </label>
-                <textarea :id="_('text_content')" class="form-control" v-model="widget.text_content" :aria-describedby="_('textContentHelp')" rows="10"></textarea>
+                <textarea :id="_('text_content')" class="form-control" v-model="widget.text_content" rows="10"></textarea>
             </div>
         </template>
     </WidgetBase>

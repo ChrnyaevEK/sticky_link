@@ -2,9 +2,9 @@
     <WidgetBase v-bind="{ ...$props, ...$attrs }">
         <template slot="content">
             <div class="d-flex flex-column w-100 h-100">
-                <span class="w-100 text-center w-drag">{{widget.title}}</span>
+                <span class="w-100 text-center">{{widget.title}}</span>
                 <button @dblclick.stop.prevent class="btn" @click.stop="widget.value+=1"><i class="fa fa-chevron-up"></i></button>
-                <div class="d-flex justify-content-center align-items-center h-100 w-drag">
+                <div class="d-flex justify-content-center align-items-center h-100">
                     <span class="text-truncate text-wrap text-center text-break">
                         {{ widget.value }}
                     </span>
@@ -41,11 +41,6 @@
                 type: Object,
                 required: true,
             },
-        },
-        methods:{
-            test(){
-                console.log(31241)
-            }
         },
         created() {
             registerIdSystem(this, this.widget.type, this.widget.id); // Create _ function to generate ids

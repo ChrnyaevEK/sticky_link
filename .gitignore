@@ -5,7 +5,7 @@ sticky_link/env.py
 sticky_link/log.txt
 .DS_Store
 node_modules
-
+__pycache__
 
 # local env files
 # .env.local
