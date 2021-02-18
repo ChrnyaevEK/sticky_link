@@ -47,29 +47,12 @@ class ObjectSerializer(serializers.BaseSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    settings = serializers.SerializerMethodField(source='get_settings')
-
     def get_queryset(self):
         return models.User.objects.filter(pk=self.request.user.id)
 
-    @staticmethod
-    def get_settings(request):
-        return ObjectSerializer(models.Settings).data
-
     class Meta:
         model = User
-        fields = ['username', 'email', 'id', 'settings']
-
-
-class WallSerializer(serializers.ModelSerializer):
-    type = serializers.ReadOnlyField(default=models.Wall.type)
-    owner = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
-
-    class Meta:
-        model = models.Wall
-        fields = '__all__'
+        fields = ['username', 'email', 'id']
 
 
 class SimpleTextSerializer(serializers.ModelSerializer):
@@ -110,4 +93,21 @@ class CounterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Counter
+        fields = '__all__'
+
+
+class WallSerializer(serializers.ModelSerializer):
+    type = serializers.ReadOnlyField(default=models.Wall.type)
+    widgets = [
+        SimpleTextSerializer(many=True, read_only=True),
+        URLSerializer(many=True, read_only=True),
+        CounterSerializer(many=True, read_only=True),
+        SimpleListSerializer(many=True, read_only=True),
+    ]
+    owner = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+
+    class Meta:
+        model = models.Wall
         fields = '__all__'

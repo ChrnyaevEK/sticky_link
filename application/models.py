@@ -8,7 +8,6 @@ from django.core.validators import BaseValidator, MaxValueValidator, MinValueVal
 from django.contrib.auth.models import User
 import re
 
-
 class Settings:
     default_background_color = '#ffffff'
     default_text_color = '#000000'
@@ -96,18 +95,17 @@ class RichText(Widget):
 
 class URL(Widget):
     type = 'url'
-    max_length = 100
+    max_length = 2048
     href = models.URLField(null=True, blank=True)
     text = models.CharField(max_length=max_length, null=True, blank=True)
 
 
 class SimpleListValidator(BaseValidator):
-    max_items_amount = 20
-    max_item_length = 100
+    max_item_length = 200
 
     def compare(self, a, b):
         # Check type, items amount and length of each item
-        isinstance(a, list) and len(a) <= self.max_items_amount and all([len(i) <= self.max_item_length for i in a])
+        isinstance(a, list) and all([len(i) <= self.max_item_length for i in a])
 
 
 class SimpleList(Widget):
