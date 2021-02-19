@@ -1,6 +1,6 @@
 <template>
-    <div class="w-100 h-100 overflow-auto">
-        <div class="w-100 p-1 d-flex border-bottom justify-content-between bg-white fixed-top">
+    <div class="w-100 h-100 d-flex flex-column">
+        <div class="w-100 p-1 d-flex border-bottom justify-content-between bg-white">
             <small class="text-info">Widgets are not available. Select or create a wall to use widgets</small>
             <small class="text-secondary">
                 <strong v-if="Context.saving" class="text-secondary">Saving...</strong>
@@ -8,8 +8,16 @@
                 <strong v-else>Auto save</strong>
             </small>
         </div>
-        <router-view></router-view>
-        <div class="w-100 p-1 d-flex bg-white fixed-bottom border-top">
+        <div class="w-100 h-100 d-flex flex-column">
+            <div id="side-top"></div>
+            <div class="w-100 h-100 d-flex">
+                <div id="side-left"></div>
+                <router-view></router-view>
+                <div id="side-right"></div>
+            </div>
+            <div id="side-bottom"></div>
+        </div>
+        <div class="w-100 p-1 d-flex bg-white border-top">
             <div class="btn-group dropup p-1">
                 <button class="btn btn-sm dropdown-toggle" type="button" id="wall-list" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Walls
@@ -46,6 +54,7 @@
         created() {
             Context.$on("wallDeleted", this.onWallDeleted);
             Context.$on("wallCreated", this.onWallCreated);
+            Context.$on("routeRequest", this.onRouteRequest);
             Context.initUser();
         },
         data() {
@@ -55,28 +64,37 @@
             };
         },
         methods: {
-            onWallCreated() {
-                console.log("wall created");
+            onWallCreated(wall) {
+                Context.walls.push(wall);
             },
-            onWallDeleted() {
-                console.log("wall created");
+            onWallDeleted(wall) {
+                Context.walls.splice(Context.walls.indexOf(wall), 1);
+            },
+            onRouteRequest(callback){
+                callback(this.$route)
             },
         },
     };
 </script>
 
 <style scoped>
-    .widget-table {
-        display: table;
+    #side-top,
+    #side-bottom,
+    #side-right,
+    #side-left {
+        width: 0;
+        height: 0;
+        padding: 0;
+        margin: 0;
     }
-    .widget-table-cell {
-        display: table-cell;
-        vertical-align: middle;
+    #side-top,
+    #side-bottom {
+        height: 1.5rem;
+        width: 100%;
     }
-    .w-90 {
-        width: 90% !important;
-    }
-    .h-90 {
-        height: 90% !important;
+    #side-left,
+    #side-right {
+        width: 1.5rem;
+        height: 100%;
     }
 </style>

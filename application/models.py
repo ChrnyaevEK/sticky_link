@@ -61,11 +61,11 @@ class Widget(Common):
         height = 100
 
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
-    width = models.IntegerField(verbose_name='Widget width', default=Default.width)
-    height = models.IntegerField(verbose_name='Widget height', default=Default.height)
-    z_index = models.IntegerField(verbose_name='Widget z index(stack position)', default=Default.z_index)
-    left = models.IntegerField(verbose_name='Offset left from parent', default=Default.left)
-    top = models.IntegerField(verbose_name='Offset top from parent', default=Default.top)
+    w = models.IntegerField(verbose_name='Widget width', default=Default.width)
+    h = models.IntegerField(verbose_name='Widget height', default=Default.height)
+    z = models.IntegerField(verbose_name='Widget z index(stack position)', default=Default.z_index)
+    x = models.IntegerField(verbose_name='Offset left from parent', default=Default.left)
+    y = models.IntegerField(verbose_name='Offset top from parent', default=Default.top)
     font_size = models.IntegerField(verbose_name='Widget font size', default=Default.font_size,
                                     validators=[MaxValueValidator(Default.max_font_size),
                                                 MinValueValidator(Default.min_font_size)])

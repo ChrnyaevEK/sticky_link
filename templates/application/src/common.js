@@ -102,6 +102,8 @@ export class UpdateManager extends API {
 }
 
 export var Context = new Vue({
+    name: 'Context',
+    el: '#context',
     data: {
         saving: false, // Global saving indicator
         saved: false, // Global safe indicator

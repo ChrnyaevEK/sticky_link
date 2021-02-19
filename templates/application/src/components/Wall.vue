@@ -14,11 +14,11 @@
     import SimpleList from "./Widgets/SimpleList";
     import { API, Context, UpdateManager } from "../common.js";
 
-    export function addBlankWall() {
-        return new API("wall").create().then((response) => {
-            Context.walls.push(response);
+    Context.$on("addBlankWall", () => {
+        new API("wall").create().then((response) => {
+            Context.$emit('wallCreated', response)
         });
-    }
+    });
 
     var components = {
         SimpleText,
@@ -30,9 +30,9 @@
     export default {
         components,
         created() {
-            Context.$on("deleteWidget", this.onDeleteRequest);
-            Context.$on("addBlankWidget", this.onAddBlankWidget);
-            this.initiateWall(this.$route.params.id);
+            Context.$on("widgetDeleted", this.onWidgetDeleted);
+            Context.$on("widgetCreated", this.onWidgetCreated);
+            this.initiateWall(this.$route.params.wall_id);
         },
         data() {
             return {
@@ -45,16 +45,16 @@
         },
         methods: {
             initiateWall(id) {
-                this.$set(this, "manager", new UpdateManager('wall', id));
+                this.$set(this, "manager", new UpdateManager("wall", id));
                 this.manager.retrieve().then((response) => {
                     this.$set(this, "wall", response.wall);
                     this.$set(this, "widgets", response.widgets);
                 });
             },
-            onDeleteWall(wall) {
+            onDeleteWall() {
                 if (confirm("Are you sure? Wall will be permanently removed!")) {
-                    Context.walls.splice(Context.walls.indexOf(wall), 1);
-                    return this.manager.delete();
+                    this.manager.delete();
+                    Context.$emit('wallDeleted', this.wall)
                 }
             },
             filterWidgets(klass) {
@@ -62,22 +62,16 @@
                     return widget.type == klass.type;
                 });
             },
-            onAddBlankWidget(klass) {
-                new API(klass.type)
-                    .create({
-                        wall: this.wall.id,
-                    })
-                    .then((response) => {
-                        this.widgets.push(response);
-                    });
+            onWidgetCreated(widget) {
+                this.widgets.push(widget);
             },
-            onDeleteWidget(widget) {
+            onWidgetDeleted(widget) {
                 this.widgets.splice(this.widgets.indexOf(widget), 1);
             },
         },
         watch: {
             $route(to) {
-                this.initiateWall(to.params.id)
+                this.initiateWall(to.params.wall_id);
             },
         },
     };

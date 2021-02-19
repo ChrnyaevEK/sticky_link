@@ -1,36 +1,36 @@
 <template>
-    <vue-resizable
-        @resize:end="onResizeEnd"
-        @drag:end="onDragEnd"
-        class="widget"
-        ref="resizable"
-        dragSelector=".widget-drag"
-        :width="widget.width"
-        :height="widget.height"
-        :top="widget.top"
-        :left="widget.left"
-    >
+    <vue-draggable-resizable @resizing="onResize" @dragging="onDrag" class="widget" :parent="true" :w="widget.w" :h="widget.h" :y="widget.y" :x="widget.x" :z="widget.z">
         <div @contextmenu.stop.prevent="optionsVisible = true" class="h-100 w-100">
             <div class="widget-quick-access" v-show="quickAccessVisible">
-                <a class="widget-drag btn btn-light"><i class="fas fa-expand-arrows-alt"></i></a>
+                <a class="widget-drag btn btn-light border" @click="copyWidget"><i class="fas fa-copy"></i></a>
+                <a class="widget-drag btn btn-danger" @click="deleteWidget"><i class="fas fa-trash"></i></a>
             </div>
             <div class="content" :style="style">
                 <slot name="content"></slot>
             </div>
         </div>
-        <vue-resizable :width="400" :height="600" dragSelector=".widget-options-drag" class="bg-light" v-show="optionsVisible" :fitParent="false">
+        <!-- <vue-resizable :width="400" :height="600" dragSelector=".widget-options-drag" class="bg-light" v-show="optionsVisible" :fitParent="false">
             <div class="widget-quick-access" v-show="quickAccessVisible">
                 <a class="widget-options-drag btn btn-light"><i class="fas fa-expand-arrows-alt"></i></a>
             </div>
-        </vue-resizable>
-    </vue-resizable>
+        </vue-resizable> -->
+    </vue-draggable-resizable>
 </template>
 
 <script>
     // Front end is absolutely passive
-    import VueResizable from "vue-resizable";
-    import { registerIdSystem, UpdateManager, Context } from "../../common.js";
+    import VueDraggableResizable from "vue-draggable-resizable";
+    import "vue-draggable-resizable/dist/VueDraggableResizable.css";
+    import { registerIdSystem, UpdateManager, API, Context } from "../../common.js";
     import $ from "jquery";
+
+    Context.$on("addBlankWidget", function(klass) {
+        Context.$emit("routeRequest", ($route) => {
+            new API(klass.type).create({ wall: $route.params.wall_id }).then((response) => {
+                Context.$emit("widgetCreated", response);
+            });
+        });
+    });
 
     export default {
         name: "WidgetBase",
@@ -45,7 +45,6 @@
             var vm = this;
             return {
                 manager: new UpdateManager(vm.widget.type, vm.widget.id, this.unsetWarning, this.setWarningFromResponse),
-                optionsModal: this._("options"),
                 Context: Context,
                 warningClass: "widget-options-warning", // Show warning messages
                 quickAccessClass: "widget-quick-access",
@@ -54,15 +53,13 @@
             };
         },
         methods: {
-            onResizeEnd(event) {
-                // [eventName,left,top,width,height]
-                this.widget.width = event.width;
-                this.widget.height = event.height;
+            onResize(x, y, w, h) {
+                this.widget.w = w;
+                this.widget.h = h;
             },
-            onDragEnd(event) {
-                // [eventName,left,top,width,height]
-                this.widget.left = event.left;
-                this.widget.top = event.top;
+            onDrag(x, y) {
+                this.widget.x = x;
+                this.widget.y = y;
             },
             setWarningFromResponse(response) {
                 for (var [field, error] of Object.entries(response.responseJSON)) {
@@ -83,19 +80,21 @@
             },
             deleteWidget() {
                 if (confirm("Are you sure?")) {
-                    $(`#${this.optionsModal}`).modal("hide");
-                    Context.$emit("deleteWidget", this.widget);
-                    this.manager.delete();
+                    this.manager.delete().then(() => {
+                        Context.$emit("widgetDeleted", this.widget);
+                    });
                 }
+            },
+            copyWidget() {
+                this.manager.create(this.widget);
             },
         },
         components: {
-            VueResizable,
+            VueDraggableResizable,
         },
         computed: {
             style() {
                 return `
-                    z-index: ${this.widget.z_index};
                     background-color: ${this.widget.background_color};
                     color: ${this.widget.text_color};
                     font-size:${this.widget.font_size}px;
@@ -125,7 +124,6 @@
 
 <style scoped>
     .widget {
-        position: absolute;
         margin: 0;
         padding: 0;
         border-style: solid;
