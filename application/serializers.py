@@ -23,6 +23,8 @@ class ObjectSerializer(serializers.BaseSerializer):
                 if attribute_name.startswith('_'):
                     # Ignore private attributes.
                     pass
+                elif hasattr(attribute, '__class__'):
+                    output[attribute_name] = self.to_representation(attribute)
                 elif hasattr(attribute, '__call__'):
                     # Ignore methods and other callables.
                     pass
@@ -57,7 +59,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 class SimpleTextSerializer(serializers.ModelSerializer):
     type = serializers.ReadOnlyField(default=models.SimpleText.type)
-    max_length = serializers.ReadOnlyField(default=models.SimpleText.max_length)
 
     class Meta:
         model = models.SimpleText

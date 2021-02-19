@@ -1,11 +1,26 @@
-import Vue from 'vue'
-import 'bootstrap'
-import App from './App.vue'
-import './css/main.scss';
-import '@fortawesome/fontawesome-free/js/all.js';
-import '@fortawesome/fontawesome-free/css/all.css';
-Vue.config.productionTip = false
+import Vue from "vue";
+import VueRouter from "vue-router";
+import "bootstrap";
+import App from "./App.vue";
+import Wall from "./components/Wall";
+import "./css/main.scss";
+import "@fortawesome/fontawesome-free/js/all.js";
+import "@fortawesome/fontawesome-free/css/all.css";
+Vue.config.productionTip = true;
+Vue.use(VueRouter);
+
+const router = new VueRouter({
+    mode: "history",
+    routes: [
+        {
+            path: "/app/",
+            component: App,
+            children: [{ path: "wall/:id", component: Wall }],
+        },
+    ],
+});
 
 new Vue({
-  render: h => h(App),
-}).$mount('#app')
+    router,
+    template: "<router-view/>",
+}).$mount("#app");

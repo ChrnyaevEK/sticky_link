@@ -1,24 +1,29 @@
 <template>
-    <div class="clearfix">
-        <div class="base-layout-top">
-            <div class="status-panel d-flex p-2 w-100 border-bottom justify-content-between">
-                <small class="px-2 text-info">Widgets are not available. Select or create a wall to use widgets</small>
-                <small class="text-secondary">
-                    <strong v-if="Context.saving" class="text-secondary">Saving...</strong>
-                    <strong v-else-if="Context.saved" class="text-success">Saved!</strong>
-                    <strong v-else>Auto save</strong>
-                </small>
+    <div class="w-100 h-100 overflow-auto">
+        <div class="w-100 p-1 d-flex border-bottom justify-content-between bg-white fixed-top">
+            <small class="text-info">Widgets are not available. Select or create a wall to use widgets</small>
+            <small class="text-secondary">
+                <strong v-if="Context.saving" class="text-secondary">Saving...</strong>
+                <strong v-else-if="Context.saved" class="text-success">Saved!</strong>
+                <strong v-else>Auto save</strong>
+            </small>
+        </div>
+        <router-view></router-view>
+        <div class="w-100 p-1 d-flex bg-white fixed-bottom border-top">
+            <div class="btn-group dropup p-1">
+                <button class="btn btn-sm dropdown-toggle" type="button" id="wall-list" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Walls
+                </button>
+                <div class="dropdown-menu" aria-labelledby="wall-list">
+                    <router-link class="dropdown-item btn-sm" v-for="wall of Context.walls" :key="wall.id" :to="`/app/wall/${wall.id}`">{{ wall.title }}</router-link>
+                </div>
             </div>
-            <div class="d-flex control-panel p-1 w-100 border-top overflow-auto">
+            <div class="d-flex p-1 w-100 overflow-auto">
                 <a @click.stop="Context.$emit('addBlankWidget', SimpleText)" class="btn btn-sm bg-light border mx-1 text-nowrap">Simple text</a>
                 <a @click.stop="Context.$emit('addBlankWidget', URL)" class="btn btn-sm bg-light border mx-1 text-nowrap">URL</a>
                 <a @click.stop="Context.$emit('addBlankWidget', Counter)" class="btn btn-sm bg-light border mx-1 text-nowrap">Counter</a>
                 <a @click.stop="Context.$emit('addBlankWidget', SimpleList)" class="btn btn-sm bg-light border mx-1 text-nowrap">Simple list</a>
             </div>
-        </div>
-
-        <div class="base-layout-bottom">
-            <Wall ref="wall" :wall="wall"></Wall>
         </div>
     </div>
 </template>
@@ -28,7 +33,6 @@
     import URL from "./components/Widgets/URL";
     import Counter from "./components/Widgets/Counter";
     import SimpleList from "./components/Widgets/SimpleList";
-    import Wall from "./components/Wall";
     import { Context } from "./common.js";
 
     var components = {
@@ -36,15 +40,13 @@
         URL,
         Counter,
         SimpleList,
-        Wall,
     };
     export default {
         components,
         created() {
-            Context.$on("deleteWall", this.onDeleteWall);
-            Context.initUserContext().then(()=>{
-
-            })
+            Context.$on("wallDeleted", this.onWallDeleted);
+            Context.$on("wallCreated", this.onWallCreated);
+            Context.initUser();
         },
         data() {
             return {
@@ -53,25 +55,28 @@
             };
         },
         methods: {
-
+            onWallCreated() {
+                console.log("wall created");
+            },
+            onWallDeleted() {
+                console.log("wall created");
+            },
         },
     };
 </script>
 
 <style scoped>
-    .base-layout {
-        position: absolute;
-        width: 100%;
-        height: 100%;
+    .widget-table {
+        display: table;
     }
-    .base-layout-bottom {
-        z-index: 0;
+    .widget-table-cell {
+        display: table-cell;
+        vertical-align: middle;
     }
-    .base-layout-top {
-        z-index: 101;
+    .w-90 {
+        width: 90% !important;
     }
-    .control-panel {
-        position: absolute;
-        bottom: 0;
+    .h-90 {
+        height: 90% !important;
     }
 </style>

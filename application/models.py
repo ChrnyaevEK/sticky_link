@@ -8,25 +8,6 @@ from django.core.validators import BaseValidator, MaxValueValidator, MinValueVal
 from django.contrib.auth.models import User
 import re
 
-class Settings:
-    default_background_color = '#ffffff'
-    default_text_color = '#000000'
-    default_z_index = 0
-    default_left = 0
-    default_top = 0
-    default_font_size = 16
-    min_font_size = 8
-    max_font_size = 40
-    default_font_weight = 400
-    min_font_weight = 100
-    max_font_weight = 900
-    max_wall_title_length = 200
-    default_wall_title = 'Untitled'
-    max_wall_description_length = 500
-
-    default_widget_width = 200
-    default_widget_height = 100
-
 
 class Common(models.Model):
     id = models.AutoField(primary_key=True)
@@ -41,13 +22,18 @@ class Common(models.Model):
 
 
 class Wall(Common):
-    type = 'wall'
+    class Default:
+        type = 'wall'
+        title = 'Untitled'
+        title_length = 200
+        description_length = 500
+
+    type = Default.type
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     allowed_users = models.ManyToManyField(User, verbose_name='List of allowed users',
                                            related_name='related_walls', blank=True)
-    title = models.CharField(verbose_name='Wall title', max_length=Settings.max_wall_title_length,
-                             default=Settings.default_wall_title)
-    description = models.CharField(verbose_name='Wall description', max_length=Settings.max_wall_description_length,
+    title = models.CharField(verbose_name='Wall title', max_length=Default.title_length, default=Default.title)
+    description = models.CharField(verbose_name='Wall description', max_length=Default.description_length,
                                    blank=True, null=True)
 
 
@@ -59,66 +45,107 @@ class ColorValidator(BaseValidator):
 
 
 class Widget(Common):
-    wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
-    width = models.IntegerField(verbose_name='Widget width', default=Settings.default_widget_width)
-    height = models.IntegerField(verbose_name='Widget height', default=Settings.default_widget_height)
-    z_index = models.IntegerField(verbose_name='Widget z index(stack position)', default=Settings.default_z_index)
-    left = models.IntegerField(verbose_name='Offset left from parent', default=Settings.default_left)
-    top = models.IntegerField(verbose_name='Offset top from parent', default=Settings.default_top)
-    font_size = models.IntegerField(verbose_name='Widget font size', default=Settings.default_font_size,
-                                    validators=[MaxValueValidator(Settings.max_font_size),
-                                                MinValueValidator(Settings.min_font_size)])
-    font_weight = models.IntegerField(verbose_name='Widget font weight', default=Settings.default_font_weight,
-                                      validators=[MaxValueValidator(Settings.max_font_weight),
-                                                  MinValueValidator(Settings.min_font_weight)])
+    class Default:
+        background_color = '#ffffff'
+        text_color = '#000000'
+        z_index = 0
+        left = 0
+        top = 0
+        font_size = 16
+        min_font_size = 8
+        max_font_size = 40
+        font_weight = 400
+        min_font_weight = 100
+        max_font_weight = 900
+        width = 200
+        height = 100
 
-    background_color = models.CharField(max_length=9, validators=[ColorValidator],
-                                        default=Settings.default_background_color)
-    text_color = models.CharField(max_length=9, validators=[ColorValidator], default=Settings.default_text_color)
+    wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
+    width = models.IntegerField(verbose_name='Widget width', default=Default.width)
+    height = models.IntegerField(verbose_name='Widget height', default=Default.height)
+    z_index = models.IntegerField(verbose_name='Widget z index(stack position)', default=Default.z_index)
+    left = models.IntegerField(verbose_name='Offset left from parent', default=Default.left)
+    top = models.IntegerField(verbose_name='Offset top from parent', default=Default.top)
+    font_size = models.IntegerField(verbose_name='Widget font size', default=Default.font_size,
+                                    validators=[MaxValueValidator(Default.max_font_size),
+                                                MinValueValidator(Default.min_font_size)])
+    font_weight = models.IntegerField(verbose_name='Widget font weight', default=Default.font_weight,
+                                      validators=[MaxValueValidator(Default.max_font_weight),
+                                                  MinValueValidator(Default.min_font_weight)])
+
+    background_color = models.CharField(max_length=9, validators=[ColorValidator], default=Default.background_color)
+    text_color = models.CharField(max_length=9, validators=[ColorValidator], default=Default.text_color)
 
     class Meta:
         abstract = True
 
 
 class SimpleText(Widget):
-    type = 'simple_text'
-    max_length = 2000
-    text_content = models.TextField(verbose_name='Text content of widget', max_length=max_length, null=True, blank=True)
+    class Default:
+        content_length = 2000
+        type = 'simple_text'
+
+    type = Default.type
+    text_content = models.TextField(verbose_name='Text content of widget', max_length=Default.content_length, null=True,
+                                    blank=True)
 
 
 class RichText(Widget):
-    type = 'rich_text'
+    class Default:
+        type = 'rich_text'
+
+    type = Default.type
     text_color = None  # Color is set by markdown
     text_content = models.TextField(verbose_name='Text content of widget', null=True, blank=True)
     show_source = models.BooleanField(default=True)
 
 
 class URL(Widget):
-    type = 'url'
-    max_length = 2048
+    class Default:
+        type = 'url'
+        url_length = 2048
+
+    type = Default.type
     href = models.URLField(null=True, blank=True)
-    text = models.CharField(max_length=max_length, null=True, blank=True)
+    text = models.CharField(max_length=Default.url_length, null=True, blank=True)
 
 
 class SimpleListValidator(BaseValidator):
-    max_item_length = 200
 
     def compare(self, a, b):
         # Check type, items amount and length of each item
-        isinstance(a, list) and all([len(i) <= self.max_item_length for i in a])
+        isinstance(a, list) and all([len(i) <= SimpleList.Default.item_length for i in a])
 
 
 class SimpleList(Widget):
-    type = 'simple_list'
-    max_title_length = 100
-    max_description_length = 200
-    title = models.CharField(max_length=max_title_length, null=True, blank=True)
-    description = models.CharField(max_length=max_description_length, null=True, blank=True)
+    class Default:
+        type = 'simple_list'
+        item_length = 200
+        title_length = 100
+        description_length = 200
+
+    type = Default.type
+    title = models.CharField(max_length=Default.title_length, null=True, blank=True)
+    description = models.CharField(max_length=Default.description_length, null=True, blank=True)
     items = models.JSONField(default=list, validators=[SimpleListValidator(None)])
 
 
 class Counter(Widget):
-    type = 'counter'
-    max_length = 200
-    title = models.CharField(max_length=max_length, blank=True, null=True)
-    value = models.BigIntegerField(default=0)
+    class Default:
+        type = 'counter'
+        title_length = 200
+        initial_value = 0
+
+    type = Default.type
+    title = models.CharField(max_length=Default.title_length, blank=True, null=True)
+    value = models.BigIntegerField(default=Default.initial_value)
+
+
+class Settings:
+    widget = Widget.Default
+    wall = Wall.Default
+    simple_text = SimpleText.Default
+    rich_text = RichText.Default
+    url = URL.Default
+    simple_list = SimpleList.Default
+    counter = Counter.Default

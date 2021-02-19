@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="w-100 h-100">
         <SimpleText v-for="widget of filterWidgets(SimpleText)" :key="widget.type + widget.id" :widget="widget"> </SimpleText>
         <URL v-for="widget of filterWidgets(URL)" :key="widget.type + widget.id" :widget="widget"> </URL>
         <Counter v-for="widget of filterWidgets(Counter)" :key="widget.type + widget.id" :widget="widget"> </Counter>
@@ -12,7 +12,13 @@
     import URL from "./Widgets/URL";
     import Counter from "./Widgets/Counter";
     import SimpleList from "./Widgets/SimpleList";
-    import { API, Context, registerIdSystem, UpdateManager } from "../common.js";
+    import { API, Context, UpdateManager } from "../common.js";
+
+    export function addBlankWall() {
+        return new API("wall").create().then((response) => {
+            Context.walls.push(response);
+        });
+    }
 
     var components = {
         SimpleText,
@@ -20,46 +26,36 @@
         Counter,
         SimpleList,
     };
+
     export default {
         components,
         created() {
-            registerIdSystem(this, this.wall);
             Context.$on("deleteWidget", this.onDeleteRequest);
             Context.$on("addBlankWidget", this.onAddBlankWidget);
-            Context.$on("deleteWall", this.onDeleteWall);
-            Context.$on("addBlankWall", this.onAddBlankWall);
+            this.initiateWall(this.$route.params.id);
         },
         data() {
-            var manager = new UpdateManager(this.wall.type, this.wall.id);
             return {
                 Context,
-                manager,
+                manager: {},
+                wall: {},
+                widgets: [],
                 ...components,
             };
         },
-        props: {
-            wall: {
-                type: Object,
-                required: true,
-            },
-            widgets: {
-                type: Array,
-                default: () => []
-            },
-        },
         methods: {
+            initiateWall(id) {
+                this.$set(this, "manager", new UpdateManager('wall', id));
+                this.manager.retrieve().then((response) => {
+                    this.$set(this, "wall", response.wall);
+                    this.$set(this, "widgets", response.widgets);
+                });
+            },
             onDeleteWall(wall) {
                 if (confirm("Are you sure? Wall will be permanently removed!")) {
-                    this.manager.delete();
                     Context.walls.splice(Context.walls.indexOf(wall), 1);
-                    Context.$emit('wallDeleted')
+                    return this.manager.delete();
                 }
-            },
-            onAddBlankWall() {
-                this.manager.create().then((response) => {
-                    Context.walls.push(response);
-                    Context.$emit('wallCreated')
-                });
             },
             filterWidgets(klass) {
                 return this.widgets.filter(function(widget) {
@@ -77,6 +73,11 @@
             },
             onDeleteWidget(widget) {
                 this.widgets.splice(this.widgets.indexOf(widget), 1);
+            },
+        },
+        watch: {
+            $route(to) {
+                this.initiateWall(to.params.id)
             },
         },
     };

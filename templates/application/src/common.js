@@ -112,11 +112,8 @@ export var Context = new Vue({
         walls: [],
     },
     methods: {
-        getWallContext(id) {
-            return new API("wall_context").retrieve(id);
-        },
-        initUserContext() {
-            new API("user_context").list().then((response)=>{
+        initUser() {
+            return new API("user").list().then((response)=>{
                 this.$set(this, "user", response.user);
                 this.$set(this, "settings", response.settings);
                 this.$set(this, "walls", response.walls);

@@ -1,10 +1,12 @@
 from application import models
 from application import serializers
+from rest_framework.decorators import permission_classes, api_view
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse, Http404
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
+from rest_framework.response import Response
 from django.http import HttpResponse
-from django.views import View
 from django.core.exceptions import PermissionDenied
 
 
@@ -28,11 +30,17 @@ class UserViewSet(ReadOnlyModelViewSet):
     def get_queryset(self):
         return models.User.objects.filter(pk=self.request.user.id)
 
+    def retrieve(self, request, *args, **kwargs):
+        return self._get(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        return self._get(request, *args, **kwargs)
+
     @staticmethod
-    def get_context(request):
+    def _get(request, *args, **kwargs):
         walls = _get_protected_queryset(models.Wall, request.user)
         return JsonResponse({
-            'walls': serializers.WallSerializer(walls, many=True),
+            'walls': serializers.WallSerializer(walls, many=True).data,
             'settings': serializers.ObjectSerializer(models.Settings).data,
             'user': serializers.UserSerializer(request.user).data,
         })
@@ -44,10 +52,10 @@ class WallViewSet(ModelViewSet):
     def get_queryset(self):
         return _get_protected_queryset(models.Wall, self.request.user)
 
-    def get_context(self, request, wall_id):
-        walls_query = self.get_queryset()
+    def retrieve(self, request, pk=None):
+        walls_query = _get_protected_queryset(models.Wall, request.user)
         try:
-            wall = walls_query.get(pk=wall_id)
+            wall = walls_query.get(pk=pk)
         except models.Wall.DoesNotExist:
             raise PermissionDenied  # Wall exist, but access is not granted
         widgets = []
@@ -60,7 +68,7 @@ class WallViewSet(ModelViewSet):
         ):
             for widget in model.objects.filter(wall=wall):
                 widgets.append(serializer(widget).data)
-        return JsonResponse({
+        return Response({
             'wall': serializers.WallSerializer(wall).data,
             'widgets': widgets,
         })

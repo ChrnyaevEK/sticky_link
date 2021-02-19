@@ -5,7 +5,6 @@
         class="widget"
         ref="resizable"
         dragSelector=".widget-drag"
-        :fitParent="true"
         :width="widget.width"
         :height="widget.height"
         :top="widget.top"
@@ -126,7 +125,7 @@
 
 <style scoped>
     .widget {
-        position: absolute !important;
+        position: absolute;
         margin: 0;
         padding: 0;
         border-style: solid;

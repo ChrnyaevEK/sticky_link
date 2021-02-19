@@ -5,34 +5,28 @@
                 <span class="w-100 text">{{ widget.title }}</span>
                 <small class="w-100 text">{{ widget.description }}</small>
                 <div class="form-group h-100 overflow-auto">
-                    <div class="border p-1 my-1" v-for="(val, i) of widget.items" :key="i">
-                        <div class="d-flex text-break">
-                            <span class="w-100">
-                                {{ val }}
-                            </span>
-                            <a @click.stop="removeItem(i)" class="col-2 btn"><i class="fas fa-times"></i></a>
-                        </div>
+                    <div class="border d-flex text-break m-1" v-for="(val, i) of widget.items" :key="i">
+                        <span class="w-100 p-1">
+                            {{ val }}
+                        </span>
+                        <a @click.stop="removeItem(i)" class="btn"><i class="fas fa-times"></i></a>
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="p-1 border-top">
                     <div class="d-flex">
                         <input @dblclick.stop type="text" :id="_('item-input')" v-model="item" @keyup.enter="addItem" class="form-control" />
-                        <a @click.stop="addItem" class="col-2 btn"><i class="fas fa-plus"></i></a>
+                        <a @click.stop="addItem" class="btn"><i class="fas fa-plus"></i></a>
                     </div>
                 </div>
             </div>
         </template>
         <template slot="options">
             <div class="form-group">
-                <label :for="_('title')"
-                    >Title
-                </label>
+                <label :for="_('title')">Title </label>
                 <input :id="_('title')" class="form-control" v-model.number="widget.title" :aria-describedby="_('titleHelp')" />
-            </div>            
+            </div>
             <div class="form-group">
-                <label :for="_('description')"
-                    >Description
-                </label>
+                <label :for="_('description')">Description </label>
                 <input :id="_('description')" class="form-control" v-model.number="widget.description" :aria-describedby="_('descriptionHelp')" />
             </div>
         </template>
@@ -73,9 +67,9 @@
                     this.item = "";
                 }
             },
-            removeItem(i){
-                this.widget.items.splice(i, 1)
-            }
+            removeItem(i) {
+                this.widget.items.splice(i, 1);
+            },
         },
     };
 </script>
