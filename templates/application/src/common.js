@@ -20,7 +20,9 @@ export class API {
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
                 if (cookie.substring(0, name.length + 1) === name + "=") {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    cookieValue = decodeURIComponent(
+                        cookie.substring(name.length + 1)
+                    );
                     break;
                 }
             }
@@ -87,10 +89,15 @@ export class UpdateManager extends API {
             // Grab last state and push it to server
             if (this.lastState !== null) {
                 Context.saving = true;
-                this.update(this.lastState).then(() => {
-                    Context.saved = true;
-                    resolve();
-                }, reject);
+                this.update(this.lastState).then(
+                    () => {
+                        Context.saved = true;
+                        if (resolve) resolve();
+                    },
+                    () => {
+                        if (reject) reject();
+                    }
+                );
                 this.lastState = null;
             }
         }, this.refreshRate);
@@ -102,8 +109,8 @@ export class UpdateManager extends API {
 }
 
 export var Context = new Vue({
-    name: 'Context',
-    el: '#context',
+    name: "Context",
+    el: "#context",
     data: {
         saving: false, // Global saving indicator
         saved: false, // Global safe indicator
@@ -115,11 +122,11 @@ export var Context = new Vue({
     },
     methods: {
         initUser() {
-            return new API("user").list().then((response)=>{
+            return new API("user").list().then((response) => {
                 this.$set(this, "user", response.user);
                 this.$set(this, "settings", response.settings);
                 this.$set(this, "walls", response.walls);
-            })
+            });
         },
     },
     watch: {
@@ -140,7 +147,9 @@ export var Context = new Vue({
         },
         user: {
             handler() {
-                $("#tab-title").text(`${process.env.VUE_APP_TITLE} @ ${this.user.username}`);
+                $("#tab-title").text(
+                    `${this.user.username} @ ${process.env.VUE_APP_TITLE}`
+                );
             },
             deep: true,
         },

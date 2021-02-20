@@ -27,8 +27,14 @@ class Wall(Common):
         title = 'Untitled'
         title_length = 200
         description_length = 500
+        width = 900
+        height = 600
+        min_width = 300
+        min_height = 600
 
     type = Default.type
+    w = models.IntegerField(verbose_name='Wall width', default=Default.width)
+    h = models.IntegerField(verbose_name='Wall height', default=Default.height)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     allowed_users = models.ManyToManyField(User, verbose_name='List of allowed users',
                                            related_name='related_walls', blank=True)
@@ -48,7 +54,9 @@ class Widget(Common):
     class Default:
         background_color = '#ffffff'
         text_color = '#000000'
-        z_index = 0
+        z = 0
+        min_z = 0
+        max_z = 1000
         left = 0
         top = 0
         font_size = 16
@@ -63,7 +71,9 @@ class Widget(Common):
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
     w = models.IntegerField(verbose_name='Widget width', default=Default.width)
     h = models.IntegerField(verbose_name='Widget height', default=Default.height)
-    z = models.IntegerField(verbose_name='Widget z index(stack position)', default=Default.z_index)
+    z = models.IntegerField(verbose_name='Widget z index(stack position)', default=Default.z, validators=[
+        MaxValueValidator(Default.max_z), MinValueValidator(Default.min_z)
+    ])
     x = models.IntegerField(verbose_name='Offset left from parent', default=Default.left)
     y = models.IntegerField(verbose_name='Offset top from parent', default=Default.top)
     font_size = models.IntegerField(verbose_name='Widget font size', default=Default.font_size,

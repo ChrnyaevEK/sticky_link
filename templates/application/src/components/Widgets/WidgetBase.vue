@@ -1,19 +1,47 @@
 <template>
-    <vue-draggable-resizable @resizing="onResize" @dragging="onDrag" class="widget" :parent="true" :w="widget.w" :h="widget.h" :y="widget.y" :x="widget.x" :z="widget.z">
-        <div @contextmenu.stop.prevent="optionsVisible = true" class="h-100 w-100">
-            <div class="widget-quick-access" v-show="quickAccessVisible">
-                <a class="widget-drag btn btn-light border" @click="copyWidget"><i class="fas fa-copy"></i></a>
-                <a class="widget-drag btn btn-danger" @click="deleteWidget"><i class="fas fa-trash"></i></a>
-            </div>
-            <div class="content" :style="style">
-                <slot name="content"></slot>
-            </div>
+    <vue-draggable-resizable
+        @resizing="onResize"
+        @dragging="onDrag"
+        @mousedown.native.stop.prevent
+        @mouseup.native.stop.prevent
+        @mousemove.native.stop.prevent
+        @click.native.stop.prevent
+        class="widget"
+        :parent="true"
+        :w="widget.w"
+        :h="widget.h"
+        :y="widget.y"
+        :x="widget.x"
+        :z="widget.z"
+    >
+        <div class="widget-quick-access" v-show="quickAccessVisible">
+            <a class="widget-drag btn btn-light border" @click="copyWidget"
+                ><i class="fas fa-copy"></i
+            ></a>
+            <a class="widget-drag btn btn-danger" @click="deleteWidget"
+                ><i class="fas fa-trash"></i
+            ></a>
         </div>
-        <!-- <vue-resizable :width="400" :height="600" dragSelector=".widget-options-drag" class="bg-light" v-show="optionsVisible" :fitParent="false">
-            <div class="widget-quick-access" v-show="quickAccessVisible">
-                <a class="widget-options-drag btn btn-light"><i class="fas fa-expand-arrows-alt"></i></a>
-            </div>
-        </vue-resizable> -->
+        <div
+            class="w-100 h-100"
+            :style="style"
+            @contextmenu.stop.prevent="optionsVisible = true"
+        >
+            <slot name="content"></slot>
+        </div>
+        <vue-draggable-resizable
+            v-if="optionsVisible"
+            @mousedown.native.stop.prevent
+            @mouseup.native.stop.prevent
+            @mousemove.native.stop.prevent
+            @click.native.stop.prevent
+            :w="400"
+            :h="600"
+            :resizable="false"
+            :parent="false"
+            class="bg-white widget-options border border-secondary rounded"
+        >
+        </vue-draggable-resizable>
     </vue-draggable-resizable>
 </template>
 
@@ -21,14 +49,21 @@
     // Front end is absolutely passive
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
-    import { registerIdSystem, UpdateManager, API, Context } from "../../common.js";
+    import {
+        registerIdSystem,
+        UpdateManager,
+        API,
+        Context,
+    } from "../../common.js";
     import $ from "jquery";
 
     Context.$on("addBlankWidget", function(klass) {
         Context.$emit("routeRequest", ($route) => {
-            new API(klass.type).create({ wall: $route.params.wall_id }).then((response) => {
-                Context.$emit("widgetCreated", response);
-            });
+            new API(klass.type)
+                .create({ wall: $route.params.wall_id })
+                .then((response) => {
+                    Context.$emit("widgetCreated", response);
+                });
         });
     });
 
@@ -42,10 +77,26 @@
         },
         data: function() {
             registerIdSystem(this, this.widget); // Create _ function to generate ids
+            Context.$on("closeWidgetOptions", () => {
+                this.optionsVisible = false;
+            });
+            Context.$on('widgetUpdatePosition', (wall)=>{
+                if (this.widget.x + this.widget.w >= wall.w ) {
+                    this.widget.x = wall.w - this.widget.w
+                }
+                if (this.widget.y + this.widget.h >= wall.h ) {
+                    this.widget.y = wall.h - this.widget.h
+                }
+            })
             var vm = this;
             return {
-                manager: new UpdateManager(vm.widget.type, vm.widget.id, this.unsetWarning, this.setWarningFromResponse),
-                Context: Context,
+                manager: new UpdateManager(
+                    vm.widget.type,
+                    vm.widget.id,
+                    this.unsetWarning,
+                    this.setWarningFromResponse
+                ),
+                Context,
                 warningClass: "widget-options-warning", // Show warning messages
                 quickAccessClass: "widget-quick-access",
                 quickAccessVisible: false,
@@ -62,7 +113,9 @@
                 this.widget.y = y;
             },
             setWarningFromResponse(response) {
-                for (var [field, error] of Object.entries(response.responseJSON)) {
+                for (var [field, error] of Object.entries(
+                    response.responseJSON
+                )) {
                     $(`[for='${this._(field)}']`)
                         .addClass("text-danger")
                         .append(
@@ -134,16 +187,6 @@
         width: 100%;
         height: 100%;
         position: absolute;
-    }
-    .content {
-        width: 100%;
-        height: 100%;
-    }
-    .sidebar {
-        height: 100%;
-    }
-    .sidebar:hover {
-        cursor: grab;
     }
     .widget-quick-access {
         position: absolute;

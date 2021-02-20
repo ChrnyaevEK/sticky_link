@@ -15,7 +15,7 @@ const router = new VueRouter({
         {
             path: "/app/",
             component: App,
-            children: [{ path: "wall/:wall_id", component: Wall }],
+            children: [{ path: "wall/:wallId", component: Wall }],
         },
     ],
 });
