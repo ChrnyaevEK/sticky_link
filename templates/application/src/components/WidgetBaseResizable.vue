@@ -5,7 +5,6 @@
         @mousedown.native.stop
         @mouseup.native.stop
         @mousemove.native.stop
-        @click.native.stop
         class="widget"
         :parent="true"
         :w="widget.w"
@@ -33,7 +32,7 @@
         <div
             class="w-100 h-100"
             :style="style"
-            @dblclick.stop.prevent="onOpenOptions"
+            @contextmenu.stop.prevent="onOpenOptions"
         >
             <slot name="content"></slot>
         </div>

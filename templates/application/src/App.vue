@@ -1,5 +1,5 @@
 <template>
-    <div class="w-100 h-100 d-flex flex-column">
+    <div class="w-100 h-100 d-flex flex-column" >
         <span class=" w-100 p-1 bg-white border-bottom">
             <span
                 class="text-secondary"

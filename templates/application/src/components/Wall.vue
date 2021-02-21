@@ -1,6 +1,6 @@
 <template>
     <div class="w-100 h-100">
-        <div 
+        <div
             v-if="$route.query.mode == Context.edit && wall"
             class="w-100 h-100 overflow-hidden"
         >
@@ -57,6 +57,7 @@
     import { API, Context, UpdateManager } from "../common.js";
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
+    import $ from 'jquery'
 
     Context.$on("addBlankWall", () => {
         new API("wall").create().then((response) => {
@@ -79,6 +80,9 @@
     export default {
         components,
         created() {
+            $(document).keyup(function(e) {
+                if (e.keyCode === 27) Context.$emit('closeWidgetOptions'); // esc
+            });
             this.initiateWall(this.$route.params.wallId).then(() => {
                 Context.$on("widgetDeleted", this.onWidgetDeleted);
                 Context.$on("widgetCreated", this.onWidgetCreated);
