@@ -3,25 +3,50 @@
         <div
             class="w-100 p-1 d-flex border-bottom justify-content-between bg-white"
         >
-            <small class="text-info" v-if="!validWall"
-                >Widgets are not available. Select or create a wall to use
-                widgets</small
-            >
-            <small class="text-primary" v-else
-                ><strong>{{ wallTitle }}</strong></small
-            >
-            <small class="text-secondary">
-                <strong v-if="Context.saving" class="text-secondary"
-                    >Saving...</strong
+            <span class="small font-weight-bold">
+                <span class="text-info" v-if="!validWall"
+                    >Widgets are not available. Select or create a wall to use
+                    widgets</span
                 >
-                <strong v-else-if="Context.saved" class="text-success"
-                    >Saved!</strong
+                <span v-else> Sticky link </span>
+                <span v-if="Context.saving" class="text-secondary"
+                    >Saving...</span
                 >
-                <strong v-else>Auto save</strong>
+                <span v-else-if="Context.saved" class="text-success"
+                    >Saved!</span
+                >
+                <span v-else class="text-secondary">Auto save</span>
+            </span>
+
+            <small>
+                <router-link
+                    v-if="$route.query.mode == Context.edit"
+                    class="mx-1"
+                    :to="{
+                        name: 'wall',
+                        params: { wallId: $route.params.wallId },
+                        query: { mode: Context.view },
+                    }"
+                >
+                    View mode
+                </router-link>
+
+                <router-link
+                    v-if="$route.query.mode == Context.view"
+                    :to="{
+                        name: 'wall',
+                        params: { wallId: $route.params.wallId },
+                        query: { mode: Context.edit },
+                    }"
+                    >Open editor</router-link
+                >
             </small>
         </div>
-        <router-view></router-view>
-        <div class="w-100 p-1 d-flex bg-white border-top">
+        <router-view style="position: relative;"></router-view>
+        <div
+            v-if="$route.query.mode == Context.edit"
+            class="w-100 p-1 d-flex bg-white border-top"
+        >
             <div class="btn-group dropup p-1">
                 <button
                     class="btn btn-sm dropdown-toggle"
@@ -37,11 +62,22 @@
                     <router-link
                         class="dropdown-item btn-sm"
                         v-for="wall of Context.walls"
+                        :class="wall.id == $route.params.wallId ? 'active' : ''"
                         :key="wall.id"
-                        :to="`/app/wall/${wall.id}`"
+                        :to="{
+                            name: 'wall',
+                            params: { wallId: wall.id },
+                            query: { mode: Context.edit },
+                        }"
                         >{{ wall.title }}</router-link
                     >
                 </div>
+                <a
+                    class="btn btn-sm border"
+                    @click="Context.$emit('addBlankWall')"
+                >
+                    <i class="fas fa-plus"></i>
+                </a>
             </div>
             <div class="d-flex p-1 w-100 overflow-auto" v-if="validWall">
                 <a
@@ -111,17 +147,6 @@
                 this.validWall = Context.walls.some((w) => {
                     return String(w.id) == this.$route.params.wallId;
                 });
-            },
-        },
-        computed: {
-            wallTitle() {
-                try {
-                    return Context.walls.filter((w) => {
-                        return String(w.id) == this.$route.params.wallId;
-                    })[0].title;
-                } catch (e) {
-                    return "";
-                }
             },
         },
         watch: {

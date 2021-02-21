@@ -1,19 +1,15 @@
 <template>
-    <div class="w-100 h-100 d-flex flex-column overflow-hidden">
-        <a id="side-top" class="btn btn-sm btn-light" @click="wall.h += 10">
-            <i class="fas fa-plus"></i>
-        </a>
-        <div class="w-100 h-100 d-flex">
-            <a
-                id="side-left"
-                class="btn btn-sm btn-light"
-                @click="wall.w -= 10"
+    <div class="w-100 h-100">
+        <div
+            v-if="$route.query.mode == Context.edit"
+            class="w-100 h-100 overflow-hidden"
+        >
+            <div
+                class="w-100 h-100 wall-container overflow-auto"
+                @click.stop="Context.$emit('closeWidgetOptions')"
             >
-                <i class="fas fa-minus"></i>
-            </a>
-            <div class="w-100 h-100 wall-container border overflow-auto">
                 <vue-draggable-resizable
-                    @click="Context.$emit('closeWidgetOptions')"
+                    @click.native.stop.prevent
                     @resizing="onResize"
                     @resizestop="onResizeStop"
                     :resizable="true"
@@ -21,55 +17,31 @@
                     :parent="false"
                     :h="wall.h"
                     :w="wall.w"
+                    :x="15"
+                    :y="15"
+                    class="border border-secondary"
                 >
-                    <div v-if="staticSize" class="w-100 h-100">
-                        <SimpleText
-                            v-for="widget of filterWidgets(SimpleText)"
-                            :key="widget.type + widget.id"
-                            :parent="true"
-                            :widget="widget"
-                        >
-                        </SimpleText>
-                        <URL
-                            v-for="widget of filterWidgets(URL)"
-                            :key="widget.type + widget.id"
-                            :widget="widget"
-                        >
-                        </URL>
-                        <Counter
-                            v-for="widget of filterWidgets(Counter)"
-                            :key="widget.type + widget.id"
-                            :widget="widget"
-                        >
-                        </Counter>
-                        <SimpleList
-                            v-for="widget of filterWidgets(SimpleList)"
-                            :key="widget.type + widget.id"
-                            :widget="widget"
-                        >
-                        </SimpleList>
-                    </div>
+                    <WidgetList v-if="ready" :widgets="widgets"></WidgetList>
                 </vue-draggable-resizable>
             </div>
-            <a
-                id="side-right"
-                class="btn btn-sm btn-light"
-                @click="wall.w += 10"
-            >
-                <i class="fas fa-plus"></i>
-            </a>
+            <span class="wall-title col-12 col-md-4 col-lg-3 p-0"
+                ><input
+                    type="text"
+                    class="form-control border-0"
+                    v-model="wall.title"
+            /></span>
         </div>
-        <a id="side-bottom" class="btn btn-sm btn-light" @click="wall.h -= 10">
-            <i class="fas fa-minus"></i>
-        </a>
+        <div v-if="$route.query.mode == Context.view">
+            <WidgetList :widgets="widgets"></WidgetList>
+            <span class="wall-title col-12 col-md-4 col-lg-3">
+                <span class="font-weight-bold text-primary">{{ wall.title }}</span>
+            </span>
+        </div>
     </div>
 </template>
 
 <script>
-    import SimpleText from "./Widgets/SimpleText";
-    import URL from "./Widgets/URL";
-    import Counter from "./Widgets/Counter";
-    import SimpleList from "./Widgets/SimpleList";
+    import WidgetList from "./WidgetList";
     import { API, Context, UpdateManager } from "../common.js";
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
@@ -81,11 +53,8 @@
     });
 
     var components = {
-        SimpleText,
-        URL,
-        Counter,
-        SimpleList,
         VueDraggableResizable,
+        WidgetList,
     };
 
     export default {
@@ -101,8 +70,7 @@
                 manager: {},
                 wall: {},
                 widgets: [],
-                blockUpdate: false,
-                staticSize: true,
+                ready: true,
                 ...components,
             };
         },
@@ -112,20 +80,19 @@
                 this.wall.h = h;
             },
             onResizeStop() {
-                this.staticSize = false;
-                Context.$emit('widgetUpdatePosition', this.wall)
-                this.$nextTick(()=>{
-                    this.staticSize = true;
-                })
+                this.ready = false;
+                this.$nextTick(() => {
+                    this.ready = true;
+                });
             },
             initiateWall(id) {
-                this.blockUpdate = true;
+                this.ready = false;
                 this.$set(this, "manager", new UpdateManager("wall", id));
                 this.manager.retrieve().then((response) => {
                     this.$set(this, "wall", response.wall);
                     this.$set(this, "widgets", response.widgets);
                     this.$nextTick(() => {
-                        this.blockUpdate = false;
+                        this.ready = true;
                     });
                 });
             },
@@ -136,11 +103,6 @@
                     this.manager.delete();
                     Context.$emit("wallDeleted", this.wall);
                 }
-            },
-            filterWidgets(klass) {
-                return this.widgets.filter(function(widget) {
-                    return widget.type == klass.type;
-                });
             },
             onWidgetCreated(widget) {
                 this.widgets.push(widget);
@@ -155,7 +117,8 @@
             },
             wall: {
                 handler() {
-                    if (!this.blockUpdate) {
+                    if (this.ready) {
+                        Context.$emit("widgetUpdatePosition", this.wall);
                         this.manager.updated(this.wall);
                     }
                 },
@@ -182,27 +145,11 @@
 </script>
 
 <style scoped>
-    #side-top,
-    #side-bottom,
-    #side-right,
-    #side-left {
-        width: 0;
-        height: 0;
-        display: flex;
-    }
-    #side-top,
-    #side-bottom {
-        justify-content: center;
-        height: auto;
-        width: 100%;
-    }
-    #side-left,
-    #side-right {
-        align-items: center;
-        width: auto;
-        height: 100%;
-    }
     .wall-container {
         position: relative;
+    }
+    .wall-title {
+        position: absolute;
+        bottom: 0;
     }
 </style>

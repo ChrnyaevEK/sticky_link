@@ -116,6 +116,8 @@ export var Context = new Vue({
         saved: false, // Global safe indicator
         savedTimeoutId: undefined,
         savedTimeoutDuration: 5000, // ms, until property will be unset
+        edit: 'edit',
+        view: 'view',
         user: {},
         settings: {},
         walls: [],
