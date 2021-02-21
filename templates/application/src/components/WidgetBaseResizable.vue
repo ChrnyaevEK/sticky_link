@@ -14,18 +14,26 @@
         :x="widget.x"
         :z="widget.z"
     >
-        <div class="widget-quick-access w-100" v-show="quickAccessVisible">
-            <a class="btn btn-light border" @click="copyWidget"
-                ><i class="fas fa-copy"></i
-            ></a>
-            <a class="btn btn-danger" @click="deleteWidget"
-                ><i class="fas fa-trash"></i
-            ></a>
+        <div class="widget-quick-access" v-show="quickAccessVisible">
+            <button
+                :disabled="lockWidgetCreation"
+                class="btn btn-light border"
+                @click="copyWidget"
+            >
+                <i class="fas fa-copy"></i>
+            </button>
+            <button
+                :disabled="lockWidgetCreation"
+                class="btn btn-danger"
+                @click="deleteWidget"
+            >
+                <i class="fas fa-trash"></i>
+            </button>
         </div>
         <div
             class="w-100 h-100"
             :style="style"
-            @contextmenu.stop.prevent="onOpenOptions"
+            @dblclick.stop.prevent="onOpenOptions"
         >
             <slot name="content"></slot>
         </div>
@@ -194,7 +202,9 @@
                 </div>
                 <slot name="options"></slot>
                 <div class="form-group d-flex justify-content-center">
-                    <small class="text-secondary">All changes are automatically saved</small>
+                    <small class="text-secondary"
+                        >All changes are automatically saved</small
+                    >
                 </div>
             </div>
         </vue-draggable-resizable>
@@ -237,6 +247,8 @@
         },
         created() {
             registerIdSystem(this, this.widget); // Create _ function to generate ids
+            Context.$on("lockWidgetCreation", this.onLockWidgetCreation);
+            Context.$on("unlockWidgetCreation", this.onUnlockWidgetCreation);
             Context.$on("closeWidgetOptions", this.onCloseOptions);
             Context.$on("widgetUpdatePosition", (wall) => {
                 if (this.widget.x + this.widget.w >= wall.w) {
@@ -263,6 +275,7 @@
             return {
                 manager,
                 Context,
+                lockWidgetCreation: false,
                 warningClass: "widget-options-warning", // Show warning messages
                 quickAccessClass: "widget-quick-access",
                 quickAccessVisible: false,
@@ -332,6 +345,12 @@
                         Context.$emit("unlockWidgetCreation");
                     });
             },
+            onLockWidgetCreation() {
+                this.lockWidgetCreation = true;
+            },
+            onUnlockWidgetCreation() {
+                this.lockWidgetCreation = false;
+            },
         },
         components: {
             VueDraggableResizable,
@@ -380,6 +399,7 @@
         position: absolute;
     }
     .widget-quick-access {
+        right: 0;
         position: absolute;
         display: flex;
         justify-content: flex-end;
