@@ -39,132 +39,134 @@
             :z="4"
             :resizable="false"
             :parent="false"
-            class="bg-white widget-options border rounded overflow-auto p-2"
+            class="bg-white widget-options border overflow-auto shadow rounded"
         >
-            <div class="form-group d-flex justify-content-end">
-                <a class="btn" @click="onCloseOptions"
-                    ><i class="fas fa-times"></i
-                ></a>
-            </div>
-            <div class="form-group">
-                <div class="row">
-                    <div class="col-4">
-                        <label :for="_('x')">X coord.</label>
-                        <input
-                            class="form-control"
-                            v-model.number="widget.x"
-                            type="number"
-                            :id="_('x')"
-                            step="1"
-                        />
-                    </div>
-                    <div class="col-4">
-                        <label :for="_('y')">Y coord.</label>
-                        <input
-                            class="form-control"
-                            v-model.number="widget.y"
-                            type="number"
-                            :id="_('y')"
-                            step="1"
-                        />
-                    </div>
-                    <div class="col-4">
-                        <label :for="_('z')">Z coord.</label>
-                        <input
-                            class="form-control"
-                            v-model.number="widget.z"
-                            type="number"
-                            :id="_('z')"
-                            step="1"
-                        />
-                    </div>
+            <div class="w-100 h-100 p-3">
+                <div class="form-group d-flex justify-content-between">
+                    <strong>Options</strong>
+                    <a class="btn" @click="onCloseOptions"
+                        ><i class="fas fa-times"></i
+                    ></a>
+                </div>
+
+                <div class="form-group">
+                    <label :for="_('x')">X coordinate</label>
+                    <input
+                        class="form-control"
+                        v-model.number="widget.x"
+                        type="number"
+                        :id="_('x')"
+                        step="1"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label :for="_('y')">Y coordinate</label>
+                    <input
+                        class="form-control"
+                        v-model.number="widget.y"
+                        type="number"
+                        :id="_('y')"
+                        step="1"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label :for="_('z')">Z coordinate</label>
+                    <input
+                        class="form-control"
+                        v-model.number="widget.z"
+                        type="number"
+                        :id="_('z')"
+                        step="1"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label :for="_('w')">Width</label>
+                    <input
+                        class="form-control"
+                        v-model.number="widget.w"
+                        type="number"
+                        :id="_('w')"
+                        step="1"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label :for="_('h')">Height</label>
+                    <input
+                        class="form-control"
+                        v-model.number="widget.h"
+                        type="number"
+                        :id="_('h')"
+                        step="1"
+                    />
+                </div>
+                <div class="form-group">
+                    <label :for="_('font_size')">Font size</label>
+                    <input
+                        class="form-control"
+                        v-model.number="widget.font_size"
+                        type="number"
+                        step="1"
+                        :id="_('font_size')"
+                        :min="
+                            Context.settings.widget
+                                ? Context.settings.widget.min_font_size
+                                : 0
+                        "
+                        :max="
+                            Context.settings.widget
+                                ? Context.settings.widget.max_font_size
+                                : 0
+                        "
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label :for="_('font_weight')">Font weight</label>
+                    <input
+                        class="form-control"
+                        v-model.number="widget.font_weight"
+                        type="number"
+                        step="100"
+                        :id="_('font_weight')"
+                        :min="
+                            Context.settings.widget
+                                ? Context.settings.widget.min_font_weight
+                                : 0
+                        "
+                        :max="
+                            Context.settings.widget
+                                ? Context.settings.widget.max_font_weight
+                                : 0
+                        "
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label :for="_('background_color')">Background color</label>
+                    <input
+                        type="color"
+                        v-model="widget.background_color"
+                        class="form-control"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label :for="_('text_color')">Text color</label>
+                    <input
+                        type="color"
+                        v-model="widget.text_color"
+                        class="form-control"
+                    />
+                </div>
+                <slot name="options"></slot>
+                <div class="form-group d-flex justify-content-center">
+                    <small class="text-secondary">All changes are automatically saved</small>
                 </div>
             </div>
-            <div class="form-group">
-                <div class="row">
-                    <div class="col-6">
-                        <label :for="_('w')">Width</label>
-                        <input
-                            class="form-control"
-                            v-model.number="widget.w"
-                            type="number"
-                            :id="_('w')"
-                            step="1"
-                        />
-                    </div>
-                    <div class="col-6">
-                        <label :for="_('h')">Height</label>
-                        <input
-                            class="form-control"
-                            v-model.number="widget.h"
-                            type="number"
-                            :id="_('h')"
-                            step="1"
-                        />
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="row">
-                    <div class="col-6">
-                        <label :for="_('font_size')">Font size</label>
-                        <input
-                            class="form-control"
-                            v-model.number="widget.font_size"
-                            type="number"
-                            step="1"
-                            :id="_('font_size')"
-                            :min="
-                                Context.settings.widget
-                                    ? Context.settings.widget.min_font_size
-                                    : 0
-                            "
-                            :max="
-                                Context.settings.widget
-                                    ? Context.settings.widget.max_font_size
-                                    : 0
-                            "
-                        />
-                    </div>
-                    <div class="col-6">
-                        <label :for="_('font_weight')">Font weight</label>
-                        <input
-                            class="form-control"
-                            v-model.number="widget.font_weight"
-                            type="number"
-                            step="100"
-                            :id="_('font_weight')"
-                            :min="
-                                Context.settings.widget
-                                    ? Context.settings.widget.min_font_weight
-                                    : 0
-                            "
-                            :max="
-                                Context.settings.widget
-                                    ? Context.settings.widget.max_font_weight
-                                    : 0
-                            "
-                        />
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label :for="_('background_color')">Background color</label>
-                <input
-                    type="color"
-                    v-model="widget.background_color"
-                    class="form-control"
-                />
-            </div>
-            <div class="form-group">
-                <label :for="_('text_color')">Text color</label>
-                <input
-                    type="color"
-                    v-model="widget.text_color"
-                    class="form-control"
-                />
-            </div>
-            <slot name="options"></slot>
         </vue-draggable-resizable>
     </vue-draggable-resizable>
 </template>
@@ -182,11 +184,15 @@
     import $ from "jquery";
 
     Context.$on("addBlankWidget", function(klass) {
+        Context.$emit("lockWidgetCreation");
         Context.$emit("routeRequest", ($route) => {
             new API(klass.type)
                 .create({ wall: $route.params.wallId })
                 .then((response) => {
                     Context.$emit("widgetCreated", response);
+                })
+                .always(() => {
+                    Context.$emit("unlockWidgetCreation");
                 });
         });
     });
@@ -249,6 +255,7 @@
                 this.optionsVisible = false;
             },
             setWarningFromResponse(response) {
+                this.unsetWarning();
                 for (var [field, error] of Object.entries(
                     response.responseJSON
                 )) {
@@ -269,12 +276,19 @@
             },
             deleteWidget() {
                 if (confirm("Are you sure?")) {
-                    this.manager.delete().then(() => {
-                        Context.$emit("widgetDeleted", this.widget);
-                    });
+                    Context.$emit("lockWidgetCreation");
+                    this.manager
+                        .delete()
+                        .then(() => {
+                            Context.$emit("widgetDeleted", this.widget);
+                        })
+                        .always(() => {
+                            Context.$emit("unlockWidgetCreation");
+                        });
                 }
             },
             copyWidget() {
+                Context.$emit("lockWidgetCreation");
                 this.manager
                     .create({
                         ...this.widget,
@@ -283,6 +297,9 @@
                     })
                     .then((widget) => {
                         Context.$emit("widgetCreated", widget);
+                    })
+                    .always(() => {
+                        Context.$emit("unlockWidgetCreation");
                     });
             },
         },

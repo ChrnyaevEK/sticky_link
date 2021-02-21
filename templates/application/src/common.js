@@ -31,11 +31,14 @@ export class API {
     }
     ajax(settings) {
         var token = this.csrfToken;
+        Context.saving = true;
         return $.ajax({
             headers: {
                 "X-CSRFToken": token,
             },
             ...settings,
+        }).always(() => {
+            Context.saved = true;
         });
     }
     retrieve(id) {
@@ -88,15 +91,9 @@ export class UpdateManager extends API {
         this.intervalId = setInterval(() => {
             // Grab last state and push it to server
             if (this.lastState !== null) {
-                Context.saving = true;
                 this.update(this.lastState).then(
-                    () => {
-                        Context.saved = true;
-                        if (resolve) resolve();
-                    },
-                    () => {
-                        if (reject) reject();
-                    }
+                    resolve || function() {},
+                    reject || function() {}
                 );
                 this.lastState = null;
             }
@@ -116,8 +113,8 @@ export var Context = new Vue({
         saved: false, // Global safe indicator
         savedTimeoutId: undefined,
         savedTimeoutDuration: 5000, // ms, until property will be unset
-        edit: 'edit',
-        view: 'view',
+        edit: "edit",
+        view: "view",
         user: {},
         settings: {},
         walls: [],
@@ -127,6 +124,7 @@ export var Context = new Vue({
             return new API("user").list().then((response) => {
                 this.$set(this, "user", response.user);
                 this.$set(this, "settings", response.settings);
+                this.walls = [];
                 this.$set(this, "walls", response.walls);
             });
         },

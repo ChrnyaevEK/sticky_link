@@ -24,6 +24,12 @@ const router = new VueRouter({
                 },
             ],
         },
+        {
+            path: "*",
+            name: "unreachable",
+            component: App,
+            redirect: '/app'
+        },
     ],
 });
 

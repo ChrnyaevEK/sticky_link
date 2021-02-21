@@ -30,7 +30,7 @@ class Wall(Common):
         width = 900
         height = 600
         min_width = 300
-        min_height = 600
+        min_height = 300
 
     type = Default.type
     w = models.IntegerField(verbose_name='Wall width', default=Default.width)

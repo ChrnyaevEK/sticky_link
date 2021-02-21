@@ -1,7 +1,7 @@
 <template>
     <div class="w-100 h-100">
-        <div
-            v-if="$route.query.mode == Context.edit"
+        <div 
+            v-if="$route.query.mode == Context.edit && wall"
             class="w-100 h-100 overflow-hidden"
         >
             <div
@@ -19,22 +19,34 @@
                     :w="wall.w"
                     :x="15"
                     :y="15"
-                    class="border border-secondary"
+                    :minWidth="
+                        Context.settings.wall
+                            ? Context.settings.wall.min_width
+                            : 50
+                    "
+                    :minHeight="
+                        Context.settings.wall
+                            ? Context.settings.wall.min_height
+                            : 50
+                    "
+                    class="border-secondary shadow"
                 >
                     <WidgetList v-if="ready" :widgets="widgets"></WidgetList>
                 </vue-draggable-resizable>
             </div>
             <span class="wall-title col-12 col-md-4 col-lg-3 p-0"
                 ><input
-                    type="text"
+                    @input="onWallTitleUpdate"
                     class="form-control border-0"
                     v-model="wall.title"
             /></span>
         </div>
-        <div v-if="$route.query.mode == Context.view">
+        <div v-else-if="$route.query.mode == Context.view && wall">
             <WidgetList :widgets="widgets"></WidgetList>
             <span class="wall-title col-12 col-md-4 col-lg-3">
-                <span class="font-weight-bold text-primary">{{ wall.title }}</span>
+                <span class="font-weight-bold text-primary">{{
+                    wall.title
+                }}</span>
             </span>
         </div>
     </div>
@@ -48,9 +60,16 @@
 
     Context.$on("addBlankWall", () => {
         new API("wall").create().then((response) => {
+            Context.walls.push(response);
             Context.$emit("wallCreated", response);
         });
     });
+
+    function validateWall(id) {
+        return Context.walls.some((w) => {
+            return String(w.id) == id;
+        });
+    }
 
     var components = {
         VueDraggableResizable,
@@ -60,17 +79,37 @@
     export default {
         components,
         created() {
-            Context.$on("widgetDeleted", this.onWidgetDeleted);
-            Context.$on("widgetCreated", this.onWidgetCreated);
-            this.initiateWall(this.$route.params.wallId);
+            this.initiateWall(this.$route.params.wallId).then(() => {
+                Context.$on("widgetDeleted", this.onWidgetDeleted);
+                Context.$on("widgetCreated", this.onWidgetCreated);
+                Context.$on("deleteWall", this.onDeleteWall);
+            });
+        },
+        beforeRouteEnter(to, from, next) {
+            if (validateWall(to.params.wallId)) {
+                next();
+            } else {
+                next({
+                    name: "app",
+                });
+            }
+        },
+        beforeRouteUpdate(to, from, next) {
+            if (validateWall(to.params.wallId)) {
+                this.initiateWall(to.params.wallId).then(next);
+            } else {
+                next({
+                    name: "app",
+                });
+            }
         },
         data() {
             return {
                 Context,
-                manager: {},
-                wall: {},
-                widgets: [],
-                ready: true,
+                manager: null,
+                wall: null,
+                widgets: null,
+                ready: false,
                 ...components,
             };
         },
@@ -88,7 +127,7 @@
             initiateWall(id) {
                 this.ready = false;
                 this.$set(this, "manager", new UpdateManager("wall", id));
-                this.manager.retrieve().then((response) => {
+                return this.manager.retrieve().then((response) => {
                     this.$set(this, "wall", response.wall);
                     this.$set(this, "widgets", response.widgets);
                     this.$nextTick(() => {
@@ -100,8 +139,21 @@
                 if (
                     confirm("Are you sure? Wall will be permanently removed!")
                 ) {
+                    for (var i = 0; i < Context.walls.length; i++) {
+                        if (Context.walls[i].id == this.wall.id) {
+                            Context.walls.splice(i, 1);
+                            break;
+                        }
+                    }
                     this.manager.delete();
                     Context.$emit("wallDeleted", this.wall);
+                }
+            },
+            onWallTitleUpdate() {
+                for (var wall of Context.walls) {
+                    if (wall.id == this.wall.id) {
+                        wall.title = this.wall.title;
+                    }
                 }
             },
             onWidgetCreated(widget) {
@@ -112,9 +164,6 @@
             },
         },
         watch: {
-            $route(to) {
-                this.initiateWall(to.params.wallId);
-            },
             wall: {
                 handler() {
                     if (this.ready) {
@@ -125,22 +174,6 @@
                 deep: true,
             },
         },
-        computed: {
-            style() {
-                return `
-                    min-width: ${
-                        Context.settings.wall
-                            ? Context.settings.wall.min_width
-                            : 0
-                    }px;
-                    min-height: ${
-                        Context.settings.wall
-                            ? Context.settings.wall.min_height
-                            : 0
-                    }px;
-                `;
-            },
-        },
     };
 </script>
 
@@ -148,8 +181,13 @@
     .wall-container {
         position: relative;
     }
+    .wall-alert,
     .wall-title {
         position: absolute;
         bottom: 0;
+        left: auto;
+    }
+    .wall-title input {
+        background-color: transparent;
     }
 </style>
