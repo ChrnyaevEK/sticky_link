@@ -7,9 +7,9 @@
             <div
                 class="w-100 h-100 wall-container overflow-auto"
                 @click.stop="Context.$emit('closeWidgetOptions')"
-            >
+            >    
                 <vue-draggable-resizable
-                    @click.native.stop.prevent
+                    @click.native.stop
                     @resizing="onResize"
                     @resizestop="onResizeStop"
                     :resizable="true"

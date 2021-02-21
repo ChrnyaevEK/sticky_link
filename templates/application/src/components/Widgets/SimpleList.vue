@@ -9,8 +9,8 @@
     >
         <template slot="content">
             <div class="d-flex flex-column h-100 w-100">
-                <span class="w-100 text">{{ widget.title }}</span>
-                <small class="w-100 text">{{ widget.description }}</small>
+                <span class="w-100 text mx-1">{{ widget.title }}</span>
+                <small class="w-100 text mx-1">{{ widget.description }}</small>
                 <div class="form-group h-100 overflow-auto">
                     <div
                         class="border d-flex text-break m-1"

@@ -41,6 +41,7 @@
             @mousedown.native.stop
             @mouseup.native.stop
             @mousemove.native.stop
+            dragHandle=".options-drag"
             :w="400"
             :h="600"
             :z="4"
@@ -49,7 +50,9 @@
             class="bg-white widget-options border overflow-auto shadow rounded"
         >
             <div class="w-100 h-100 p-3">
-                <div class="form-group d-flex justify-content-between">
+                <div
+                    class="form-group d-flex justify-content-between align-items-center options-drag border-bottom"
+                >
                     <strong>Options</strong>
                     <a class="btn" @click="onCloseOptions"
                         ><i class="fas fa-times"></i
@@ -186,6 +189,7 @@
                     <label :for="_('background_color')">Background color</label>
                     <input
                         type="color"
+                        :id="_('background_color')"
                         v-model="widget.background_color"
                         class="form-control"
                     />
@@ -195,10 +199,12 @@
                     <label :for="_('text_color')">Text color</label>
                     <input
                         type="color"
+                        :id="_('text_color')"
                         v-model="widget.text_color"
                         class="form-control"
                     />
                 </div>
+                <hr />
                 <slot name="options"></slot>
                 <div class="form-group d-flex justify-content-center">
                     <small class="text-secondary"
