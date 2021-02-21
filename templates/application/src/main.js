@@ -6,6 +6,7 @@ import Wall from "./components/Wall";
 import "./css/main.scss";
 import "@fortawesome/fontawesome-free/js/all.js";
 import "@fortawesome/fontawesome-free/css/all.css";
+import { Context } from "./common";
 Vue.config.productionTip = true;
 Vue.use(VueRouter);
 
@@ -21,6 +22,16 @@ const router = new VueRouter({
                     name: "wall",
                     path: "wall/:wallId",
                     component: Wall,
+                    beforeEnter: (to, from, next) => {
+                        if (
+                            to.query.mode !== Context.edit &&
+                            to.query.mode !== Context.view
+                        ) {
+                            next({ name: "app" });
+                        } else {
+                            next();
+                        }
+                    },
                 },
             ],
         },
@@ -28,7 +39,7 @@ const router = new VueRouter({
             path: "*",
             name: "unreachable",
             component: App,
-            redirect: '/app'
+            redirect: "/app",
         },
     ],
 });

@@ -57,6 +57,11 @@
                         type="number"
                         :id="_('x')"
                         step="1"
+                        :min="
+                            Context.settings.widget
+                                ? Context.settings.widget.min_x
+                                : 0
+                        "
                     />
                 </div>
 
@@ -68,6 +73,11 @@
                         type="number"
                         :id="_('y')"
                         step="1"
+                        :min="
+                            Context.settings.widget
+                                ? Context.settings.widget.min_y
+                                : 0
+                        "
                     />
                 </div>
 
@@ -79,6 +89,16 @@
                         type="number"
                         :id="_('z')"
                         step="1"
+                        :min="
+                            Context.settings.widget
+                                ? Context.settings.widget.min_z
+                                : 0
+                        "
+                        :max="
+                            Context.settings.widget
+                                ? Context.settings.widget.max_z
+                                : 0
+                        "
                     />
                 </div>
 
@@ -90,6 +110,11 @@
                         type="number"
                         :id="_('w')"
                         step="1"
+                        :min="
+                            Context.settings.widget
+                                ? Context.settings.widget.min_width
+                                : 0
+                        "
                     />
                 </div>
 
@@ -101,6 +126,11 @@
                         type="number"
                         :id="_('h')"
                         step="1"
+                        :min="
+                            Context.settings.widget
+                                ? Context.settings.widget.min_height
+                                : 0
+                        "
                     />
                 </div>
                 <div class="form-group">

@@ -56,6 +56,8 @@ class Widget(Common):
         text_color = '#000000'
         z = 0
         min_z = 0
+        min_x = 0
+        min_y = 0
         max_z = 1000
         left = 0
         top = 0
@@ -65,7 +67,9 @@ class Widget(Common):
         font_weight = 400
         min_font_weight = 100
         max_font_weight = 900
+        min_width = 2
         width = 200
+        min_height = 2
         height = 100
 
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
@@ -74,8 +78,12 @@ class Widget(Common):
     z = models.IntegerField(verbose_name='Widget z index(stack position)', default=Default.z, validators=[
         MaxValueValidator(Default.max_z), MinValueValidator(Default.min_z)
     ])
-    x = models.IntegerField(verbose_name='Offset left from parent', default=Default.left)
-    y = models.IntegerField(verbose_name='Offset top from parent', default=Default.top)
+    x = models.IntegerField(verbose_name='Offset left from parent', default=Default.left, validators=[
+        MinValueValidator(Default.min_x)
+    ])
+    y = models.IntegerField(verbose_name='Offset top from parent', default=Default.top, validators=[
+        MinValueValidator(Default.min_y)
+    ])
     font_size = models.IntegerField(verbose_name='Widget font size', default=Default.font_size,
                                     validators=[MaxValueValidator(Default.max_font_size),
                                                 MinValueValidator(Default.min_font_size)])
