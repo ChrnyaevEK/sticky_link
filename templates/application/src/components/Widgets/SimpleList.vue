@@ -1,10 +1,6 @@
-<template id="simple-list-widget">
+<template id="simple-list-template">
     <component
-        :is="
-            $route.query.mode == Context.edit
-                ? 'WidgetBaseResizable'
-                : 'WidgetBaseSimple'
-        "
+        :is="WidgetBase"
         v-bind="{ ...$props, ...$attrs }"
     >
         <template slot="content">
@@ -66,13 +62,11 @@
 </template>
 
 <script>
-    import WidgetBaseResizable from "./../WidgetBaseResizable";
-    import WidgetBaseSimple from "./../WidgetBaseSimple";
     import { registerIdSystem, Context  } from "../../common.js";
     export default {
         type: "simple_list",
         name: "SimpleList",
-        template: "#simple-list-widget",
+        template: "#simple-list-template",
         data() {
             return {
                 item: "", // Item to add
@@ -84,13 +78,13 @@
                 type: Object,
                 required: true,
             },
+            WidgetBase: {
+                type: Object,
+                required: true,
+            }
         },
         created() {
             registerIdSystem(this, this.widget.type, this.widget.id); // Create _ function to generate ids
-        },
-        components: {
-            WidgetBaseResizable,
-            WidgetBaseSimple,
         },
         methods: {
             addItem() {

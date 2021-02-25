@@ -5,7 +5,7 @@
 </template>
 
 <script>
-    import { UpdateManager } from "../common.js";
+    import { UpdateManager } from "../../common.js";
     export default {
         name: "WidgetBaseSimple",
         props: {

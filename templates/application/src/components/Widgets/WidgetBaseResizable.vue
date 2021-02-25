@@ -14,26 +14,14 @@
         :z="widget.z"
     >
         <div class="widget-quick-access" v-show="quickAccessVisible">
-            <button
-                :disabled="lockWidgetCreation"
-                class="btn btn-light border"
-                @click="copyWidget"
-            >
+            <button :disabled="lockWidgetCreation" class="btn btn-light border" @click="copyWidget">
                 <i class="fas fa-copy"></i>
             </button>
-            <button
-                :disabled="lockWidgetCreation"
-                class="btn btn-danger"
-                @click="deleteWidget"
-            >
+            <button :disabled="lockWidgetCreation" class="btn btn-danger" @click="deleteWidget">
                 <i class="fas fa-trash"></i>
             </button>
         </div>
-        <div
-            class="w-100 h-100"
-            :style="style"
-            @contextmenu.stop.prevent="onOpenOptions"
-        >
+        <div class="w-100 h-100" :style="style" @contextmenu.stop.prevent="onOpenOptions">
             <slot name="content"></slot>
         </div>
         <vue-draggable-resizable
@@ -50,45 +38,19 @@
             class="bg-white widget-options border overflow-auto shadow rounded"
         >
             <div class="w-100 h-100 p-3">
-                <div
-                    class="form-group d-flex justify-content-between align-items-center options-drag border-bottom"
-                >
+                <div class="form-group d-flex justify-content-between align-items-center options-drag border-bottom">
                     <strong>Options</strong>
-                    <a class="btn" @click="onCloseOptions"
-                        ><i class="fas fa-times"></i
-                    ></a>
+                    <a class="btn" @click="onCloseOptions"><i class="fas fa-times"></i></a>
                 </div>
 
                 <div class="form-group">
                     <label :for="_('x')">X coordinate</label>
-                    <input
-                        class="form-control"
-                        v-model.number="widget.x"
-                        type="number"
-                        :id="_('x')"
-                        step="1"
-                        :min="
-                            Context.settings.widget
-                                ? Context.settings.widget.min_x
-                                : 0
-                        "
-                    />
+                    <input class="form-control" v-model.number="widget.x" type="number" :id="_('x')" step="1" :min="Context.settings.widget ? Context.settings.widget.min_x : 0" />
                 </div>
 
                 <div class="form-group">
                     <label :for="_('y')">Y coordinate</label>
-                    <input
-                        class="form-control"
-                        v-model.number="widget.y"
-                        type="number"
-                        :id="_('y')"
-                        step="1"
-                        :min="
-                            Context.settings.widget
-                                ? Context.settings.widget.min_y
-                                : 0
-                        "
-                    />
+                    <input class="form-control" v-model.number="widget.y" type="number" :id="_('y')" step="1" :min="Context.settings.widget ? Context.settings.widget.min_y : 0" />
                 </div>
 
                 <div class="form-group">
@@ -99,49 +61,19 @@
                         type="number"
                         :id="_('z')"
                         step="1"
-                        :min="
-                            Context.settings.widget
-                                ? Context.settings.widget.min_z
-                                : 0
-                        "
-                        :max="
-                            Context.settings.widget
-                                ? Context.settings.widget.max_z
-                                : 0
-                        "
+                        :min="Context.settings.widget ? Context.settings.widget.min_z : 0"
+                        :max="Context.settings.widget ? Context.settings.widget.max_z : 0"
                     />
                 </div>
 
                 <div class="form-group">
                     <label :for="_('w')">Width</label>
-                    <input
-                        class="form-control"
-                        v-model.number="widget.w"
-                        type="number"
-                        :id="_('w')"
-                        step="1"
-                        :min="
-                            Context.settings.widget
-                                ? Context.settings.widget.min_width
-                                : 0
-                        "
-                    />
+                    <input class="form-control" v-model.number="widget.w" type="number" :id="_('w')" step="1" :min="Context.settings.widget ? Context.settings.widget.min_width : 0" />
                 </div>
 
                 <div class="form-group">
                     <label :for="_('h')">Height</label>
-                    <input
-                        class="form-control"
-                        v-model.number="widget.h"
-                        type="number"
-                        :id="_('h')"
-                        step="1"
-                        :min="
-                            Context.settings.widget
-                                ? Context.settings.widget.min_height
-                                : 0
-                        "
-                    />
+                    <input class="form-control" v-model.number="widget.h" type="number" :id="_('h')" step="1" :min="Context.settings.widget ? Context.settings.widget.min_height : 0" />
                 </div>
                 <div class="form-group">
                     <label :for="_('font_size')">Font size</label>
@@ -151,16 +83,8 @@
                         type="number"
                         step="1"
                         :id="_('font_size')"
-                        :min="
-                            Context.settings.widget
-                                ? Context.settings.widget.min_font_size
-                                : 0
-                        "
-                        :max="
-                            Context.settings.widget
-                                ? Context.settings.widget.max_font_size
-                                : 0
-                        "
+                        :min="Context.settings.widget ? Context.settings.widget.min_font_size : 0"
+                        :max="Context.settings.widget ? Context.settings.widget.max_font_size : 0"
                     />
                 </div>
 
@@ -172,44 +96,24 @@
                         type="number"
                         step="100"
                         :id="_('font_weight')"
-                        :min="
-                            Context.settings.widget
-                                ? Context.settings.widget.min_font_weight
-                                : 0
-                        "
-                        :max="
-                            Context.settings.widget
-                                ? Context.settings.widget.max_font_weight
-                                : 0
-                        "
+                        :min="Context.settings.widget ? Context.settings.widget.min_font_weight : 0"
+                        :max="Context.settings.widget ? Context.settings.widget.max_font_weight : 0"
                     />
                 </div>
 
                 <div class="form-group">
                     <label :for="_('background_color')">Background color</label>
-                    <input
-                        type="color"
-                        :id="_('background_color')"
-                        v-model="widget.background_color"
-                        class="form-control"
-                    />
+                    <input type="color" :id="_('background_color')" v-model="widget.background_color" class="form-control" />
                 </div>
 
                 <div class="form-group">
                     <label :for="_('text_color')">Text color</label>
-                    <input
-                        type="color"
-                        :id="_('text_color')"
-                        v-model="widget.text_color"
-                        class="form-control"
-                    />
+                    <input type="color" :id="_('text_color')" v-model="widget.text_color" class="form-control" />
                 </div>
                 <hr />
                 <slot name="options"></slot>
                 <div class="form-group d-flex justify-content-center">
-                    <small class="text-secondary"
-                        >All changes are automatically saved</small
-                    >
+                    <small class="text-secondary">All changes are automatically saved</small>
                 </div>
             </div>
         </vue-draggable-resizable>
@@ -220,12 +124,7 @@
     // Front end is absolutely passive
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
-    import {
-        registerIdSystem,
-        UpdateManager,
-        API,
-        Context,
-    } from "../common.js";
+    import { registerIdSystem, UpdateManager, API, Context } from "../common.js";
     import $ from "jquery";
 
     Context.$on("addBlankWidget", function(klass) {
@@ -271,12 +170,7 @@
             });
         },
         data: function() {
-            var manager = new UpdateManager(
-                this.widget.type,
-                this.widget.id,
-                this.unsetWarning,
-                this.setWarningFromResponse
-            );
+            var manager = new UpdateManager(this.widget.type, this.widget.id, this.unsetWarning, this.setWarningFromResponse);
             return {
                 manager,
                 Context,
@@ -304,9 +198,7 @@
             },
             setWarningFromResponse(response) {
                 this.unsetWarning();
-                for (var [field, error] of Object.entries(
-                    response.responseJSON
-                )) {
+                for (var [field, error] of Object.entries(response.responseJSON)) {
                     $(`[for='${this._(field)}']`)
                         .addClass("text-danger")
                         .append(
