@@ -104,14 +104,18 @@
             },
             onWallDeleted(wall) {
                 Context.$emit("showAlert", `Wall "${wall.title}" has been deleted!`, "success");
-                this.$router.push(Context.walls.length ? {
-                    name: "wallEdit",
-                    params: {
-                        wallId: Context.walls[0].id,
-                    },
-                }: {
-                    name: "app"
-                });
+                this.$router.push(
+                    Context.walls.length
+                        ? {
+                              name: "wallEdit",
+                              params: {
+                                  wallId: Context.walls[0].id,
+                              },
+                          }
+                        : {
+                              name: "appEmpty",
+                          }
+                );
             },
             onShowAlert(alertMessage, alertClass) {
                 this.alertMessage = alertMessage;

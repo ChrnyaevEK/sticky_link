@@ -85,9 +85,9 @@ const router = new VueRouter({
         {
             path: "/app",
             component: AppEmpty,
-            name: 'app',
             children: [
                 {
+                    name: "appEmpty",
                     path: "",
                     alias: "*",
                     component: WallEmpty,
