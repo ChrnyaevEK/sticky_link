@@ -16,6 +16,7 @@
                 class="border-secondary shadow"
             >
                 <WidgetList :widgets="widgets" :base="WidgetBaseResizable"></WidgetList>
+                <WidgetOptions></WidgetOptions>
             </vue-draggable-resizable>
             <span class="wall-title col-12 col-md-4 col-lg-3 p-0"><input @input="onWallTitleUpdate" class="form-control border-0" v-model="wall.title"/></span>
         </div>
@@ -25,6 +26,7 @@
 <script>
     import WidgetList from "./WidgetList";
     import WidgetBaseResizable from "../Widgets/WidgetBaseResizable";
+    import WidgetOptions from "../Widgets/WidgetOptions";
     import { Context, UpdateManager } from "../../common.js";
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
@@ -42,6 +44,7 @@
         components: {
             VueDraggableResizable,
             WidgetList,
+            WidgetOptions,
         },
         data() {
             return {

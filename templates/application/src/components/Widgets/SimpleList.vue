@@ -38,26 +38,6 @@
                 </div>
             </div>
         </template>
-        <template slot="options">
-            <div class="form-group">
-                <label :for="_('title')">Title </label>
-                <input
-                    :id="_('title')"
-                    class="form-control"
-                    v-model.number="widget.title"
-                    :aria-describedby="_('titleHelp')"
-                />
-            </div>
-            <div class="form-group">
-                <label :for="_('description')">Description </label>
-                <input
-                    :id="_('description')"
-                    class="form-control"
-                    v-model.number="widget.description"
-                    :aria-describedby="_('descriptionHelp')"
-                />
-            </div>
-        </template>
     </component>
 </template>
 

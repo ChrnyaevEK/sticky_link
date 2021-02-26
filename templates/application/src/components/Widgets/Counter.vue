@@ -16,16 +16,6 @@
                 </button>
             </div>
         </template>
-        <template slot="options">
-            <div class="form-group">
-                <label :for="_('value')">Value </label>
-                <input :id="_('value')" class="form-control" v-model.number="widget.value" :aria-describedby="_('valueHelp')" />
-            </div>
-            <div class="form-group">
-                <label :for="_('title')">Title </label>
-                <input :id="_('title')" class="form-control" v-model.number="widget.title" :aria-describedby="_('titleHelp')" />
-            </div>
-        </template>
     </component>
 </template>
 

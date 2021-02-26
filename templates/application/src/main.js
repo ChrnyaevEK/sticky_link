@@ -30,15 +30,18 @@ const router = new VueRouter({
                     name: "wallEdit",
                     path: "wall/:wallId",
                     component: WallEdit,
-                    beforeEnter(to, from, next){
+                    beforeEnter(to, from, next) {
                         if (validateWall(to.params.wallId)) {
-                            next()
+                            next();
                         } else {
                             next({
-                                name: 'wallEditForbidden'
-                            })
+                                name: "wallEditForbidden",
+                                params: {
+                                    wallId: to.params.wallId,
+                                },
+                            });
                         }
-                    }
+                    },
                 },
                 {
                     name: "wallEditForbidden",
@@ -59,23 +62,41 @@ const router = new VueRouter({
                     name: "wallView",
                     path: "wall/:wallId",
                     component: WallView,
+                    beforeEnter(to, from, next) {
+                        if (validateWall(to.params.wallId)) {
+                            next();
+                        } else {
+                            next({
+                                name: "wallViewForbidden",
+                                params: {
+                                    wallId: to.params.wallId,
+                                },
+                            });
+                        }
+                    },
+                },
+                {
+                    name: "wallViewForbidden",
+                    path: "wall/:wallId",
+                    component: WallForbidden,
+                },
+            ],
+        },
+        {
+            path: "/app",
+            component: AppEmpty,
+            children: [
+                {
+                    path: "",
+                    alias: "*",
+                    component: WallEmpty,
                 },
             ],
         },
         {
             path: "*",
-            component: AppEmpty,
-            children: [
-                {
-                    path: "*",
-                    component: WallEmpty,
-                },
-            ],
+            redirect: "/app",
         },
-        // {
-        //     path: "*",
-        //     redirect: '/app',
-        // }
     ],
 });
 
