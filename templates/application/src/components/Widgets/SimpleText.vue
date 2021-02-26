@@ -37,6 +37,6 @@
 
 <style>
     .editor {
-        min-height: unset;
+        min-height: unset !important;
     }
 </style>
