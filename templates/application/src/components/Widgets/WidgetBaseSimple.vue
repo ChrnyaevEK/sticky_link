@@ -1,5 +1,5 @@
 <template>
-    <div class="widget" :style="style">
+    <div class="widget" :class="[widget.border ? 'widget-border' : 'widget-no-border']" :style="style">
         <slot name="content"></slot>
     </div>
 </template>
@@ -45,14 +45,3 @@
         },
     };
 </script>
-
-<style scoped>
-    .widget {
-        margin: 0;
-        padding: 0;
-        border-style: solid;
-        border-width: 1px;
-        border-color: #dadada;
-        position: absolute;
-    }
-</style>
