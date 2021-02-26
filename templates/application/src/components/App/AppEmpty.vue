@@ -10,7 +10,21 @@
 
 <script>
     import WallSelectCreate from "../Utils/WallSelectCreate";
+    import { Context } from "../../common.js";
     export default {
         components: { WallSelectCreate },
+        created(){
+            Context.$on("wallCreated", this.onWallCreated);
+        },
+        methods: {
+            onWallCreated(wall) {
+                this.$router.push({
+                    name: "wallEdit",
+                    params: {
+                        wallId: wall.id,
+                    },
+                });
+            },
+        }
     };
 </script>
