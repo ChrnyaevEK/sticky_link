@@ -5,6 +5,7 @@ sticky_link/env.py
 sticky_link/log.txt
 .DS_Store
 node_modules
+package-lock.json
 __pycache__
 
 # local env files
@@ -28,3 +29,4 @@ pnpm-debug.log*
 /venv/
 /static/application/
 /templates/application/dist/
+/templates/application/package-lock.json
