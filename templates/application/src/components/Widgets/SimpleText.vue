@@ -1,8 +1,8 @@
 <template id="simple-text-template">
-    <component :is="base" v-bind="{ ...$props, ...$attrs }">
+    <component :is="base" v-bind="{ ...$props, ...$attrs }" class="p-0">
         <template slot="content">
             <div class="d-flex flex-column h-100">
-                <span class="flex-grow-1 text-truncate text-wrap text-break ql-editor" v-html="widget.text_content"></span>
+                <span class="flex-grow-1 text-truncate text-wrap text-break ql-editor editor" v-html="widget.text_content"></span>
             </div>
         </template>
     </component>
@@ -34,3 +34,9 @@
         },
     };
 </script>
+
+<style>
+    .editor {
+        min-height: unset;
+    }
+</style>
