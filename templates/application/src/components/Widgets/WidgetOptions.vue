@@ -5,6 +5,7 @@
         @mouseup.native.stop
         @mousemove.native.stop
         dragHandle=".options-drag"
+        @click.native.stop
         :w="400"
         :h="600"
         :z="10"

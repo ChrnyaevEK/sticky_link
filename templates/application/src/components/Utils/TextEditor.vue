@@ -1,5 +1,5 @@
 <template>
-    <vue-editor @click.native.stop :value="value" :editorOptions="editorOptions" :editorToolbar="customToolbar" @input="$emit('input', $event)"></vue-editor>
+    <vue-editor :value="value" :editorOptions="editorOptions" :editorToolbar="customToolbar" @input="$emit('input', $event)"></vue-editor>
 </template>
 <script>
     import { VueEditor } from "vue2-editor";
