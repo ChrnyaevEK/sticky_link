@@ -13,12 +13,8 @@
             return {
                 customToolbar: [
                     [{ font: [] }, { size: [] }, { header: ["1", "2", "3", "4", "5", "6"] }],
-                    ["bold", "italic", "underline", "strike"],
-                    [{ color: [] }, { script: "super" }, { script: "sub" }],
-                    ["blockquote", "code-block"],
-                    [{ list: "ordered" }, { list: "bullet" }, { indent: "-1" }, { indent: "+1" }],
-                    ["direction", { align: [] }],
-                    ["link", "clean"],
+                    ["bold", "italic", "underline", "strike", { color: [] }, { script: "super" }, { script: "sub" }, "blockquote", "code-block", "direction", "link"],
+                    [{ list: "ordered" }, { list: "bullet" }, { indent: "-1" }, { indent: "+1" }, { align: [] }, "clean"],
                 ],
                 editorOptions: {
                     placeholder: "Lorem ipsum dolor sit amet",

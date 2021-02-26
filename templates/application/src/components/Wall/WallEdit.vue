@@ -2,7 +2,7 @@
     <div class="w-100 h-100 overflow-hidden">
         <div class="w-100 h-100 wall-container overflow-auto" @click.stop="Context.$emit('closeWidgetOptions')" v-if="dataReady">
             <vue-draggable-resizable
-                @click.native.stop
+                @click.stop="Context.$emit('closeWidgetOptions')"
                 @resizing="onResizing"
                 :resizable="true"
                 :draggable="true"
