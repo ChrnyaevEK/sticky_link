@@ -110,7 +110,7 @@
                         wallId: Context.walls[0].id,
                     },
                 }: {
-                    name: "wallEdit"
+                    name: "app"
                 });
             },
             onShowAlert(alertMessage, alertClass) {
