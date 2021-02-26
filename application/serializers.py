@@ -65,14 +65,6 @@ class SimpleTextSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class RichTextSerializer(serializers.ModelSerializer):
-    type = serializers.ReadOnlyField(default=models.RichText.type)
-
-    class Meta:
-        model = models.RichText
-        fields = '__all__'
-
-
 class URLSerializer(serializers.ModelSerializer):
     type = serializers.ReadOnlyField(default=models.URL.type)
 

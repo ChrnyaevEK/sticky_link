@@ -6,6 +6,8 @@
         @mouseup.native.stop
         @mousemove.native.stop
         class="widget"
+        :class="[widget.border ? 'widget-border' : 'widget-no-border']"
+        :style="style"
         :parent="true"
         :w="widget.w"
         :h="widget.h"
@@ -21,7 +23,7 @@
                 <i class="fas fa-trash"></i>
             </button>
         </div>
-        <div class="w-100 h-100" :style="style" @contextmenu.stop.prevent="Context.$emit('openWidgetOptions', widget)">
+        <div class="w-100 h-100" @contextmenu.stop.prevent="Context.$emit('openWidgetOptions', widget)">
             <slot name="content"></slot>
         </div>
     </vue-draggable-resizable>
@@ -168,13 +170,6 @@
 </script>
 
 <style scoped>
-    .widget {
-        margin: 0;
-        padding: 0;
-        border-style: solid;
-        border-width: 1px;
-        border-color: #dadada;
-    }
     .control-area {
         width: 100%;
         height: 100%;
@@ -182,6 +177,7 @@
     }
     .widget-quick-access {
         right: 0;
+        top: 0;
         position: absolute;
         display: flex;
         justify-content: flex-end;

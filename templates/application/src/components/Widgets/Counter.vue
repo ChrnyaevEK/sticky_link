@@ -41,7 +41,7 @@
             };
         },
         created() {
-            registerIdSystem(this, this.widget.type, this.widget.id); // Create _ function to generate ids
+            registerIdSystem(this, this.widget); // Create _ function to generate ids
         },
     };
 </script>

@@ -61,7 +61,6 @@ class WallViewSet(ModelViewSet):
         widgets = []
         for model, serializer in (
                 (models.SimpleText, serializers.SimpleTextSerializer),
-                (models.RichText, serializers.RichTextSerializer),
                 (models.URL, serializers.URLSerializer),
                 (models.SimpleList, serializers.SimpleListSerializer),
                 (models.Counter, serializers.CounterSerializer),
@@ -79,13 +78,6 @@ class SimpleTextViewSet(ModelViewSet):
 
     def get_queryset(self):
         return _get_protected_queryset(models.SimpleText, self.request.user)
-
-
-class RichTextViewSet(ModelViewSet):
-    serializer_class = serializers.RichTextSerializer
-
-    def get_queryset(self):
-        return _get_protected_queryset(models.RichText, self.request.user)
 
 
 class URLViewSet(ModelViewSet):

@@ -87,14 +87,15 @@
                 <label :for="_('text_color')">Text color</label>
                 <input type="color" :id="_('text_color')" v-model="widget.text_color" class="form-control" />
             </div>
+            <div class="form-check">
+                <input type="checkbox" :id="_('border')" class="form-check-input" v-model="widget.border" />
+                <label class="form-check-label" :for="_('border')">Border</label>
+            </div>
             <hr />
             <!--Options by widget type========================================================================================================-->
             <!--Simple text-->
             <template v-if="widget.type == SimpleText.type">
-                <div class="form-group">
-                    <label :for="_('text_content')">Content of widget </label>
-                    <textarea :id="_('text_content')" class="form-control" v-model="widget.text_content" rows="10"></textarea>
-                </div>
+                <TextEditor v-model="widget.text_content"></TextEditor>
             </template>
             <!--Counter-->
             <template v-if="widget.type == Counter.type">
@@ -140,6 +141,7 @@
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
     import { registerIdSystem, Context } from "../../common.js";
     import $ from "jquery";
+    import TextEditor from "../Utils/TextEditor";
     import SimpleText from "./SimpleText";
     import URL from "./URL";
     import Counter from "./Counter";
@@ -192,6 +194,7 @@
             },
         },
         components: {
+            TextEditor,
             VueDraggableResizable,
         },
     };

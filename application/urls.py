@@ -7,7 +7,6 @@ from django.conf.urls.static import static
 router = routers.DefaultRouter()
 router.register('wall', views.WallViewSet, basename='wall')
 router.register('simple_text', views.SimpleTextViewSet, basename='simple_text')
-router.register('rich_text', views.RichTextViewSet, basename='rich_text')
 router.register('url', views.URLViewSet, 'url')
 router.register('simple_list', views.SimpleListViewSet, basename='simple_list')
 router.register('counter', views.CounterViewSet, basename='counter')

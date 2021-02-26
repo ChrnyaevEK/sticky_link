@@ -2,7 +2,7 @@
     <component :is="base" v-bind="{ ...$props, ...$attrs }">
         <template slot="content">
             <div class="d-flex flex-column h-100">
-                <span class="flex-grow-1 text-truncate text-wrap text-break">{{ widget.text_content }}</span>
+                <span class="flex-grow-1 text-truncate text-wrap text-break ql-editor" v-html="widget.text_content"></span>
             </div>
         </template>
     </component>
@@ -30,7 +30,7 @@
             };
         },
         created() {
-            registerIdSystem(this, this.widget.type, this.widget.id); // Create _ function to generate ids
+            registerIdSystem(this, this.widget); // Create _ function to generate ids
         },
     };
 </script>

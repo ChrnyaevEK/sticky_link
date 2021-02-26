@@ -71,6 +71,7 @@ class Widget(Common):
         width = 200
         min_height = 2
         height = 100
+        border = True
 
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
     w = models.IntegerField(verbose_name='Widget width', default=Default.width)
@@ -93,6 +94,7 @@ class Widget(Common):
 
     background_color = models.CharField(max_length=9, validators=[ColorValidator], default=Default.background_color)
     text_color = models.CharField(max_length=9, validators=[ColorValidator], default=Default.text_color)
+    border = models.BooleanField(default=Default.border)
 
     class Meta:
         abstract = True
@@ -100,22 +102,11 @@ class Widget(Common):
 
 class SimpleText(Widget):
     class Default:
-        content_length = 2000
         type = 'simple_text'
 
     type = Default.type
-    text_content = models.TextField(verbose_name='Text content of widget', max_length=Default.content_length, null=True,
+    text_content = models.TextField(verbose_name='Text content of widget', null=True,
                                     blank=True)
-
-
-class RichText(Widget):
-    class Default:
-        type = 'rich_text'
-
-    type = Default.type
-    text_color = None  # Color is set by markdown
-    text_content = models.TextField(verbose_name='Text content of widget', null=True, blank=True)
-    show_source = models.BooleanField(default=True)
 
 
 class URL(Widget):
@@ -163,7 +154,6 @@ class Settings:
     widget = Widget.Default
     wall = Wall.Default
     simple_text = SimpleText.Default
-    rich_text = RichText.Default
     url = URL.Default
     simple_list = SimpleList.Default
     counter = Counter.Default
