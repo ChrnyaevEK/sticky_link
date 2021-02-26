@@ -1,5 +1,5 @@
 <template id="simple-text-template">
-    <component :is="WidgetBase" v-bind="{ ...$props, ...$attrs }">
+    <component :is="base" v-bind="{ ...$props, ...$attrs }">
         <template slot="content">
             <div class="d-flex flex-column h-100">
                 <span class="flex-grow-1 text-truncate text-wrap text-break">{{ widget.text_content }}</span>
@@ -25,7 +25,7 @@
                 type: Object,
                 required: true,
             },
-            WidgetBase: {
+            base: {
                 type: Object,
                 required: true,
             },

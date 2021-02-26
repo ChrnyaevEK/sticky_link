@@ -1,5 +1,5 @@
 <template id="url-template">
-    <component :is="WidgetBase" v-bind="{ ...$props, ...$attrs }">
+    <component :is="base" v-bind="{ ...$props, ...$attrs }">
         <template slot="content">
             <div class="w-100 h-100 d-flex justify-content-center align-items-center">
                 <span class="p-2 border rounded" @click="openHref">
@@ -31,7 +31,7 @@
                 type: Object,
                 required: true,
             },
-            WidgetBase: {
+            base: {
                 type: Object,
                 required: true,
             },

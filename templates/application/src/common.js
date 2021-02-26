@@ -166,7 +166,33 @@ export function registerIdSystem(vm, data_source) {
     };
 }
 
+export function validateWall(id) {
+    return Context.walls.some((w) => {
+        return String(w.id) == id;
+    });
+}
+
+export function deleteWall(id) {
+    for (var i = 0; i < Context.walls.length; i++) {
+        if (Context.walls[i].id == id) {
+            Context.walls.splice(i, 1);
+            break;
+        }
+    }
+}
+
+export function updateWall(id, obj) {
+    for (var wall of Context.walls) {
+        if (wall.id == id) {
+            Object.assign(wall, obj);
+        }
+    }
+}
+
 export default {
+    validateWall,
+    deleteWall,
+    updateWall,
     registerIdSystem,
     API,
     UpdateManager,

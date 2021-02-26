@@ -1,9 +1,9 @@
 <template>
-    <div v-else id="major-tom" class="w-100 h-100 h1 text-info d-flex justify-content-center align-items-center">
-        <i class="fas fa-user-astronaut" title="Now it's time to leave the capsule if you dare... Go for a wall!"></i>
-    </div>
+    <div class="w-100 h-100 d-flex justify-content-center align-items-center text-muted">No wall selected...</div>
 </template>
 
-<script>
-    export default {};
-</script>
+<style scoped>
+    .rotate-left-315 {
+        transform: rotate(315deg);
+    }
+</style>

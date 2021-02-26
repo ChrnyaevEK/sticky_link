@@ -1,5 +1,5 @@
 <template id="counter-template">
-    <component :is="WidgetBase" v-bind="{ ...$props, ...$attrs }">
+    <component :is="base" v-bind="{ ...$props, ...$attrs }">
         <template slot="content">
             <div class="d-flex flex-column w-100 h-100">
                 <span class="w-100 text-center">{{ widget.title }}</span>
@@ -40,7 +40,7 @@
                 type: Object,
                 required: true,
             },
-            WidgetBase: {
+            base: {
                 type: Object,
                 required: true,
             },

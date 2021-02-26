@@ -6,7 +6,7 @@
     </span>
 </template>
 <script>
-    import { Context } from "../common.js";
+    import { Context } from "../../common.js";
     export default {
         data() {
             return { Context };

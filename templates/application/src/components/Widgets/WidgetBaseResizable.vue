@@ -124,7 +124,7 @@
     // Front end is absolutely passive
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
-    import { registerIdSystem, UpdateManager, API, Context } from "../common.js";
+    import { registerIdSystem, UpdateManager, API, Context } from "../../common.js";
     import $ from "jquery";
 
     Context.$on("addBlankWidget", function(klass) {
@@ -156,10 +156,12 @@
             Context.$on("closeWidgetOptions", this.onCloseOptions);
             Context.$on("widgetUpdatePosition", (wall) => {
                 if (this.widget.x + this.widget.w >= wall.w) {
-                    this.widget.x = wall.w - this.widget.w;
+                    var x = wall.w - this.widget.w;
+                    this.widget.x = x < 0 ? 0 : x;
                 }
                 if (this.widget.y + this.widget.h >= wall.h) {
-                    this.widget.y = wall.h - this.widget.h;
+                    var y = wall.h - this.widget.h;
+                    this.widget.y = y < 0 ? 0 : y;
                 }
                 if (this.widget.h >= wall.h) {
                     this.widget.h = wall.h;
@@ -269,6 +271,9 @@
                 },
                 deep: true,
             },
+        },
+        updated() {
+            window.dispatchEvent(new Event("resize"));
         },
         mounted() {
             $(this.$el)

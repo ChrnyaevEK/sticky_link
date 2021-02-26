@@ -1,9 +1,9 @@
 <template>
     <div class="w-100 h-100">
-        <SimpleText v-for="widget of filterSimpleText" :key="widget.type + widget.id" :parent="true" :WidgetBase="WidgetBase" :widget="widget"> </SimpleText>
-        <URL v-for="widget of filterURL" :key="widget.type + widget.id" :widget="widget" :WidgetBase="WidgetBase"> </URL>
-        <Counter v-for="widget of filterCounter" :key="widget.type + widget.id" :widget="widget" :WidgetBase="WidgetBase"> </Counter>
-        <SimpleList v-for="widget of filterSimpleList" :key="widget.type + widget.id" :widget="widget" :WidgetBase="WidgetBase"> </SimpleList>
+        <SimpleText v-for="widget of filterWidget(SimpleText)" :key="widget.type + widget.id" :parent="true" :base="base" :widget="widget"> </SimpleText>
+        <URL v-for="widget of filterWidget(URL)" :key="widget.type + widget.id" :widget="widget" :base="base"> </URL>
+        <Counter v-for="widget of filterWidget(Counter)" :key="widget.type + widget.id" :widget="widget" :base="base"> </Counter>
+        <SimpleList v-for="widget of filterWidget(SimpleList)" :key="widget.type + widget.id" :widget="widget" :base="base"> </SimpleList>
     </div>
 </template>
 
@@ -13,40 +13,31 @@
     import Counter from "../Widgets/Counter";
     import SimpleList from "../Widgets/SimpleList";
 
+    var components = {
+        SimpleText,
+        URL,
+        Counter,
+        SimpleList,
+    };
+
     export default {
         name: "WidgetList",
-        components: {
-            SimpleText,
-            URL,
-            Counter,
-            SimpleList,
-        },
+        components,
         props: {
             widgets: {
                 type: Array,
                 required: true,
             },
-            WidgetBase: null,
+            base: null,
+        },
+        data() {
+            return components;
         },
         methods: {
-            filterWidgets(klass) {
+            filterWidget(klass) {
                 return this.widgets.filter(function(widget) {
                     return widget.type == klass.type;
                 });
-            },
-        },
-        computed: {
-            filterSimpleText: () => {
-                return this.filterWidgets(SimpleText);
-            },
-            filterURL: () => {
-                return this.filterWidgets(URL);
-            },
-            filterCounter: () => {
-                return this.filterWidgets(Counter);
-            },
-            filterSimpleList: () => {
-                return this.filterWidgets(SimpleList);
             },
         },
     };

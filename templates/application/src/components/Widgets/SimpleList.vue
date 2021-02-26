@@ -1,6 +1,6 @@
 <template id="simple-list-template">
     <component
-        :is="WidgetBase"
+        :is="base"
         v-bind="{ ...$props, ...$attrs }"
     >
         <template slot="content">
@@ -78,7 +78,7 @@
                 type: Object,
                 required: true,
             },
-            WidgetBase: {
+            base: {
                 type: Object,
                 required: true,
             }

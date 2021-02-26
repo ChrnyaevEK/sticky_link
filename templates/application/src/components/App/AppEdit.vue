@@ -4,11 +4,9 @@
             <a href="/" class="m-3"> Sticky link </a>
             <router-link
                 class="mr-3"
-                v-if="$route.query.mode == Context.edit"
                 :to="{
-                    name: 'wall',
+                    name: 'wallView',
                     params: { wallId: $route.params.wallId },
-                    query: { mode: Context.view },
                 }"
             >
                 View
@@ -23,31 +21,7 @@
         >
         <router-view></router-view>
         <div class="w-100 p-1 d-flex bg-white border-top">
-            <div class="btn-group dropup">
-                <a class="btn btn-sm dropdown-toggle" id="wall-list" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Select any wall to open for edition">
-                    Walls
-                </a>
-                <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
-                    <router-link
-                        class="dropdown-item btn btn-sm"
-                        v-for="wall of Context.walls"
-                        :key="wall.id"
-                        :class="{ active: wall.id == $route.params.wallId }"
-                        :to="{
-                            name: 'wall',
-                            params: { wallId: wall.id },
-                            query: { mode: Context.edit },
-                        }"
-                        >{{ wall.title }}</router-link
-                    >
-                </div>
-                <a class="mr-1 btn btn-sm btn-success border" @click="Context.$emit('addBlankWall')" title="Add new wall">
-                    <i class="fas fa-plus"></i>
-                </a>
-                <a class="mr-1 btn btn-sm btn-danger border" @click.stop="Context.$emit('deleteWall')" title="Delete current wall">
-                    <i class="fas fa-trash"></i>
-                </a>
-            </div>
+            <WallSelectCreate></WallSelectCreate>
             <div class="d-flex w-100 overflow-auto">
                 <button
                     @click.stop="Context.$emit('addBlankWidget', SimpleText)"
@@ -83,26 +57,23 @@
 
 <script>
     import SaveUtil from "../Utils/SaveUtil";
-    import SimpleText from "./components/Widgets/SimpleText";
-    import URL from "./components/Widgets/URL";
-    import Counter from "./components/Widgets/Counter";
-    import SimpleList from "./components/Widgets/SimpleList";
-    import { Context } from "./common.js";
+    import WallSelectCreate from "../Utils/WallSelectCreate";
+    import SimpleText from "../Widgets/SimpleText";
+    import URL from "../Widgets/URL";
+    import Counter from "../Widgets/Counter";
+    import SimpleList from "../Widgets/SimpleList";
+    import { Context } from "../../common.js";
 
     var components = {
         SimpleText,
         URL,
         Counter,
         SimpleList,
+        SaveUtil,
+        WallSelectCreate,
     };
     export default {
         components,
-        beforeRouteEnter(to, from, next) {
-            Context.initUser().then(next);
-        },
-        beforeRouteUpdate(to, from, next) {
-            Context.initUser().then(next);
-        },
         created() {
             Context.$on("wallDeleted", this.onWallDeleted);
             Context.$on("wallCreated", this.onWallCreated);
@@ -124,19 +95,21 @@
         methods: {
             onWallCreated(wall) {
                 this.$router.push({
-                    name: "wall",
+                    name: "wallEdit",
                     params: {
                         wallId: wall.id,
-                    },
-                    query: {
-                        mode: Context.edit,
                     },
                 });
                 Context.$emit("showAlert", `New wall has been created!`, "success");
             },
             onWallDeleted(wall) {
                 Context.$emit("showAlert", `Wall "${wall.title}" has been deleted!`, "success");
-                this.validateState();
+                this.$router.push({
+                    name: "wallEdit",
+                    params: {
+                        wallId: Context.walls.length ? Context.walls[0].id : undefined,
+                    },
+                });
             },
             onShowAlert(alertMessage, alertClass) {
                 this.alertMessage = alertMessage;
