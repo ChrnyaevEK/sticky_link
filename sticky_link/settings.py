@@ -26,6 +26,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'application',
     'rest_framework',
     'corsheaders',
@@ -72,7 +73,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'sticky_link.wsgi.application'
-
+ASGI_APPLICATION = 'sticky_link.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
