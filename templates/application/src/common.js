@@ -84,16 +84,18 @@ export class API {
 
 export class UpdateManager extends API {
     // Push data about widget at certain rate (so we do not spam server)
-    constructor(urlName, id, resolve, reject) {
+    constructor(urlName, id) {
         super(urlName, id);
         this.lastState = null;
+        this.resolve = null
+        this.reject = null
         this.refreshRate = 1000; // ms
         this.intervalId = setInterval(() => {
             // Grab last state and push it to server
             if (this.lastState !== null) {
                 this.update(this.lastState).then(
-                    resolve || function() {},
-                    reject || function() {}
+                    this.resolve || function() {},
+                    this.reject || function() {}
                 );
                 this.lastState = null;
             }
