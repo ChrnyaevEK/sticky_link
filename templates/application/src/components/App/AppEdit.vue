@@ -77,7 +77,6 @@
         created() {
             Context.$on("wallDeleted", this.onWallDeleted);
             Context.$on("wallCreated", this.onWallCreated);
-            Context.$on("routeRequest", this.onRouteRequest);
             Context.$on("showAlert", this.onShowAlert);
             Context.$on("lockWidgetCreation", this.onLockWidgetCreation);
             Context.$on("unlockWidgetCreation", this.onUnlockWidgetCreation);
@@ -127,10 +126,7 @@
             },
             onUnlockWidgetCreation() {
                 this.lockWidgetCreation = false;
-            },
-            onRouteRequest(callback) {
-                callback(this.$route);
-            },
+            }
         },
     };
 </script>

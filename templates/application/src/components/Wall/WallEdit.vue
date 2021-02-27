@@ -33,13 +33,6 @@
     import $ from "jquery";
     import { deleteWall, updateWall } from "../../common.js";
 
-    Context.$on("addBlankWall", () => {
-        new UpdateManager("wall").create().then((response) => {
-            Context.walls.push(response);
-            Context.$emit("wallCreated", response);
-        });
-    });
-
     export default {
         components: {
             VueDraggableResizable,

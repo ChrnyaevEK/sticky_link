@@ -7,6 +7,8 @@ import AppEmpty from "./components/App/AppEmpty";
 import WallEdit from "./components/Wall/WallEdit";
 import WallView from "./components/Wall/WallView";
 import WallEmpty from "./components/Wall/WallEmpty";
+import "./components/Wall/once";
+import "./components/Widgets/once";
 import WallForbidden from "./components/Wall/WallForbidden";
 import "./css/main.scss";
 import "@fortawesome/fontawesome-free/js/all.js";
@@ -101,11 +103,13 @@ const router = new VueRouter({
     ],
 });
 
+
 router.beforeEach((to, from, next) => {
     Context.initUser().then(next);
 });
 
-new Vue({
+var app = new Vue({
     router,
     template: "<router-view/>",
 }).$mount("#app");
+Context.$on("routeRequest", (callback) => {callback(app.$route)});

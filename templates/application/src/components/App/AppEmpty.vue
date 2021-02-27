@@ -13,7 +13,7 @@
     import { Context } from "../../common.js";
     export default {
         components: { WallSelectCreate },
-        created(){
+        created() {
             Context.$on("wallCreated", this.onWallCreated);
         },
         methods: {
@@ -25,6 +25,6 @@
                     },
                 });
             },
-        }
+        },
     };
 </script>
