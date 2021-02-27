@@ -35,7 +35,6 @@
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
     import { registerIdSystem, UpdateManager, Context } from "../../common.js";
     import $ from "jquery";
-
     Context.$on("addBlankWidget", function(klass) {
         Context.$emit("lockWidgetCreation");
         Context.$emit("routeRequest", ($route) => {
