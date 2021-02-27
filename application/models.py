@@ -13,12 +13,6 @@ class Common(models.Model):
     id = models.AutoField(primary_key=True)
     date_of_creation = models.DateTimeField(verbose_name='Date of creation', auto_now_add=True)
     last_update = models.DateTimeField(verbose_name='Date of last update (wall or any widget)', auto_now=True)
-    data_fields = []  # List of fields names, that contains data
-
-    def save(self, *args, **kwargs):
-        print(args)
-        print(kwargs)
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{type(self).__name__}: {self.id}'
@@ -78,6 +72,9 @@ class Widget(Common):
         min_height = 2
         height = 100
         border = True
+        static_fields = [  # For partial update - all common fields
+           'id', 'wall', 'w', 'h', 'z', 'x', 'y', 'font_size', 'font_weight', 'background_color', 'text_color', 'border'
+        ]
 
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
     w = models.IntegerField(verbose_name='Widget width', default=Default.width)

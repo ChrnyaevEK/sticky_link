@@ -23,7 +23,7 @@
                 <i class="fas fa-trash"></i>
             </button>
         </div>
-        <div class="w-100 h-100" @contextmenu.stop.prevent="Context.$emit('openWidgetOptions', widget)">
+        <div class="w-100 h-100" @contextmenu.stop.prevent="Context.$emit('openWidgetOptions', widget, manager)">
             <slot name="content"></slot>
         </div>
     </vue-draggable-resizable>
@@ -33,8 +33,22 @@
     // Front end is absolutely passive
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
-    import { registerIdSystem, UpdateManager, Context } from "../../common.js";
+    import { registerIdSystem, UpdateManager, API, Context } from "../../common.js";
     import $ from "jquery";
+
+    Context.$on("addBlankWidget", function(klass) {
+        Context.$emit("lockWidgetCreation");
+        Context.$emit("routeRequest", ($route) => {
+            new API(klass.type)
+                .create({ wall: $route.params.wallId })
+                .then((response) => {
+                    Context.$emit("widgetCreated", response);
+                })
+                .always(() => {
+                    Context.$emit("unlockWidgetCreation");
+                });
+        });
+    });
 
     export default {
         name: "WidgetBaseResizable",
@@ -134,8 +148,8 @@
         },
         watch: {
             widget: {
-                handler: function() {
-                    this.manager.updated(this.widget);
+                handler: function(newWidget, oldWidget) {
+                    this.manager.updated(newWidget, oldWidget);
                 },
                 deep: true,
             },

@@ -162,18 +162,27 @@
                 Counter,
                 SimpleList,
                 widget: null,
+                manager: null,
                 optionsVisible: false,
             };
         },
         methods: {
-            onOpenOptions(widget) {
+            onOpenOptions(widget, manager) {
+                manager.resolve = this.unsetWarning;
+                manager.reject = this.setWarningFromResponse;
                 registerIdSystem(this, widget); // Create _ function to generate ids
                 this.$set(this, "widget", widget);
+                this.$set(this, "manager", manager);
                 this.optionsVisible = true;
             },
             onCloseOptions() {
-                this.widget = null;
-                this.optionsVisible = false;
+                if (this.manager) {
+                    this.manager.resolve = null;
+                    this.manager.reject = null;
+                    this.manager = null;
+                    this.widget = null;
+                    this.optionsVisible = false;
+                }
             },
             setWarningFromResponse(response) {
                 this.unsetWarning();
@@ -190,7 +199,7 @@
             unsetWarning() {
                 $(`.${this.warningClass}`)
                     .parent()
-                    .removeClass("text-dander");
+                    .removeClass("text-danger");
                 $(`.${this.warningClass}`).remove();
             },
         },

@@ -1,6 +1,18 @@
 from rest_framework import serializers
 from application import models
 from django.contrib.auth.models import User
+from channels.layers import get_channel_layer
+from application.consumers import Event
+from asgiref.sync import async_to_sync
+
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 
 class ObjectSerializer(serializers.BaseSerializer):
@@ -48,7 +60,27 @@ class ObjectSerializer(serializers.BaseSerializer):
             return output
 
 
-class UserSerializer(serializers.ModelSerializer):
+class CustomModelSerializer(serializers.ModelSerializer):
+    channel_layer = get_channel_layer()
+
+    def save(self, **kwargs):
+        self.dispatch_channels_event()
+        super().save(**kwargs)
+
+    def dispatch_channels_event(self):
+        request = self.context['request']
+        async_to_sync(self.channel_layer.group_send)(f'{models.Wall.type}_{self.instance.wall.id}', {
+            'type': Event.wall_update,
+            'instance': {
+                'type': self.instance.type,
+                'id': self.instance.id,
+                'ip': get_client_ip(request),
+                'user': request.user.id
+            }
+        })
+
+
+class UserSerializer(CustomModelSerializer):
     def get_queryset(self):
         return models.User.objects.filter(pk=self.request.user.id)
 
@@ -57,7 +89,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'id']
 
 
-class SimpleTextSerializer(serializers.ModelSerializer):
+class SimpleTextSerializer(CustomModelSerializer):
     type = serializers.ReadOnlyField(default=models.SimpleText.type)
 
     class Meta:
@@ -65,7 +97,7 @@ class SimpleTextSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class URLSerializer(serializers.ModelSerializer):
+class URLSerializer(CustomModelSerializer):
     type = serializers.ReadOnlyField(default=models.URL.type)
 
     class Meta:
@@ -73,7 +105,7 @@ class URLSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SimpleListSerializer(serializers.ModelSerializer):
+class SimpleListSerializer(CustomModelSerializer):
     type = serializers.ReadOnlyField(default=models.SimpleList.type)
 
     class Meta:
@@ -81,7 +113,7 @@ class SimpleListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CounterSerializer(serializers.ModelSerializer):
+class CounterSerializer(CustomModelSerializer):
     type = serializers.ReadOnlyField(default=models.Counter.type)
 
     class Meta:
@@ -89,7 +121,7 @@ class CounterSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class WallSerializer(serializers.ModelSerializer):
+class WallSerializer(CustomModelSerializer):
     type = serializers.ReadOnlyField(default=models.Wall.type)
     widgets = [
         SimpleTextSerializer(many=True, read_only=True),

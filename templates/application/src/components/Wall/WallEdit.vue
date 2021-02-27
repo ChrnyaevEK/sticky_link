@@ -27,11 +27,18 @@
     import WidgetList from "./WidgetList";
     import WidgetBaseResizable from "../Widgets/WidgetBaseResizable";
     import WidgetOptions from "../Widgets/WidgetOptions";
-    import { Context, UpdateManager } from "../../common.js";
+    import { Context, UpdateManager, API, WS } from "../../common.js";
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
     import $ from "jquery";
     import { deleteWall, updateWall } from "../../common.js";
+
+    Context.$on("addBlankWall", () => {
+        new API("wall").create().then((response) => {
+            Context.walls.push(response);
+            Context.$emit("wallCreated", response);
+        });
+    });
 
     export default {
         components: {
@@ -44,6 +51,7 @@
                 Context,
                 WidgetBaseResizable,
                 manager: undefined,
+                ws: undefined,
                 wall: undefined,
                 widgets: undefined,
                 dataReady: false,
@@ -57,13 +65,15 @@
         },
         watch: {
             $route: "initiateWall",
+            wall(newVal, oldVal) {
+                if (newVal && oldVal && newVal.id == oldVal.id) this.manager.updated(newVal, oldVal);
+            },
         },
         methods: {
             onResizing(x, y, w, h) {
                 this.wall.w = w;
                 this.wall.h = h;
                 Context.$emit("widgetUpdatePosition", this.wall);
-                this.manager.updated(this.wall);
             },
             onDeleteWall() {
                 if (confirm("Are you sure? Wall will be permanently removed!")) {
@@ -74,7 +84,6 @@
             },
             onWallTitleUpdate() {
                 updateWall(this.wall.id, { title: this.wall.title });
-                this.manager.updated(this.wall);
             },
             onWidgetCreated(widget) {
                 this.widgets.push(widget);
@@ -87,11 +96,13 @@
                 this.wall = undefined;
                 this.widgets = undefined;
                 var manager = new UpdateManager("wall", this.$route.params.wallId);
+                var ws = new WS("wall", this.$route.params.wallId);
                 return manager.retrieve().then((response) => {
                     $(document).keyup(function(e) {
                         if (e.keyCode === 27) Context.$emit("closeWidgetOptions"); // esc
                     });
                     this.$set(this, "manager", manager);
+                    this.$set(this, "ws", ws);
                     this.$set(this, "wall", response.wall);
                     this.$set(this, "widgets", response.widgets);
                     this.dataReady = true;

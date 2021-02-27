@@ -2,8 +2,12 @@
     <component :is="base" v-bind="{ ...$props, ...$attrs }">
         <template slot="content">
             <div class="w-100 h-100 d-flex justify-content-center align-items-center">
-                <span class="p-2 border rounded" @click="openHref">
-                    <a :href="widget.href" target="_blank" class="text-break" :style="`color: ${widget.text_color};`">{{ widget.text || widget.href }}</a>
+                <span class="btn btn-default p-2 border" @click="openHref">
+                    <a :href="widget.href" target="_blank" class="text-break" :style="`color: ${widget.text_color};`" :disabled="widget.href ? false:true"
+                        ><u>{{ widget.text || widget.href }}</u></a
+                    >
+
+                    <i class="fas fa-external-link-square-alt text-muted mx-1"></i>
                 </span>
             </div>
         </template>
@@ -36,7 +40,7 @@
         },
         methods: {
             openHref() {
-                window.open(this.widget.href, "_blank");
+                if (this.widget.href) window.open(this.widget.href, "_blank");
             },
         },
     };

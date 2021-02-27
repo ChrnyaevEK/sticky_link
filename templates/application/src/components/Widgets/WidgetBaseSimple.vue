@@ -37,8 +37,8 @@
         },
         watch: {
             widget: {
-                handler: function() {
-                    this.manager.updated(this.widget);
+                handler: function(newWidget, oldWidget) {
+                    this.manager.updated(newWidget, oldWidget);
                 },
                 deep: true,
             },
