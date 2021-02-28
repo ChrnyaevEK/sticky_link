@@ -1,13 +1,16 @@
 from application import models
 from application import serializers
-from rest_framework.decorators import permission_classes, api_view
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse, Http404
 from django.shortcuts import render
 from rest_framework.response import Response
 from django.http import HttpResponse
 from django.core.exceptions import PermissionDenied
+from channels.layers import get_channel_layer
+from application.consumers import Event as ConsumerEvent
+from asgiref.sync import async_to_sync
+import hashlib
+import json
 
 
 def _get_protected_queryset(model, user):
@@ -46,7 +49,49 @@ class UserViewSet(ReadOnlyModelViewSet):
         })
 
 
-class WallViewSet(ModelViewSet):
+class CustomModelViewSet(ModelViewSet):
+    channel_layer = get_channel_layer()
+    version_hash_field = 'version_hash'
+
+    def ensure_update_synchronization(self, response):
+        data = response.data
+        try:
+            wall_id = data['wall']
+        except KeyError:
+            wall_id = data['id']
+        version_hash = self._get_version_hash(data)
+        async_to_sync(self.channel_layer.group_send)(
+            f'{models.Wall.type}_{wall_id}',
+            {
+                'type': ConsumerEvent.wall_update,
+                'instance': {
+                    'type': data['type'],
+                    'id': data['id'],
+                    self.version_hash_field: version_hash,
+                }
+            })
+        response.data[self.version_hash_field] = version_hash
+
+    @staticmethod
+    def _get_version_hash(validated_data):
+        return hashlib.md5(json.dumps(validated_data).encode('utf-8')).hexdigest()
+
+    @staticmethod
+    def _check_update_fields(validated_data, fields):
+        return len(set(validated_data.keys()).intersection(fields))
+
+    def partial_update(self, request, *args, **kwargs):
+        response = super().partial_update(request, *args, **kwargs)
+        self.ensure_update_synchronization(response)
+        return response
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        self.ensure_update_synchronization(response)
+        return response
+
+
+class WallViewSet(CustomModelViewSet):
     serializer_class = serializers.WallSerializer
 
     def get_queryset(self):
@@ -73,28 +118,28 @@ class WallViewSet(ModelViewSet):
         })
 
 
-class SimpleTextViewSet(ModelViewSet):
+class SimpleTextViewSet(CustomModelViewSet):
     serializer_class = serializers.SimpleTextSerializer
 
     def get_queryset(self):
         return _get_protected_queryset(models.SimpleText, self.request.user)
 
 
-class URLViewSet(ModelViewSet):
+class URLViewSet(CustomModelViewSet):
     serializer_class = serializers.URLSerializer
 
     def get_queryset(self):
         return _get_protected_queryset(models.URL, self.request.user)
 
 
-class SimpleListViewSet(ModelViewSet):
+class SimpleListViewSet(CustomModelViewSet):
     serializer_class = serializers.SimpleListSerializer
 
     def get_queryset(self):
         return _get_protected_queryset(models.SimpleList, self.request.user)
 
 
-class CounterViewSet(ModelViewSet):
+class CounterViewSet(CustomModelViewSet):
     serializer_class = serializers.CounterSerializer
 
     def get_queryset(self):

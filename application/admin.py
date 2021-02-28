@@ -2,8 +2,13 @@ from django.contrib import admin
 
 from application import models
 
-admin.site.register(models.Wall)
-admin.site.register(models.SimpleText)
-admin.site.register(models.URL)
-admin.site.register(models.SimpleList)
-admin.site.register(models.Counter)
+
+class Admin(admin.ModelAdmin):
+    readonly_fields = ('date_of_creation', 'last_update',)
+
+
+admin.site.register(models.Wall, Admin)
+admin.site.register(models.SimpleText, Admin)
+admin.site.register(models.URL, Admin)
+admin.site.register(models.SimpleList, Admin)
+admin.site.register(models.Counter, Admin)

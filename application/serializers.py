@@ -1,18 +1,6 @@
 from rest_framework import serializers
 from application import models
 from django.contrib.auth.models import User
-from channels.layers import get_channel_layer
-from application.consumers import Event
-from asgiref.sync import async_to_sync
-
-
-def get_client_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
 
 
 class ObjectSerializer(serializers.BaseSerializer):
@@ -61,26 +49,11 @@ class ObjectSerializer(serializers.BaseSerializer):
 
 
 class CustomModelSerializer(serializers.ModelSerializer):
-    channel_layer = get_channel_layer()
-
-    def save(self, **kwargs):
-        self.dispatch_channels_event()
-        super().save(**kwargs)
-
-    def dispatch_channels_event(self):
-        request = self.context['request']
-        async_to_sync(self.channel_layer.group_send)(f'{models.Wall.type}_{self.instance.wall.id}', {
-            'type': Event.wall_update,
-            'instance': {
-                'type': self.instance.type,
-                'id': self.instance.id,
-                'ip': get_client_ip(request),
-                'user': request.user.id
-            }
-        })
+    pass
 
 
 class UserSerializer(CustomModelSerializer):
+
     def get_queryset(self):
         return models.User.objects.filter(pk=self.request.user.id)
 

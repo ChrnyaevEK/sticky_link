@@ -1,7 +1,7 @@
 <template>
     <vue-draggable-resizable
-        @resizing="onResize"
-        @dragging="onDrag"
+        @resizestop="onResize"
+        @dragstop="onDrag"
         @mousedown.native.stop
         @mouseup.native.stop
         @mousemove.native.stop
@@ -145,13 +145,19 @@
                     font-weight:${this.widget.font_weight};
                 `;
             },
+            widgetStr: function() {
+                return JSON.stringify(this.widget);
+            },
         },
         watch: {
-            widget: {
-                handler: function(newWidget, oldWidget) {
-                    this.manager.updated(newWidget, oldWidget);
+            widgetStr: {
+                handler: function(newValue, oldValue) {
+                    if (newValue && oldValue) {
+                        newValue = JSON.parse(newValue);
+                        oldValue = JSON.parse(oldValue);
+                        if (newValue !== oldValue) this.manager.updated(newValue, oldValue);
+                    }
                 },
-                deep: true,
             },
         },
         updated() {

@@ -1,4 +1,5 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.auth import get_user
 from application.models import Wall
 import json
 
@@ -24,7 +25,4 @@ class WallConsumer(AsyncWebsocketConsumer):
         )
 
     async def on_wall_update(self, data):
-        data = data['instance']
-        # Do not send notifications to the changes source client
-        if data['ip'] != self.scope['client'][0] and data['user'] != self.scope['user'].id:
-            await self.send(text_data=json.dumps(data))
+        await self.send(text_data=json.dumps(data))

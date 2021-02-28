@@ -3,7 +3,7 @@
         <div class="w-100 h-100 wall-container overflow-auto" @click.stop="Context.$emit('closeWidgetOptions')" v-if="dataReady">
             <vue-draggable-resizable
                 @click.stop="Context.$emit('closeWidgetOptions')"
-                @resizing="onResizing"
+                @resizestop="onResizing"
                 :resizable="true"
                 :draggable="true"
                 :parent="false"
@@ -57,16 +57,28 @@
                 dataReady: false,
             };
         },
+        computed: {
+            wallStr: function() {
+                return JSON.stringify(this.wall);
+            },
+        },
         created() {
             Context.$on("widgetDeleted", this.onWidgetDeleted);
             Context.$on("widgetCreated", this.onWidgetCreated);
             Context.$on("deleteWall", this.onDeleteWall);
             this.initiateWall();
         },
+
         watch: {
             $route: "initiateWall",
-            wall(newVal, oldVal) {
-                if (newVal && oldVal && newVal.id == oldVal.id) this.manager.updated(newVal, oldVal);
+            wallStr: {
+                handler(newValue, oldValue) {
+                    if (newValue && oldValue) {
+                        newValue = JSON.parse(newValue);
+                        oldValue = JSON.parse(oldValue);
+                        if (newValue !== oldValue) this.manager.updated(newValue, oldValue);
+                    }
+                },
             },
         },
         methods: {

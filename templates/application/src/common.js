@@ -5,27 +5,27 @@ function generateId(property, type, id) {
     return `${property}-${type}-${id}`;
 }
 
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 export class API {
     constructor(urlName, id) {
         this.urlName = urlName;
         this.id = id;
         this.apiHost = process.env.VUE_APP_API_HOST;
         this.csrfCookieName = "csrftoken";
-        this.csrfToken = this.getCookie(this.csrfCookieName);
-    }
-    getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== "") {
-            const cookies = document.cookie.split(";");
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === name + "=") {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
+        this.csrfToken = getCookie(this.csrfCookieName);
     }
     ajax(settings) {
         var token = this.csrfToken;
@@ -92,15 +92,15 @@ export class API {
 export class WS {
     constructor(urlName, id) {
         this.socket = null;
-        this.urlName = urlName
-        this.id = id
+        this.urlName = urlName;
+        this.id = id;
         this.connectionTimeout = 1000; // ms
         this.connect();
     }
     connect() {
         this.socket = new WebSocket(`ws://${process.env.VUE_APP_HOST}/${this.urlName}/${this.id}`);
         this.socket.onmessage = (e) => {
-            this.onMessage(e);
+            this.onMessage(JSON.parse(e.data));
         };
         this.socket.onclose = () => {
             this.onClose();
@@ -112,7 +112,7 @@ export class WS {
     onClose() {
         console.error("Wall socket closed unexpectedly");
         setTimeout(() => {
-            this.connect()
+            this.connect();
         }, this.connectionTimeout);
     }
 }
@@ -223,52 +223,42 @@ export function updateWall(id, obj) {
     }
 }
 
-export function widgetGenerateStaticUpdate(widget) {
-    // Pull out only static fields from widget
+export function widgetGenerateUpdate(widget, fields) {
     var update = {};
-    for (var field of Context.settings.widget.static_fields) {
+    for (var field of fields) {
         update[field] = widget[field];
     }
     return update;
 }
 
-export function widgetGenerateDynamicUpdate(widget) {
-    var update = deepCopy(widget);
-    for (var field of Context.settings.widget.static_fields) {
-        delete update[field];
-    }
-    return update;
-}
-
 export function widgetGenerateDifference(newWidget, oldWidget) {
-    for (var field of Context.settings.widget.static_fields) {
-        if (oldWidget[field] !== newWidget[field]) {
-            return widgetGenerateStaticUpdate(newWidget);
+    var leftFields = [];
+    var fieldGroups = [Context.settings.widget.general_fields, Context.settings.widget.position_fields];
+    var allFields = [...Context.settings.widget.general_fields, ...Context.settings.widget.position_fields, ...Context.settings.widget.static_fields ];
+    for (let field of Object.getOwnPropertyNames(newWidget)) {
+        if (allFields.indexOf(field) == -1) {
+            leftFields.push(field);
         }
     }
-    return widgetGenerateDynamicUpdate(newWidget);
+    fieldGroups.push(leftFields);
+    for (let fields of fieldGroups) {
+        for (let field of fields) {
+            if (oldWidget[field] !== newWidget[field]) {
+                return widgetGenerateUpdate(newWidget, fields);
+            }
+        }
+    }
+    return {};
 }
 
-export function widgetApplyStaticUpdate(widget, source) {
-    // Update out only static fields in widget
-    for (var field of Context.settings.widget.static_fields) {
+export function widgetApplyUpdate(widget, source, fields) {
+    for (var field of fields) {
         widget[field] = source[field];
     }
 }
 
-export function widgetApplyDynamicUpdate(widget, source) {
-    for (var field of Object.getOwnPropertyNames(source)) {
-        if (Context.settings.widget.static_fields.indexOf(field) == -1) {
-            widget[field] = source[field];
-        }
-    }
-}
-
 export default {
-    widgetGenerateStaticUpdate,
-    widgetApplyStaticUpdate,
-    widgetGenerateDynamicUpdate,
-    widgetApplyDynamicUpdate,
+    widgetApplyUpdate,
     validateWall,
     deleteWall,
     updateWall,

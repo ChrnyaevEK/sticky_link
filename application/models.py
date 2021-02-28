@@ -72,9 +72,9 @@ class Widget(Common):
         min_height = 2
         height = 100
         border = True
-        static_fields = [  # For partial update - all common fields
-           'id', 'wall', 'w', 'h', 'z', 'x', 'y', 'font_size', 'font_weight', 'background_color', 'text_color', 'border'
-        ]
+        static_fields = ['id', 'wall', 'type', 'date_of_creation', 'last_update']
+        general_fields = ['font_size', 'font_weight', 'background_color', 'text_color', 'border']
+        position_fields = ['w', 'h', 'z', 'x', 'y']
 
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
     w = models.IntegerField(verbose_name='Widget width', default=Default.width)
