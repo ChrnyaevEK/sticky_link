@@ -2,7 +2,9 @@
     <component :is="base" v-bind="{ ...$props, ...$attrs }">
         <template slot="content">
             <div class="d-flex flex-column h-100 w-100">
-                <span class="w-100 text">{{ widget.title }} <small class="text-muted">{{widget.items ? widget.items.length : 0}}</small></span>
+                <span class="w-100 text"
+                    >{{ widget.title }} <small class="text-muted">{{ widget.items ? widget.items.length : 0 }}</small></span
+                >
                 <div class="form-group h-100 overflow-auto  border-bottom  border-top">
                     <div class="border d-flex text-break my-1" v-for="(val, i) of widget.items" :key="i">
                         <span class="w-100 p-1">
@@ -21,7 +23,6 @@
 </template>
 
 <script>
-    import { registerIdSystem, Context } from "../../common.js";
     export default {
         type: "simple_list",
         name: "SimpleList",
@@ -29,7 +30,6 @@
         data() {
             return {
                 item: undefined, // Item to add
-                Context,
             };
         },
         props: {
@@ -41,9 +41,6 @@
                 type: Object,
                 required: true,
             },
-        },
-        created() {
-            registerIdSystem(this, this.widget); // Create _ function to generate ids
         },
         methods: {
             addItem() {

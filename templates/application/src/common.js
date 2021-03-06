@@ -1,9 +1,9 @@
 import $ from "jquery";
 import Vue from "vue";
+import Vuex from "vuex";
+import store from "./store";
 
-function generateId(property, type, id) {
-    return `${property}-${type}-${id}`;
-}
+Vue.use(Vuex);
 
 function getCookie(name) {
     let cookieValue = null;
@@ -19,74 +19,212 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-export class API {
-    constructor(urlName, id) {
-        this.urlName = urlName;
-        this.id = id;
-        this.apiHost = process.env.VUE_APP_API_HOST;
-        this.csrfCookieName = "csrftoken";
-        this.csrfToken = getCookie(this.csrfCookieName);
-    }
+
+export var updateManager = {
+    refreshRate: 200,
+    queue: {
+        waiter: {},
+        handler: {},
+    },
+    updated(source, type, id) {
+        return new Promise((resolve, reject) => {
+            var key = `${source}${type}${id}`;
+
+            this.queue.handler[key] = () => {
+                store
+                    .dispatch("filter", {
+                        source,
+                        type,
+                        id,
+                    })
+                    .then((data) => {
+                        api.update_partial(type, id, data[0]).then(resolve, reject);
+                    });
+            };
+            if (!this.queue.waiter[key]) {
+                this.queue.waiter[key] = setTimeout(() => {
+                    delete this.queue.waiter[key];
+                    this.queue.handler[key]();
+                }, this.refreshRate);
+            }
+        });
+    },
+};
+
+export var api = {
+    apiHost: process.env.VUE_APP_API_HOST,
+    csrfToken: getCookie("csrftoken"),
     ajax(settings) {
         var token = this.csrfToken;
-        Context.saving = true;
+        env.dispatch("savingStart");
         return $.ajax({
             headers: {
                 "X-CSRFToken": token,
             },
             ...settings,
         }).always(() => {
-            Context.saved = true;
+            env.dispatch("savingStop");
         });
-    }
-    retrieve(id) {
+    },
+    get(path) {
         return this.ajax({
             crossDomain: true,
             type: "GET",
-            url: `${this.apiHost}/${this.urlName}/${this.id || id}/`,
+            url: `${this.apiHost}/${path}/`,
         });
-    }
-    list() {
+    },
+    retrieve(type, id) {
         return this.ajax({
             crossDomain: true,
             type: "GET",
-            url: `${this.apiHost}/${this.urlName}/`,
+            url: `${this.apiHost}/${type}/${id}/`,
         });
-    }
-    create(data) {
+    },
+    list(type) {
+        return this.ajax({
+            crossDomain: true,
+            type: "GET",
+            url: `${this.apiHost}/${type}/`,
+        });
+    },
+    create(type, data) {
         return this.ajax({
             crossDomain: true,
             type: "POST",
-            url: `${this.apiHost}/${this.urlName}/`,
+            url: `${this.apiHost}/${type}/`,
             contentType: "application/json",
             data: JSON.stringify(data),
         });
-    }
-    update(data, id) {
+    },
+    update(type, id, data) {
         return this.ajax({
             crossDomain: true,
             type: "PUT",
-            url: `${this.apiHost}/${this.urlName}/${this.id || id}/`,
+            url: `${this.apiHost}/${type}/${id}/`,
             contentType: "application/json",
             data: JSON.stringify(data),
         });
-    }
-    update_partial(data, id) {
+    },
+    update_partial(type, id, data) {
         return this.ajax({
             crossDomain: true,
             type: "PATCH",
-            url: `${this.apiHost}/${this.urlName}/${this.id || id}/`,
+            url: `${this.apiHost}/${type}/${id}/`,
             contentType: "application/json",
             data: JSON.stringify(data),
         });
-    }
-    delete(id) {
+    },
+    delete(type, id) {
         return this.ajax({
             crossDomain: true,
             type: "DELETE",
-            url: `${this.apiHost}/${this.urlName}/${this.id || id}/`,
+            url: `${this.apiHost}/${type}/${id}/`,
         });
-    }
+    },
+};
+
+export var env = new Vuex.Store({
+    state: {
+        loadingState: null,
+        loadingStates: {
+            loading: true,
+            ready: false,
+        },
+
+        savingState: null,
+        savingStates: {
+            saving: "Saving...",
+            saved: "Saved",
+            idle: "Auto save",
+        },
+        savingTimeoutId: null,
+        savingTimeoutDuration: 5000,
+
+        alertShow: false,
+        alertMessage: null,
+        alertClass: "info",
+
+        lockWidgets: false,
+
+        editWidget: null,
+    },
+    mutations: {
+        setSaved(state) {
+            state.savingState = state.savingStates.saved;
+        },
+        setSaving(state) {
+            state.savingState = state.savingStates.saving;
+        },
+        setSavingIdle(state) {
+            state.savingState = state.savingStates.idle;
+            state.savingTimeoutId = null;
+        },
+        setSavingTimeoutId(state, id) {
+            state.savingTimeoutId = id;
+        },
+        setAlert(state, data) {
+            state.alertClass = data.alertClass;
+            state.alertMessage = data.alertMessage;
+            state.alertShow = true;
+        },
+        unsetAlert(state) {
+            state.alertClass = "info";
+            state.alertMessage = null;
+            state.alertShow = false;
+        },
+        lockWidgets(state) {
+            state.lockWidgets = true;
+        },
+        unlockWidgets(state) {
+            state.lockWidgets = false;
+        },
+        openWidgetOptions(state, data) {
+            state.editWidget = data.id;
+        },
+        closeWidgetOptions(state) {
+            state.editWidget = null;
+        },
+    },
+    actions: {
+        openWidgetOptions(context, data) {
+            context.commit("openWidgetOptions", data);
+        },
+        closeWidgetOptions(context) {
+            context.commit("closeWidgetOptions");
+        },
+        savingStart(context) {
+            context.commit("setSaving");
+        },
+        savingStop(context) {
+            context.commit("setSaved");
+            clearTimeout(context.state.savingTimeoutId);
+            context.commit(
+                "setSavingTimeoutId",
+                setTimeout(() => {
+                    context.commit("setSavingIdle");
+                }, context.state.savingTimeoutDuration)
+            );
+        },
+        showAlert(context, { msg, klass }) {
+            context.commit("setAlert", {
+                alertMessage: msg,
+                alertClass: klass,
+            });
+        },
+        hideAlert(context) {
+            context.commit("unsetAlert");
+        },
+        lockWidgets(context) {
+            context.commit("lockWidgets");
+        },
+        unlockWidgets(context) {
+            context.commit("unlockWidgets");
+        },
+    },
+});
+
+export async function sleep(milliseconds) {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 export class WS {
@@ -117,110 +255,13 @@ export class WS {
     }
 }
 
-export class UpdateManager extends API {
-    // TODO use watchers
-    // Push data about widget at certain rate (so we do not spam server)
-    constructor(urlName, id) {
-        super(urlName, id);
-        this.lastState = null;
-        this.resolve = null;
-        this.reject = null;
-        this.refreshRate = 1000; // ms
-        this.intervalId = setInterval(() => {
-            this.flush();
-        }, this.refreshRate);
-    }
-    flush() {
-        if (this.lastState !== null) {
-            this.update_partial(this.lastState).then(this.resolve || function() {}, this.reject || function() {});
-            this.lastState = null;
-        }
-    }
-    updated(newWidget, oldWidget) {
-        if (!this.lastState) this.lastState = widgetGenerateDifference(newWidget, oldWidget);
-    }
-}
-
-export var Context = new Vue({
-    name: "Context",
-    el: "#context",
-    data: {
-        saving: false, // Global saving indicator
-        saved: false, // Global safe indicator
-        savedTimeoutId: undefined,
-        savedTimeoutDuration: 5000, // ms, until property will be unset
-        edit: "edit",
-        view: "view",
-        user: {},
-        settings: {},
-        walls: [],
-    },
-    methods: {
-        initUser() {
-            return new API("user").list().then((response) => {
-                this.$set(this, "user", response.user);
-                this.$set(this, "settings", response.settings);
-                this.walls = [];
-                this.$set(this, "walls", response.walls);
-            });
-        },
-    },
-    watch: {
-        saved(val) {
-            if (val) {
-                this.saving = false;
-                if (this.savedTimeoutId) clearTimeout(this.savedTimeoutId);
-                this.savedTimeoutId = setTimeout(() => {
-                    this.saved = false;
-                    this.savedTimeoutId = undefined;
-                }, this.savedTimeoutDuration);
-            }
-        },
-        saving(val) {
-            if (val) {
-                this.saved = false;
-            }
-        },
-        user: {
-            handler() {
-                $("#tab-title").text(`${this.user.username} @ ${process.env.VUE_APP_TITLE}`);
-            },
-            deep: true,
-        },
-    },
-});
 
 export function deepCopy(data) {
     return JSON.parse(JSON.stringify(data));
 }
 
-export function registerIdSystem(vm, data_source) {
-    vm._ = function(property) {
-        return generateId.call(vm, property, data_source.type, data_source.id);
-    };
-}
-
-export function validateWall(id) {
-    return Context.walls.some((w) => {
-        return String(w.id) == id;
-    });
-}
-
-export function deleteWall(id) {
-    for (var i = 0; i < Context.walls.length; i++) {
-        if (Context.walls[i].id == id) {
-            Context.walls.splice(i, 1);
-            break;
-        }
-    }
-}
-
-export function updateWall(id, obj) {
-    for (var wall of Context.walls) {
-        if (wall.id == id) {
-            Object.assign(wall, obj);
-        }
-    }
+export function generateId(property) {
+    return `${this._uid}-${property}`
 }
 
 export function widgetGenerateUpdate(widget, fields) {
@@ -233,8 +274,8 @@ export function widgetGenerateUpdate(widget, fields) {
 
 export function widgetGenerateDifference(newWidget, oldWidget) {
     var leftFields = [];
-    var fieldGroups = [Context.settings.widget.general_fields, Context.settings.widget.position_fields];
-    var allFields = [...Context.settings.widget.general_fields, ...Context.settings.widget.position_fields, ...Context.settings.widget.static_fields ];
+    var fieldGroups = [store.state.settings.widget.general_fields, store.state.settings.widget.position_fields];
+    var allFields = [...store.state.settings.widget.general_fields, ...store.state.settings.widget.position_fields, ...store.state.settings.widget.static_fields];
     for (let field of Object.getOwnPropertyNames(newWidget)) {
         if (allFields.indexOf(field) == -1) {
             leftFields.push(field);
@@ -259,11 +300,9 @@ export function widgetApplyUpdate(widget, source, fields) {
 
 export default {
     widgetApplyUpdate,
-    validateWall,
-    deleteWall,
-    updateWall,
-    registerIdSystem,
-    API,
-    UpdateManager,
-    Context,
+    generateId,
+    updateManager,
+    sleep,
+    env,
+    api,
 };

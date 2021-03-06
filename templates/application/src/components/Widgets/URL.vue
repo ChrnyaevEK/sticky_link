@@ -15,7 +15,6 @@
 </template>
 
 <script>
-    import { registerIdSystem, Context } from "../../common.js";
     export default {
         type: "url",
         name: "URL",
@@ -29,14 +28,6 @@
                 type: Object,
                 required: true,
             },
-        },
-        data() {
-            return {
-                Context,
-            };
-        },
-        created() {
-            registerIdSystem(this, this.widget); // Create _ function to generate ids
         },
         methods: {
             openHref() {

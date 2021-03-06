@@ -14,6 +14,7 @@ router.register('user', views.UserViewSet, basename='user')
 
 urlpatterns = [
     path('', views.Event.enter, name="enter"),
+    path('api/settings/', views.Static.settings, name="static_settings"),
     path('api/', include(router.urls), name="api"),
     *static(settings.STATIC_URL, document_root='templates/application/dist/static'),
     re_path('.*', views.Event.enter, name="enter"),

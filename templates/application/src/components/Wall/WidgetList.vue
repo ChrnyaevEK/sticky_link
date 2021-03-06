@@ -24,10 +24,6 @@
         name: "WidgetList",
         components,
         props: {
-            widgets: {
-                type: Array,
-                required: true,
-            },
             base: null,
         },
         data() {
@@ -35,7 +31,7 @@
         },
         methods: {
             filterWidget(klass) {
-                return this.widgets.filter(function(widget) {
+                return this.$store.state.widgets.filter(function(widget) {
                     return widget.type == klass.type;
                 });
             },

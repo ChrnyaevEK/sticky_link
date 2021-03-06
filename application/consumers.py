@@ -1,5 +1,4 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.auth import get_user
 from application.models import Wall
 import json
 
@@ -9,9 +8,12 @@ class Event:
 
 
 class WallConsumer(AsyncWebsocketConsumer):
+    @staticmethod
+    def generate_group_name(wall_id):
+        return f"{Wall.Default.type}_{wall_id}"
 
     async def connect(self):
-        self.group_name = f"{Wall.Default.type}_{self.scope['url_route']['kwargs']['id']}"
+        self.group_name = self.generate_group_name(self.scope['url_route']['kwargs']['id'])
         await self.channel_layer.group_add(
             self.group_name,
             self.channel_name,

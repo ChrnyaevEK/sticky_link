@@ -5,7 +5,6 @@
 </template>
 
 <script>
-    import { UpdateManager } from "../../common.js";
     export default {
         name: "WidgetBaseSimple",
         props: {
@@ -13,12 +12,6 @@
                 type: Object,
                 required: true,
             },
-        },
-        data: function() {
-            var manager = new UpdateManager(this.widget.type, this.widget.id);
-            return {
-                manager,
-            };
         },
         computed: {
             style() {
@@ -34,14 +27,6 @@
                     font-weight:${this.widget.font_weight};
                 `;
             },
-        },
-        watch: {
-            widget: {
-                handler: function(newWidget, oldWidget) {
-                    this.manager.updated(newWidget, oldWidget);
-                },
-                deep: true,
-            },
-        },
+        }
     };
 </script>

@@ -20,7 +20,6 @@
 </template>
 
 <script>
-    import { registerIdSystem, Context } from "../../common.js";
     export default {
         type: "counter",
         name: "Counter",
@@ -34,14 +33,6 @@
                 type: Object,
                 required: true,
             },
-        },
-        data() {
-            return {
-                Context,
-            };
-        },
-        created() {
-            registerIdSystem(this, this.widget); // Create _ function to generate ids
         },
     };
 </script>

@@ -1,5 +1,7 @@
 <template>
     <vue-draggable-resizable
+        :draggable="!$env.state.lockWidgets"
+        :resizable="!$env.state.lockWidgets"
         @resizestop="onResize"
         @dragstop="onDrag"
         @mousedown.native.stop
@@ -16,39 +18,23 @@
         :z="widget.z"
     >
         <div class="widget-quick-access" v-show="quickAccessVisible">
-            <button :disabled="lockWidgetCreation" class="btn btn-light border" @click="copyWidget">
+            <button :disabled="$env.state.lockWidgets" class="btn btn-light border" @click="$store.dispatch('copyWidget', widget)">
                 <i class="fas fa-copy"></i>
             </button>
-            <button :disabled="lockWidgetCreation" class="btn btn-danger" @click="deleteWidget">
+            <button :disabled="$env.state.lockWidgets" class="btn btn-danger" @click="deleteWidget">
                 <i class="fas fa-trash"></i>
             </button>
         </div>
-        <div class="w-100 h-100" @contextmenu.stop.prevent="Context.$emit('openWidgetOptions', widget, manager)">
+        <div class="w-100 h-100" @contextmenu.stop.prevent="$env.dispatch('openWidgetOptions', widget)">
             <slot name="content"></slot>
         </div>
     </vue-draggable-resizable>
 </template>
 
 <script>
-    // Front end is absolutely passive
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
-    import { registerIdSystem, UpdateManager, API, Context } from "../../common.js";
     import $ from "jquery";
-
-    Context.$on("addBlankWidget", function(klass) {
-        Context.$emit("lockWidgetCreation");
-        Context.$emit("routeRequest", ($route) => {
-            new API(klass.type)
-                .create({ wall: $route.params.wallId })
-                .then((response) => {
-                    Context.$emit("widgetCreated", response);
-                })
-                .always(() => {
-                    Context.$emit("unlockWidgetCreation");
-                });
-        });
-    });
 
     export default {
         name: "WidgetBaseResizable",
@@ -58,79 +44,35 @@
                 required: true,
             },
         },
-        created() {
-            registerIdSystem(this, this.widget); // Create _ function to generate ids
-            Context.$on("lockWidgetCreation", this.onLockWidgetCreation);
-            Context.$on("unlockWidgetCreation", this.onUnlockWidgetCreation);
-            Context.$on("widgetUpdatePosition", (wall) => {
-                if (this.widget.x + this.widget.w >= wall.w) {
-                    var x = wall.w - this.widget.w;
-                    this.widget.x = x < 0 ? 0 : x;
-                }
-                if (this.widget.y + this.widget.h >= wall.h) {
-                    var y = wall.h - this.widget.h;
-                    this.widget.y = y < 0 ? 0 : y;
-                }
-                if (this.widget.h >= wall.h) {
-                    this.widget.h = wall.h;
-                }
-                if (this.widget.w >= wall.w) {
-                    this.widget.w = wall.w;
-                }
-            });
-        },
         data: function() {
-            var manager = new UpdateManager(this.widget.type, this.widget.id, this.unsetWarning, this.setWarningFromResponse);
             return {
-                manager,
-                Context,
-                lockWidgetCreation: false,
                 quickAccessClass: "widget-quick-access",
                 quickAccessVisible: false,
             };
         },
         methods: {
             onResize(x, y, w, h) {
-                this.widget.w = w;
-                this.widget.h = h;
+                this.widget.w = w
+                this.widget.h = h
+                this.$store.dispatch("updateWidget", {
+                    id: this.widget.id,
+                    w,
+                    h,
+                });
             },
             onDrag(x, y) {
-                this.widget.x = x;
-                this.widget.y = y;
+                this.widget.x = x
+                this.widget.y = y
+                this.$store.dispatch("updateWidget", {
+                    id: this.widget.id,
+                    x,
+                    y,
+                });
             },
             deleteWidget() {
                 if (confirm("Are you sure?")) {
-                    Context.$emit("lockWidgetCreation");
-                    this.manager
-                        .delete()
-                        .then(() => {
-                            Context.$emit("widgetDeleted", this.widget);
-                        })
-                        .always(() => {
-                            Context.$emit("unlockWidgetCreation");
-                        });
+                    this.$store.dispatch("deleteWidget", this.widget);
                 }
-            },
-            copyWidget() {
-                Context.$emit("lockWidgetCreation");
-                this.manager
-                    .create({
-                        ...this.widget,
-                        x: this.widget.x + 5,
-                        y: this.widget.y + 5,
-                    })
-                    .then((widget) => {
-                        Context.$emit("widgetCreated", widget);
-                    })
-                    .always(() => {
-                        Context.$emit("unlockWidgetCreation");
-                    });
-            },
-            onLockWidgetCreation() {
-                this.lockWidgetCreation = true;
-            },
-            onUnlockWidgetCreation() {
-                this.lockWidgetCreation = false;
             },
         },
         components: {
@@ -144,20 +86,6 @@
                     font-size:${this.widget.font_size}px;
                     font-weight:${this.widget.font_weight};
                 `;
-            },
-            widgetStr: function() {
-                return JSON.stringify(this.widget);
-            },
-        },
-        watch: {
-            widgetStr: {
-                handler: function(newValue, oldValue) {
-                    if (newValue && oldValue) {
-                        newValue = JSON.parse(newValue);
-                        oldValue = JSON.parse(oldValue);
-                        if (newValue !== oldValue) this.manager.updated(newValue, oldValue);
-                    }
-                },
             },
         },
         updated() {

@@ -6,7 +6,7 @@
         <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
             <router-link
                 class="dropdown-item btn btn-sm"
-                v-for="wall of Context.walls"
+                v-for="wall of $store.state.walls"
                 :key="wall.id"
                 :class="{ active: wall.id == $route.params.wallId }"
                 :to="{
@@ -16,16 +16,15 @@
                 >{{ wall.title }}</router-link
             >
         </div>
-        <a v-if="createWall" class="mr-1 btn btn-sm btn-success border" @click="Context.$emit('addBlankWall')" title="Add new wall">
+        <a v-if="createWall" class="mr-1 btn btn-sm btn-success border" @click="$emit('createWall')" title="Add new wall">
             <i class="fas fa-plus"></i>
         </a>
-        <a v-if="deleteWall" class="mr-1 btn btn-sm btn-danger border" @click.stop="Context.$emit('deleteWall')" title="Delete current wall">
+        <a v-if="deleteWall" class="mr-1 btn btn-sm btn-danger border" @click.stop="$emit('deleteWall')" title="Delete current wall">
             <i class="fas fa-trash"></i>
         </a>
     </div>
 </template>
 <script>
-    import { Context } from "../../common.js";
     export default {
         props: {
             createWall: {
@@ -36,9 +35,6 @@
                 type: Boolean,
                 default: true,
             }
-        },
-        data() {
-            return { Context };
         },
     };
 </script>

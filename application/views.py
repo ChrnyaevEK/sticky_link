@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from django.http import HttpResponse
 from django.core.exceptions import PermissionDenied
 from channels.layers import get_channel_layer
-from application.consumers import Event as ConsumerEvent
+from application.consumers import Event as ConsumerEvent, WallConsumer
 from asgiref.sync import async_to_sync
 import hashlib
 import json
@@ -27,6 +27,12 @@ class Event:
         return HttpResponse(render(request, template))
 
 
+class Static:
+    @staticmethod
+    def settings(request):
+        return JsonResponse(serializers.ObjectSerializer(models.Settings).data)
+
+
 class UserViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.UserSerializer
 
@@ -41,12 +47,7 @@ class UserViewSet(ReadOnlyModelViewSet):
 
     @staticmethod
     def _get(request, *args, **kwargs):
-        walls = _get_protected_queryset(models.Wall, request.user)
-        return JsonResponse({
-            'walls': serializers.WallSerializer(walls, many=True).data,
-            'settings': serializers.ObjectSerializer(models.Settings).data,
-            'user': serializers.UserSerializer(request.user).data,
-        })
+        return JsonResponse(serializers.UserSerializer(request.user).data)
 
 
 class CustomModelViewSet(ModelViewSet):
@@ -61,7 +62,7 @@ class CustomModelViewSet(ModelViewSet):
             wall_id = data['id']
         version_hash = self._get_version_hash(data)
         async_to_sync(self.channel_layer.group_send)(
-            f'{models.Wall.type}_{wall_id}',
+            WallConsumer.generate_group_name(wall_id),
             {
                 'type': ConsumerEvent.wall_update,
                 'instance': {
@@ -75,10 +76,6 @@ class CustomModelViewSet(ModelViewSet):
     @staticmethod
     def _get_version_hash(validated_data):
         return hashlib.md5(json.dumps(validated_data).encode('utf-8')).hexdigest()
-
-    @staticmethod
-    def _check_update_fields(validated_data, fields):
-        return len(set(validated_data.keys()).intersection(fields))
 
     def partial_update(self, request, *args, **kwargs):
         response = super().partial_update(request, *args, **kwargs)
@@ -112,10 +109,11 @@ class WallViewSet(CustomModelViewSet):
         ):
             for widget in model.objects.filter(wall=wall):
                 widgets.append(serializer(widget).data)
-        return Response({
-            'wall': serializers.WallSerializer(wall).data,
-            'widgets': widgets,
-        })
+        return Response(widgets)
+
+    def list(self, request, *args, **kwargs):
+        walls = _get_protected_queryset(models.Wall, request.user)
+        return Response(self.serializer_class(walls, many=True).data)
 
 
 class SimpleTextViewSet(CustomModelViewSet):

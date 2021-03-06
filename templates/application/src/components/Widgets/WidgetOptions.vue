@@ -1,6 +1,6 @@
 <template>
     <vue-draggable-resizable
-        v-if="optionsVisible"
+        v-if="$env.state.editWidget !== null"
         @mousedown.native.stop
         @mouseup.native.stop
         @mousemove.native.stop
@@ -18,40 +18,32 @@
         <div class="w-100 h-100 p-3">
             <div class="form-group d-flex justify-content-between align-items-center options-drag border-bottom cursor-move">
                 <strong>Options</strong>
-                <a class="btn" @click="onCloseOptions"><i class="fas fa-times"></i></a>
+                <a class="btn" @click="$env.dispatch('closeWidgetOptions')"><i class="fas fa-times"></i></a>
             </div>
 
             <div class="form-group">
                 <label :for="_('x')">X coordinate</label>
-                <input class="form-control" v-model.number="widget.x" type="number" :id="_('x')" step="1" :min="Context.settings.widget ? Context.settings.widget.min_x : 0" />
+                <input class="form-control" v-model.number="widget.x" type="number" :id="_('x')" step="1" :min="$store.state.settings.widget.min_x" />
             </div>
 
             <div class="form-group">
                 <label :for="_('y')">Y coordinate</label>
-                <input class="form-control" v-model.number="widget.y" type="number" :id="_('y')" step="1" :min="Context.settings.widget ? Context.settings.widget.min_y : 0" />
+                <input class="form-control" v-model.number="widget.y" type="number" :id="_('y')" step="1" :min="$store.state.settings.widget.min_y" />
             </div>
 
             <div class="form-group">
                 <label :for="_('z')">Z coordinate</label>
-                <input
-                    class="form-control"
-                    v-model.number="widget.z"
-                    type="number"
-                    :id="_('z')"
-                    step="1"
-                    :min="Context.settings.widget ? Context.settings.widget.min_z : 0"
-                    :max="Context.settings.widget ? Context.settings.widget.max_z : 0"
-                />
+                <input class="form-control" v-model.number="widget.z" type="number" :id="_('z')" step="1" :min="$store.state.settings.widget.min_z" :max="$store.state.settings.widget.max_z" />
             </div>
 
             <div class="form-group">
                 <label :for="_('w')">Width</label>
-                <input class="form-control" v-model.number="widget.w" type="number" :id="_('w')" step="1" :min="Context.settings.widget ? Context.settings.widget.min_width : 0" />
+                <input class="form-control" v-model.number="widget.w" type="number" :id="_('w')" step="1" :min="$store.state.settings.widget.min_width" />
             </div>
 
             <div class="form-group">
                 <label :for="_('h')">Height</label>
-                <input class="form-control" v-model.number="widget.h" type="number" :id="_('h')" step="1" :min="Context.settings.widget ? Context.settings.widget.min_height : 0" />
+                <input class="form-control" v-model.number="widget.h" type="number" :id="_('h')" step="1" :min="$store.state.settings.widget.min_height" />
             </div>
             <div class="form-group">
                 <label :for="_('font_size')">Font size</label>
@@ -61,8 +53,8 @@
                     type="number"
                     step="1"
                     :id="_('font_size')"
-                    :min="Context.settings.widget ? Context.settings.widget.min_font_size : 0"
-                    :max="Context.settings.widget ? Context.settings.widget.max_font_size : 0"
+                    :min="$store.state.settings.widget.min_font_size"
+                    :max="$store.state.settings.widget.max_font_size"
                 />
             </div>
 
@@ -74,8 +66,8 @@
                     type="number"
                     step="100"
                     :id="_('font_weight')"
-                    :min="Context.settings.widget ? Context.settings.widget.min_font_weight : 0"
-                    :max="Context.settings.widget ? Context.settings.widget.max_font_weight : 0"
+                    :min="$store.state.settings.widget.min_font_weight"
+                    :max="$store.state.settings.widget.max_font_weight"
                 />
             </div>
 
@@ -140,8 +132,7 @@
     // Front end is absolutely passive
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
-    import { registerIdSystem, Context } from "../../common.js";
-    import $ from "jquery";
+    // import $ from "jquery";
     import TextEditor from "../Utils/TextEditor";
     import SimpleText from "./SimpleText";
     import URL from "./URL";
@@ -150,57 +141,45 @@
 
     export default {
         name: "WidgetOptions",
-        created() {
-            Context.$on("openWidgetOptions", this.onOpenOptions);
-            Context.$on("closeWidgetOptions", this.onCloseOptions);
-        },
         data: function() {
             return {
-                Context,
                 SimpleText,
                 URL,
                 Counter,
                 SimpleList,
-                widget: null,
-                manager: null,
-                optionsVisible: false,
             };
         },
+        computed: {
+            widget() {
+                return this.$store.state.widgets.filter((widget) => widget.id == this.$env.state.editWidget)[0];
+            },
+        },
         methods: {
-            onOpenOptions(widget, manager) {
-                manager.resolve = this.unsetWarning;
-                manager.reject = this.setWarningFromResponse;
-                registerIdSystem(this, widget); // Create _ function to generate ids
-                this.$set(this, "widget", widget);
-                this.$set(this, "manager", manager);
-                this.optionsVisible = true;
-            },
-            onCloseOptions() {
-                if (this.manager) {
-                    this.manager.resolve = null;
-                    this.manager.reject = null;
-                    this.manager = null;
-                    this.widget = null;
-                    this.optionsVisible = false;
-                }
-            },
-            setWarningFromResponse(response) {
-                this.unsetWarning();
-                for (var [field, error] of Object.entries(response.responseJSON)) {
-                    $(`[for='${this._(field)}']`)
-                        .addClass("text-danger")
-                        .append(
-                            $(`
-                        <p class="${this.warningClass}"><small>${error[0]}</small></p>
-                    `)
-                        );
-                }
-            },
-            unsetWarning() {
-                $(`.${this.warningClass}`)
-                    .parent()
-                    .removeClass("text-danger");
-                $(`.${this.warningClass}`).remove();
+            // setWarningFromResponse(response) {
+            //     this.unsetWarning();
+            //     for (var [field, error] of Object.entries(response.responseJSON)) {
+            //         $(`[for='${this._(field)}']`)
+            //             .addClass("text-danger")
+            //             .append(
+            //                 $(`
+            //             <p class="${this.warningClass}"><small>${error[0]}</small></p>
+            //         `)
+            //             );
+            //     }
+            // },
+            // unsetWarning() {
+            //     $(`.${this.warningClass}`)
+            //         .parent()
+            //         .removeClass("text-danger");
+            //     $(`.${this.warningClass}`).remove();
+            // },
+        },
+        watch: {
+            widget: {
+                handler(v) {
+                    console.log(v);
+                },
+                deep: true,
             },
         },
         components: {
