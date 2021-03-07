@@ -13,6 +13,14 @@
                 required: true,
             },
         },
+        watch: {
+            widget: {
+                handler() {
+                    this.$store.dispatch("updateWidget", this.widget);
+                },
+                deep: true,
+            },
+        },
         computed: {
             style() {
                 return `

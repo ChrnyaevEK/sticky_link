@@ -3,15 +3,25 @@
         <template slot="content">
             <div class="d-flex flex-column w-100 h-100">
                 <span class="w-100 text-center">{{ widget.title }}</span>
-                <button @dblclick.stop.prevent class="btn" @click.stop="widget.value += 1">
+                <button
+                    class="btn"
+                    @click.stop="widget.value += 1"
+                >
                     <i class="fa fa-chevron-up"></i>
                 </button>
-                <div class="d-flex justify-content-center align-items-center h-100">
-                    <span class="text-truncate text-wrap text-center text-break">
+                <div
+                    class="d-flex justify-content-center align-items-center h-100"
+                >
+                    <span
+                        class="text-truncate text-wrap text-center text-break"
+                    >
                         {{ widget.value }}
                     </span>
                 </div>
-                <button @dblclick.stop.prevent class="btn" @click.stop="widget.value -= 1">
+                <button
+                    class="btn"
+                    @click.stop="widget.value -= 1"
+                >
                     <i class="fa fa-chevron-down"></i>
                 </button>
             </div>

@@ -3,6 +3,3 @@
         {{ $env.state.savingState }}
     </span>
 </template>
-<script>
-    export default {};
-</script>

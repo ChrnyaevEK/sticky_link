@@ -4,8 +4,8 @@ import "bootstrap";
 import "./css/main.scss";
 import "@fortawesome/fontawesome-free/js/all.js";
 import "@fortawesome/fontawesome-free/css/all.css";
-import store from "./store";
 import {env, generateId} from "./common";
+import store from "./store";
 
 Vue.config.productionTip = true;
 Vue.prototype.$env = env;

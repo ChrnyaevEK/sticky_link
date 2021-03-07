@@ -12,7 +12,9 @@ function getCookie(name) {
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
             if (cookie.substring(0, name.length + 1) === name + "=") {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                cookieValue = decodeURIComponent(
+                    cookie.substring(name.length + 1)
+                );
                 break;
             }
         }
@@ -21,7 +23,7 @@ function getCookie(name) {
 }
 
 export var updateManager = {
-    refreshRate: 200,
+    refreshRate: 1000,
     queue: {
         waiter: {},
         handler: {},
@@ -38,7 +40,10 @@ export var updateManager = {
                         id,
                     })
                     .then((data) => {
-                        api.update_partial(type, id, data[0]).then(resolve, reject);
+                        api.update_partial(type, id, data[0]).then(
+                            resolve,
+                            reject
+                        );
                     });
             };
             if (!this.queue.waiter[key]) {
@@ -179,7 +184,7 @@ export var env = new Vuex.Store({
             state.lockWidgets = false;
         },
         openWidgetOptions(state, data) {
-            state.editWidget = data.id;
+            state.editWidget = data;
         },
         closeWidgetOptions(state) {
             state.editWidget = null;
@@ -236,7 +241,9 @@ export class WS {
         this.connect();
     }
     connect() {
-        this.socket = new WebSocket(`ws://${process.env.VUE_APP_HOST}/${this.urlName}/${this.id}`);
+        this.socket = new WebSocket(
+            `ws://${process.env.VUE_APP_HOST}/${this.urlName}/${this.id}`
+        );
         this.socket.onmessage = (e) => {
             this.onMessage(JSON.parse(e.data));
         };
@@ -255,13 +262,12 @@ export class WS {
     }
 }
 
-
 export function deepCopy(data) {
     return JSON.parse(JSON.stringify(data));
 }
 
 export function generateId(property) {
-    return `${this._uid}-${property}`
+    return `${this._uid}-${property}`;
 }
 
 export function widgetGenerateUpdate(widget, fields) {
@@ -274,8 +280,15 @@ export function widgetGenerateUpdate(widget, fields) {
 
 export function widgetGenerateDifference(newWidget, oldWidget) {
     var leftFields = [];
-    var fieldGroups = [store.state.settings.widget.general_fields, store.state.settings.widget.position_fields];
-    var allFields = [...store.state.settings.widget.general_fields, ...store.state.settings.widget.position_fields, ...store.state.settings.widget.static_fields];
+    var fieldGroups = [
+        store.state.settings.widget.general_fields,
+        store.state.settings.widget.position_fields,
+    ];
+    var allFields = [
+        ...store.state.settings.widget.general_fields,
+        ...store.state.settings.widget.position_fields,
+        ...store.state.settings.widget.static_fields,
+    ];
     for (let field of Object.getOwnPropertyNames(newWidget)) {
         if (allFields.indexOf(field) == -1) {
             leftFields.push(field);

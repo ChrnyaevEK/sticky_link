@@ -4,11 +4,20 @@
         :resizable="!$env.state.lockWidgets"
         @resizestop="onResize"
         @dragstop="onDrag"
+        @click.native.stop
         @mousedown.native.stop
         @mouseup.native.stop
         @mousemove.native.stop
+        @contextmenu.stop.prevent
         class="widget"
-        :class="[widget.border ? 'widget-border' : 'widget-no-border']"
+        :class="[
+            widget.border ? 'widget-border' : 'widget-no-border',
+            $env.state.editWidget &&
+            $env.state.editWidget.id == widget.id &&
+            $env.state.editWidget.type == widget.type
+                ? 'shadow'
+                : '',
+        ]"
         :style="style"
         :parent="true"
         :w="widget.w"
@@ -18,14 +27,27 @@
         :z="widget.z"
     >
         <div class="widget-quick-access" v-show="quickAccessVisible">
-            <button :disabled="$env.state.lockWidgets" class="btn btn-light border" @click="$store.dispatch('copyWidget', widget)">
+            <button
+                :disabled="$env.state.lockWidgets"
+                class="btn btn-light border"
+                @click="$store.dispatch('copyWidget', widget)"
+            >
                 <i class="fas fa-copy"></i>
             </button>
-            <button :disabled="$env.state.lockWidgets" class="btn btn-danger" @click="deleteWidget">
+            <button
+                :disabled="$env.state.lockWidgets"
+                class="btn btn-danger"
+                @click="deleteWidget"
+            >
                 <i class="fas fa-trash"></i>
             </button>
         </div>
-        <div class="w-100 h-100" @contextmenu.stop.prevent="$env.dispatch('openWidgetOptions', widget)">
+        <div
+            class="w-100 h-100"
+            @contextmenu.stop.prevent="
+                $env.dispatch('openWidgetOptions', widget)
+            "
+        >
             <slot name="content"></slot>
         </div>
     </vue-draggable-resizable>
@@ -52,27 +74,25 @@
         },
         methods: {
             onResize(x, y, w, h) {
-                this.widget.w = w
-                this.widget.h = h
-                this.$store.dispatch("updateWidget", {
-                    id: this.widget.id,
-                    w,
-                    h,
-                });
+                this.widget.w = w;
+                this.widget.h = h;
             },
             onDrag(x, y) {
-                this.widget.x = x
-                this.widget.y = y
-                this.$store.dispatch("updateWidget", {
-                    id: this.widget.id,
-                    x,
-                    y,
-                });
+                this.widget.x = x;
+                this.widget.y = y;
             },
             deleteWidget() {
                 if (confirm("Are you sure?")) {
                     this.$store.dispatch("deleteWidget", this.widget);
                 }
+            },
+        },
+        watch: {
+            widget: {
+                handler() {
+                    this.$store.dispatch("updateWidget", this.widget);
+                },
+                deep: true,
             },
         },
         components: {

@@ -17,14 +17,8 @@
 </template>
 
 <script>
-    import { Context } from "../../common.js";
     import SaveUtil from "../Utils/SaveUtil";
     export default {
         components: { SaveUtil },
-        data() {
-            return {
-                Context,
-            };
-        },
     };
 </script>

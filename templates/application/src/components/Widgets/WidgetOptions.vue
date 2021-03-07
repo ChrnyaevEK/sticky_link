@@ -6,44 +6,84 @@
         @mousemove.native.stop
         dragHandle=".options-drag"
         @click.native.stop
-        :w="400"
-        :h="600"
+        :w="w"
+        :h="h"
         :z="10"
-        :x="widget.x + widget.w"
-        :y="widget.y"
+        :x="x"
+        :y="y"
         :resizable="false"
-        :parent="false"
+        :parent="true"
         class="bg-white border overflow-auto shadow rounded options-position"
     >
         <div class="w-100 h-100 p-3">
-            <div class="form-group d-flex justify-content-between align-items-center options-drag border-bottom cursor-move">
+            <div
+                class="form-group d-flex justify-content-between align-items-center options-drag border-bottom cursor-move"
+            >
                 <strong>Options</strong>
-                <a class="btn" @click="$env.dispatch('closeWidgetOptions')"><i class="fas fa-times"></i></a>
+                <a class="btn" @click="$env.dispatch('closeWidgetOptions')"
+                    ><i class="fas fa-times"></i
+                ></a>
             </div>
 
             <div class="form-group">
                 <label :for="_('x')">X coordinate</label>
-                <input class="form-control" v-model.number="widget.x" type="number" :id="_('x')" step="1" :min="$store.state.settings.widget.min_x" />
+                <input
+                    class="form-control"
+                    v-model.number="widget.x"
+                    type="number"
+                    :id="_('x')"
+                    step="1"
+                    :min="$store.state.settings.widget.min_x"
+                />
             </div>
 
             <div class="form-group">
                 <label :for="_('y')">Y coordinate</label>
-                <input class="form-control" v-model.number="widget.y" type="number" :id="_('y')" step="1" :min="$store.state.settings.widget.min_y" />
+                <input
+                    class="form-control"
+                    v-model.number="widget.y"
+                    type="number"
+                    :id="_('y')"
+                    step="1"
+                    :min="$store.state.settings.widget.min_y"
+                />
             </div>
 
             <div class="form-group">
                 <label :for="_('z')">Z coordinate</label>
-                <input class="form-control" v-model.number="widget.z" type="number" :id="_('z')" step="1" :min="$store.state.settings.widget.min_z" :max="$store.state.settings.widget.max_z" />
+                <input
+                    class="form-control"
+                    v-model.number="widget.z"
+                    type="number"
+                    :id="_('z')"
+                    step="1"
+                    :min="$store.state.settings.widget.min_z"
+                    :max="$store.state.settings.widget.max_z"
+                />
             </div>
 
             <div class="form-group">
                 <label :for="_('w')">Width</label>
-                <input class="form-control" v-model.number="widget.w" type="number" :id="_('w')" step="1" :min="$store.state.settings.widget.min_width" />
+                <input
+                    class="form-control"
+                    v-model.number="widget.w"
+                    type="number"
+                    :id="_('w')"
+                    step="1"
+                    :min="$store.state.settings.widget.min_width"
+                />
             </div>
 
             <div class="form-group">
                 <label :for="_('h')">Height</label>
-                <input class="form-control" v-model.number="widget.h" type="number" :id="_('h')" step="1" :min="$store.state.settings.widget.min_height" />
+                <input
+                    class="form-control"
+                    v-model.number="widget.h"
+                    type="number"
+                    :id="_('h')"
+                    step="1"
+                    :min="$store.state.settings.widget.min_height"
+                />
             </div>
             <div class="form-group">
                 <label :for="_('font_size')">Font size</label>
@@ -73,16 +113,33 @@
 
             <div class="form-group">
                 <label :for="_('background_color')">Background color</label>
-                <input type="color" :id="_('background_color')" v-model="widget.background_color" class="form-control" />
+                <input
+                    type="color"
+                    :id="_('background_color')"
+                    v-model="widget.background_color"
+                    class="form-control"
+                />
             </div>
 
             <div class="form-group">
                 <label :for="_('text_color')">Text color</label>
-                <input type="color" :id="_('text_color')" v-model="widget.text_color" class="form-control" />
+                <input
+                    type="color"
+                    :id="_('text_color')"
+                    v-model="widget.text_color"
+                    class="form-control"
+                />
             </div>
             <div class="form-check">
-                <input type="checkbox" :id="_('border')" class="form-check-input" v-model="widget.border" />
-                <label class="form-check-label" :for="_('border')">Border</label>
+                <input
+                    type="checkbox"
+                    :id="_('border')"
+                    class="form-check-input"
+                    v-model="widget.border"
+                />
+                <label class="form-check-label" :for="_('border')"
+                    >Border</label
+                >
             </div>
             <hr />
             <!--Options by widget type========================================================================================================-->
@@ -94,35 +151,60 @@
             <template v-if="widget.type == Counter.type">
                 <div class="form-group">
                     <label :for="_('value')">Value </label>
-                    <input :id="_('value')" class="form-control" v-model.number="widget.value" :aria-describedby="_('valueHelp')" />
+                    <input
+                        :id="_('value')"
+                        class="form-control"
+                        v-model.number="widget.value"
+                        :aria-describedby="_('valueHelp')"
+                    />
                 </div>
                 <div class="form-group">
                     <label :for="_('title')">Title </label>
-                    <input :id="_('title')" class="form-control" v-model.number="widget.title" :aria-describedby="_('titleHelp')" />
+                    <input
+                        :id="_('title')"
+                        class="form-control"
+                        v-model.number="widget.title"
+                        :aria-describedby="_('titleHelp')"
+                    />
                 </div>
             </template>
             <!--URL-->
             <template v-if="widget.type == URL.type">
                 <div class="form-group">
                     <label :for="_('href')">URL address </label>
-                    <input :id="_('href')" class="form-control" v-model="widget.href" />
+                    <input
+                        :id="_('href')"
+                        class="form-control"
+                        v-model="widget.href"
+                    />
                 </div>
                 <div class="form-group">
                     <label :for="_('text')">URL text </label>
-                    <input :id="_('text')" class="form-control" v-model="widget.text" />
+                    <input
+                        :id="_('text')"
+                        class="form-control"
+                        v-model="widget.text"
+                    />
                 </div>
             </template>
             <!--Simple List-->
             <template v-if="widget.type == SimpleList.type">
                 <div class="form-group">
                     <label :for="_('title')">Title </label>
-                    <input :id="_('title')" class="form-control" v-model.number="widget.title" :aria-describedby="_('titleHelp')" />
+                    <input
+                        :id="_('title')"
+                        class="form-control"
+                        v-model.number="widget.title"
+                        :aria-describedby="_('titleHelp')"
+                    />
                 </div>
             </template>
 
             <!--Options by widget type========================================================================================================-->
             <div class="form-group d-flex justify-content-center">
-                <small class="text-secondary">All changes are automatically saved</small>
+                <small class="text-secondary"
+                    >All changes are automatically saved</small
+                >
             </div>
         </div>
     </vue-draggable-resizable>
@@ -132,7 +214,7 @@
     // Front end is absolutely passive
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
-    // import $ from "jquery";
+    import $ from "jquery";
     import TextEditor from "../Utils/TextEditor";
     import SimpleText from "./SimpleText";
     import URL from "./URL";
@@ -147,37 +229,59 @@
                 URL,
                 Counter,
                 SimpleList,
+                w: 400,
+                h: 600,
+                y: 0,
             };
         },
         computed: {
             widget() {
-                return this.$store.state.widgets.filter((widget) => widget.id == this.$env.state.editWidget)[0];
+                if (this.$env.state.editWidget !== null) {
+                    return this.$store.state.widgets.filter(
+                        (widget) => widget.id == this.$env.state.editWidget.id
+                    )[0];
+                }
+                return null;
+            },
+            x() {
+                return window.innerWidth - this.w;
             },
         },
         methods: {
-            // setWarningFromResponse(response) {
-            //     this.unsetWarning();
-            //     for (var [field, error] of Object.entries(response.responseJSON)) {
-            //         $(`[for='${this._(field)}']`)
-            //             .addClass("text-danger")
-            //             .append(
-            //                 $(`
-            //             <p class="${this.warningClass}"><small>${error[0]}</small></p>
-            //         `)
-            //             );
-            //     }
-            // },
-            // unsetWarning() {
-            //     $(`.${this.warningClass}`)
-            //         .parent()
-            //         .removeClass("text-danger");
-            //     $(`.${this.warningClass}`).remove();
-            // },
+            setWarningFromResponse(response) {
+                this.unsetWarning();
+                for (var [field, error] of Object.entries(
+                    response.responseJSON
+                )) {
+                    $(`[for='${this._(field)}']`)
+                        .addClass("text-danger")
+                        .append(
+                            $(`
+                        <p class="${this.warningClass}"><small>${error[0]}</small></p>
+                    `)
+                        );
+                }
+            },
+            unsetWarning() {
+                $(`.${this.warningClass}`)
+                    .parent()
+                    .removeClass("text-danger");
+                $(`.${this.warningClass}`).remove();
+            },
         },
         watch: {
             widget: {
-                handler(v) {
-                    console.log(v);
+                handler(widget) {
+                    if (widget) {
+                        this.$store.dispatch("updateWidget", widget).then(
+                            () => {
+                                this.unsetWarning();
+                            },
+                            (response) => {
+                                this.setWarningFromResponse(response);
+                            }
+                        );
+                    }
                 },
                 deep: true,
             },

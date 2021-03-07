@@ -1,6 +1,13 @@
 <template>
     <div class="btn-group dropup bg-white">
-        <a class="btn btn-sm dropdown-toggle" id="wall-list" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Select any wall to open for edition">
+        <a
+            class="btn btn-sm dropdown-toggle"
+            id="wall-list"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+            title="Select any wall to open for edition"
+        >
             Walls
         </a>
         <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
@@ -16,10 +23,22 @@
                 >{{ wall.title }}</router-link
             >
         </div>
-        <a v-if="createWall" class="mr-1 btn btn-sm btn-success border" @click="$emit('createWall')" title="Add new wall">
+        <a
+            v-if="createWall"
+            class="mr-1 btn btn-sm btn-success border"
+            @click="$emit('createWall')"
+            title="Add new wall"
+            :disable="$env.state.lockWidgets"
+        >
             <i class="fas fa-plus"></i>
         </a>
-        <a v-if="deleteWall" class="mr-1 btn btn-sm btn-danger border" @click.stop="$emit('deleteWall')" title="Delete current wall">
+        <a
+            v-if="deleteWall"
+            class="mr-1 btn btn-sm btn-danger border"
+            @click.stop="$emit('deleteWall')"
+            title="Delete current wall"
+            :disable="$env.state.lockWidgets"
+        >
             <i class="fas fa-trash"></i>
         </a>
     </div>
@@ -34,7 +53,7 @@
             deleteWall: {
                 type: Boolean,
                 default: true,
-            }
+            },
         },
     };
 </script>

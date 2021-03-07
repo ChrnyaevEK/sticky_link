@@ -17,32 +17,33 @@ var router = new VueRouter({
         {
             path: "/app/edit",
             component: AppEdit,
+
             children: [
-                {
-                    path: "wall",
-                    redirect: "/app",
-                },
                 {
                     name: "wallEdit",
                     path: "wall/:wallId",
                     component: WallEdit,
                     beforeEnter(to, from, next) {
-                        if (store.dispatch("validateWall", { id: to.params.wallId })) {
-                            store.dispatch("fetchWidgets", to.params.wallId).then(next);
-                        } else {
-                            next({
-                                name: "wallEditForbidden",
-                                params: {
-                                    wallId: to.params.wallId,
-                                },
+                        store
+                            .dispatch("validateWall", { id: to.params.wallId })
+                            .then((ok) => {
+                                if (ok) {
+                                    store
+                                        .dispatch(
+                                            "fetchWidgets",
+                                            to.params.wallId
+                                        )
+                                        .then(next);
+                                } else {
+                                    next({
+                                        name: "wallEditForbidden",
+                                        params: {
+                                            wallId: to.params.wallId,
+                                        },
+                                    });
+                                }
                             });
-                        }
                     },
-                },
-                {
-                    name: "wallEditForbidden",
-                    path: "wall/:wallId",
-                    component: WallForbidden,
                 },
             ],
         },
@@ -51,26 +52,48 @@ var router = new VueRouter({
             component: AppView,
             children: [
                 {
-                    path: "wall",
-                    redirect: "/app",
-                },
-                {
                     name: "wallView",
                     path: "wall/:wallId",
                     component: WallView,
                     beforeEnter(to, from, next) {
-                        if (store.dispatch("validateWall", { id: to.params.wallId })) {
-                            store.dispatch("fetchWidgets", to.params.wallId).then(next);
-                        } else {
-                            next({
-                                name: "wallViewForbidden",
-                                params: {
-                                    wallId: to.params.wallId,
-                                },
+                        store
+                            .dispatch("validateWall", { id: to.params.wallId })
+                            .then((ok) => {
+                                if (ok) {
+                                    store
+                                        .dispatch(
+                                            "fetchWidgets",
+                                            to.params.wallId
+                                        )
+                                        .then(next);
+                                } else {
+                                    next({
+                                        name: "wallViewForbidden",
+                                        params: {
+                                            wallId: to.params.wallId,
+                                        },
+                                    });
+                                }
                             });
-                        }
                     },
                 },
+            ],
+        },
+        {
+            path: "/app",
+            component: AppEmpty,
+            children: [
+                {
+                    name: "appEmpty",
+                    path: "",
+                    component: WallEmpty,
+                },
+            ],
+        },
+        {
+            path: "/app",
+            component: AppEmpty,
+            children: [
                 {
                     name: "wallViewForbidden",
                     path: "wall/:wallId",
@@ -83,10 +106,9 @@ var router = new VueRouter({
             component: AppEmpty,
             children: [
                 {
-                    name: "appEmpty",
-                    path: "",
-                    alias: "*",
-                    component: WallEmpty,
+                    name: "wallEditForbidden",
+                    path: "wall/:wallId",
+                    component: WallForbidden,
                 },
             ],
         },
@@ -98,7 +120,11 @@ var router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    Promise.all([store.dispatch("fetchUser"), store.dispatch("fetchSettings"), store.dispatch("fetchWalls")]).then(next);
+    Promise.all([
+        store.dispatch("fetchUser"),
+        store.dispatch("fetchSettings"),
+        store.dispatch("fetchWalls"),
+    ]).then(next);
 });
 
 export default router;

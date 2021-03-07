@@ -1,9 +1,13 @@
 <template>
     <div class="w-100 h-100 overflow-hidden">
-        <div class="w-100 h-100 wall-container overflow-auto" @click.stop="$env.dispatch('closeWidgetOptions')">
+        <div
+            v-if="wall"
+            class="w-100 h-100 wall-container overflow-auto"
+            @click.stop="$env.dispatch('closeWidgetOptions')"
+        >
             <vue-draggable-resizable
-                @click.stop="$env.dispatch('closeWidgetOptions')"
-                @resizestop="onResizing"
+                @resizestop="onResizeStop"
+                @resizing="onResizing"
                 :resizable="true"
                 :draggable="true"
                 :parent="false"
@@ -13,12 +17,17 @@
                 :y="15"
                 :minWidth="$store.state.settings.wall.min_width"
                 :minHeight="$store.state.settings.wall.min_height"
-                class="border-secondary shadow"
+                class="border border-muted shadow"
             >
                 <WidgetList :base="WidgetBaseResizable"></WidgetList>
-                <WidgetOptions></WidgetOptions>
             </vue-draggable-resizable>
-            <span class="wall-title col-12 col-md-4 col-lg-3 p-0"><input @input="onWallTitleUpdate($event.target.value)" class="form-control border-0" :value="wall.title"/></span>
+            <WidgetOptions></WidgetOptions>
+            <span class="wall-title col-12 col-md-4 col-lg-3 p-0"
+                ><input
+                    @input="onWallTitleUpdate($event.target.value)"
+                    class="form-control border-0"
+                    :value="wall.title"
+            /></span>
         </div>
     </div>
 </template>
@@ -37,33 +46,44 @@
             WidgetList,
             WidgetOptions,
         },
+        created() {
+            $(document).keyup((e) => {
+                if (e.keyCode === 27) this.$env.dispatch("closeWidgetOptions"); // esc
+            });
+        },
         data() {
             return {
                 WidgetBaseResizable,
             };
         },
-        created() {
-            $(document).keyup(function(e) {
-                if (e.keyCode === 27) this.$env.dispatch("closeWidgetOptions"); // esc
-            });
-        },
         computed: {
             wall() {
-                return this.$store.state.walls.filter((w) => w.id == this.$route.params.wallId)[0];
+                return this.$store.state.walls.filter(
+                    (wall) => wall.id == this.$route.params.wallId
+                )[0];
             },
         },
         methods: {
-            onResizing(x, y, w, h) {
+            onResizeStop(x, y, w, h) {
+                this.wall.w = w;
+                this.wall.h = h;
                 this.$store.dispatch("updateWall", {
                     id: this.wall.id,
                     w,
                     h,
                 });
+                this.$store.dispatch("recalculateWidgets", this.wall);
             },
-            onWallTitleUpdate(val) {
+            onResizing(x, y, w, h) {
+                this.wall.w = w;
+                this.wall.h = h;
+                this.$store.dispatch("recalculateWidgets", this.wall);
+            },
+            onWallTitleUpdate(value) {
+                this.wall.title = value;
                 this.$store.dispatch("updateWall", {
                     id: this.wall.id,
-                    title: val,
+                    title: value,
                 });
             },
         },

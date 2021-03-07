@@ -45,7 +45,7 @@ export default new Vuex.Store({
             state.walls.push(data);
         },
         deleteWidget(state, data) {
-            for (var i = 0; i < state.walls.length; i++) {
+            for (var i = 0; i < state.widgets.length; i++) {
                 var widget = state.widgets[i];
                 if (widget.id == data.id && widget.type == data.type) {
                     state.widgets.splice(i, 1);
@@ -136,15 +136,16 @@ export default new Vuex.Store({
         },
         updateWall(context, data) {
             context.commit("updateWall", data);
-            context.commit("recalculateWidgets", data);
             return updateManager.updated("walls", "wall", data.id);
         },
         validateWall(context, data) {
-            return context.state.walls.some((wall) => String(wall.id) == data.id);
+            return context.state.walls.some(
+                (wall) => String(wall.id) == data.id
+            );
         },
         createWidget(context, data) {
             return new Promise((resolve, reject) => {
-                api.create(data.type).then((response) => {
+                api.create(data.type, data).then((response) => {
                     context.commit("addWidget", response);
                     resolve(response);
                 }, reject);
@@ -166,6 +167,8 @@ export default new Vuex.Store({
             return new Promise((resolve, reject) => {
                 api.create(data.type, {
                     ...data,
+                    x: data.x + 5,
+                    y: data.y + 5,
                     id: undefined,
                 }).then((response) => {
                     context.commit("addWidget", response);
@@ -174,7 +177,13 @@ export default new Vuex.Store({
             });
         },
         validateWidget(context, data) {
-            return context.state.widgets.some((widget) => String(widget.id) == data.id && widget.type == data.type);
+            return context.state.widgets.some(
+                (widget) =>
+                    String(widget.id) == data.id && widget.type == data.type
+            );
+        },
+        recalculateWidgets(context, data) {
+            context.commit("recalculateWidgets", data);
         },
         filter(context, { source, type, id }) {
             return context.state[source].filter((i) => {
@@ -182,7 +191,9 @@ export default new Vuex.Store({
             });
         },
         setTabTitle(context) {
-            $("#tab-title").text(`${context.state.user.username} @ ${process.env.VUE_APP_TITLE}`);
+            $("#tab-title").text(
+                `${context.state.user.username} @ ${process.env.VUE_APP_TITLE}`
+            );
         },
     },
 });
