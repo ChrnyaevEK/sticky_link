@@ -57,7 +57,7 @@ export var updateManager = {
 };
 
 export var api = {
-    apiHost: process.env.VUE_APP_API_HOST,
+    apiHost: process.env.VUE_APP_API,
     csrfToken: getCookie("csrftoken"),
     ajax(settings) {
         var token = this.csrfToken;
@@ -242,7 +242,7 @@ export class WS {
     }
     connect() {
         this.socket = new WebSocket(
-            `ws://${process.env.VUE_APP_HOST}/${this.urlName}/${this.id}`
+            `ws://${window.location.host}/${this.urlName}/${this.id}`
         );
         this.socket.onmessage = (e) => {
             this.onMessage(JSON.parse(e.data));
