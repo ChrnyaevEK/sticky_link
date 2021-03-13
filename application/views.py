@@ -9,8 +9,6 @@ from django.core.exceptions import PermissionDenied
 from channels.layers import get_channel_layer
 from application.consumers import Event as ConsumerEvent, WallConsumer
 from asgiref.sync import async_to_sync
-import hashlib
-import json
 
 
 def _get_protected_queryset(model, user):
@@ -52,39 +50,56 @@ class UserViewSet(ReadOnlyModelViewSet):
 
 class CustomModelViewSet(ModelViewSet):
     channel_layer = get_channel_layer()
-    version_hash_field = 'version_hash'
+    version_hash_field = 'version'
 
-    def ensure_update_synchronization(self, response):
+    def push_instance_update(self, response):
         data = response.data
         try:
             wall_id = data['wall']
         except KeyError:
             wall_id = data['id']
-        version_hash = self._get_version_hash(data)
         async_to_sync(self.channel_layer.group_send)(
             WallConsumer.generate_group_name(wall_id),
             {
-                'type': ConsumerEvent.wall_update,
+                'type': ConsumerEvent.instance_update,
                 'instance': {
                     'type': data['type'],
                     'id': data['id'],
-                    self.version_hash_field: version_hash,
+                    'uid': data['uid'],
+                    'version': data['version'],
+                },
+            })
+
+    def push_instance_destroy(self, instance):
+        try:
+            wall_id = instance.wall.id
+        except AttributeError:
+            wall_id = instance.id
+        async_to_sync(self.channel_layer.group_send)(
+            WallConsumer.generate_group_name(wall_id),
+            {
+                'type': ConsumerEvent.instance_destroy,
+                'instance': {
+                    'type': instance.type,
+                    'id': instance.id,
+                    'uid': instance.uid(),
                 }
             })
-        response.data[self.version_hash_field] = version_hash
-
-    @staticmethod
-    def _get_version_hash(validated_data):
-        return hashlib.md5(json.dumps(validated_data).encode('utf-8')).hexdigest()
-
-    def partial_update(self, request, *args, **kwargs):
-        response = super().partial_update(request, *args, **kwargs)
-        self.ensure_update_synchronization(response)
-        return response
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
-        self.ensure_update_synchronization(response)
+        self.push_instance_update(response)
+        return response
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        self.push_instance_update(response)
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_queryset().get(pk=kwargs['pk'])
+        response = super().destroy(request, *args, **kwargs)
+        self.push_instance_destroy(instance)
         return response
 
 
@@ -109,11 +124,9 @@ class WallViewSet(CustomModelViewSet):
         ):
             for widget in model.objects.filter(wall=wall):
                 widgets.append(serializer(widget).data)
-        return Response(widgets)
-
-    def list(self, request, *args, **kwargs):
-        walls = _get_protected_queryset(models.Wall, request.user)
-        return Response(self.serializer_class(walls, many=True).data)
+        wall = self.serializer_class(wall).data
+        wall['widgets'] = widgets
+        return Response(wall)
 
 
 class SimpleTextViewSet(CustomModelViewSet):

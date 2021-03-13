@@ -7,12 +7,17 @@ from django.db import models
 from django.core.validators import BaseValidator, MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import User
 import re
+import hashlib
 
 
 class Common(models.Model):
+    type = None
     id = models.AutoField(primary_key=True)
     date_of_creation = models.DateTimeField(verbose_name='Date of creation', auto_now_add=True)
     last_update = models.DateTimeField(verbose_name='Date of last update (wall or any widget)', auto_now=True)
+
+    def uid(self):
+        return hashlib.md5(f'{self.type}{self.id}'.encode('utf-8')).hexdigest()
 
     def __str__(self):
         return f'{type(self).__name__}: {self.id}'

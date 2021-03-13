@@ -2,6 +2,7 @@ import $ from "jquery";
 import Vue from "vue";
 import Vuex from "vuex";
 import store from "./store";
+import router from "./router";
 
 Vue.use(Vuex);
 
@@ -12,9 +13,7 @@ function getCookie(name) {
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
             if (cookie.substring(0, name.length + 1) === name + "=") {
-                cookieValue = decodeURIComponent(
-                    cookie.substring(name.length + 1)
-                );
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
             }
         }
@@ -22,51 +21,108 @@ function getCookie(name) {
     return cookieValue;
 }
 
-export var updateManager = {
-    refreshRate: 1000,
-    queue: {
-        waiter: {},
-        handler: {},
+export var updateManager = new Vue({
+    data: {
+        coolDown: 1000,
+        waiter: {
+            // uid: timeout id
+        },
+        handler: {
+            // uid: function to call real update
+        },
+        remote: {
+            // uid: version from ws
+        },
     },
-    updated(source, type, id) {
-        return new Promise((resolve, reject) => {
-            var key = `${source}${type}${id}`;
+    methods: {
+        proposeUpdate(instance) {
+            // Require Type, Id, Uid
+            return new Promise((resolve, reject) => {
+                if (env.state.lockUpdateManager) {
+                    return resolve();
+                }
+                var update = () => {
+                    return api.update_partial(instance.type, instance.id, instance).then((response) => {
+                        if (this.remote[response.uid] !== undefined) {
+                            // Ws finished before http - resolve miss match
+                            if (this.remote[response.uid] !== response.version) {
+                                this.resolveNewVersion(response);
+                            }
+                            delete this.remote[response.uid]; // Unset remote version
+                        }
+                        resolve(response);
+                    }, reject);
+                };
 
-            this.queue.handler[key] = () => {
-                store
-                    .dispatch("filter", {
-                        source,
-                        type,
-                        id,
-                    })
-                    .then((data) => {
-                        api.update_partial(type, id, data[0]).then(
-                            resolve,
-                            reject
-                        );
-                    });
-            };
-            if (!this.queue.waiter[key]) {
-                this.queue.waiter[key] = setTimeout(() => {
-                    delete this.queue.waiter[key];
-                    this.queue.handler[key]();
-                }, this.refreshRate);
+                this.handler[instance.uid] = update;
+                clearTimeout(this.waiter[instance.uid]); // Unset last update
+                this.waiter[instance.uid] = setTimeout(() => {
+                    this.handler[instance.uid]().then(() => {
+                        delete this.handler[instance.uid], this.waiter[instance.uid];
+                    }); // Call real update
+                }, this.coolDown);
+            });
+        },
+        populateRemoteUpdate(update) {
+            if (this.handler[update.instance.uid] !== undefined) {
+                // Http is pending right now
+                this.remote[update.instance.uid] = update.instance.version;
+            } else {
+                // Else fire off update for instance, somebody just changed it
+                this.resolveNewVersion(update.instance);
             }
-        });
+        },
+        populateRemoteDestroy(update) {
+            store.dispatch("getInstanceByUid", update.instance.uid).then((localInstance) => {
+                if (localInstance) {
+                    store.commit("deleteInstance", localInstance);
+                    if (localInstance.type == "wall") {
+                        env.dispatch("resolveWallDeleted");
+                    }
+                }
+            });
+        },
+        resolveNewVersion(instance) {
+            store.dispatch("getInstanceByUid", instance.uid).then((localInstance) => {
+                if (localInstance) {
+                    store.dispatch("fetchInstance", localInstance);
+                } else {
+                    store.dispatch("fetchInstance", instance);
+                }
+            });
+        },
     },
-};
+});
+
+export class DefaultDict {
+    constructor(defaultVal) {
+        return new Proxy(
+            {},
+            {
+                get: (target, name) => (name in target ? target[name] : defaultVal),
+            }
+        );
+    }
+}
+
+export function handleUnexpected(){
+    env.dispatch("showAlert", {
+        msg: "Something went wrong...",
+        klass: "danger",
+    })
+}
 
 export var api = {
-    apiHost: process.env.VUE_APP_API,
+    apiHost: process.env.VUE_APP_API_HOST,
     csrfToken: getCookie("csrftoken"),
     ajax(settings) {
         var token = this.csrfToken;
         env.dispatch("savingStart");
         return $.ajax({
+            ...settings,
             headers: {
                 "X-CSRFToken": token,
             },
-            ...settings,
         }).always(() => {
             env.dispatch("savingStop");
         });
@@ -149,7 +205,8 @@ export var env = new Vuex.Store({
         alertMessage: null,
         alertClass: "info",
 
-        lockWidgets: false,
+        lockChanges: false,
+        lockUpdateManager: false,
 
         editWidget: null,
     },
@@ -177,11 +234,17 @@ export var env = new Vuex.Store({
             state.alertMessage = null;
             state.alertShow = false;
         },
-        lockWidgets(state) {
-            state.lockWidgets = true;
+        lockChanges(state) {
+            state.lockChanges = true;
         },
-        unlockWidgets(state) {
-            state.lockWidgets = false;
+        unlockChanges(state) {
+            state.lockChanges = false;
+        },
+        lockUpdateManager(state) {
+            state.lockUpdateManager = true;
+        },
+        unlockUpdateManager(state) {
+            state.lockUpdateManager = false;
         },
         openWidgetOptions(state, data) {
             state.editWidget = data;
@@ -219,47 +282,66 @@ export var env = new Vuex.Store({
         hideAlert(context) {
             context.commit("unsetAlert");
         },
-        lockWidgets(context) {
-            context.commit("lockWidgets");
+        lockChanges(context) {
+            context.commit("lockChanges");
         },
-        unlockWidgets(context) {
-            context.commit("unlockWidgets");
+        unlockChanges(context) {
+            context.commit("unlockChanges");
+        },
+        lockUpdateManager(context) {
+            context.commit("lockUpdateManager");
+        },
+        unlockUpdateManager(context) {
+            context.commit("unlockUpdateManager");
+        },
+        resolveWallDeleted(context) {
+            router.push({
+                name: "appEmpty",
+            });
+            context.dispatch("showAlert", {
+                msg: "Wall has been deleted!",
+                klass: "success",
+            });
+        },
+    },
+});
+
+export var ws = new Vue({
+    data: {
+        wallId: null,
+        socket: null,
+        connectionTimeout: 1000,
+    },
+    methods: {
+        connect(wallId) {
+            this.wallId = wallId;
+            this.socket = new WebSocket(`ws://${process.env.VUE_APP_HOST}/wall/${wallId}`);
+            this.socket.onmessage = (e) => {
+                this.onMessage(e);
+            };
+            this.socket.onclose = (e) => {
+                this.onClose(e);
+            };
+        },
+        onMessage(e) {
+            var event = JSON.parse(e.data);
+            if (event.type == "on_instance_update") {
+                updateManager.populateRemoteUpdate(event);
+            } else if (event.type == "on_instance_destroy") {
+                updateManager.populateRemoteDestroy(event);
+            }
+        },
+        onClose() {
+            console.error("Wall socket closed unexpectedly");
+            setTimeout(() => {
+                this.connect(this.wallId);
+            }, this.connectionTimeout);
         },
     },
 });
 
 export async function sleep(milliseconds) {
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
-export class WS {
-    constructor(urlName, id) {
-        this.socket = null;
-        this.urlName = urlName;
-        this.id = id;
-        this.connectionTimeout = 1000; // ms
-        this.connect();
-    }
-    connect() {
-        this.socket = new WebSocket(
-            `ws://${window.location.host}/${this.urlName}/${this.id}`
-        );
-        this.socket.onmessage = (e) => {
-            this.onMessage(JSON.parse(e.data));
-        };
-        this.socket.onclose = () => {
-            this.onClose();
-        };
-    }
-    onMessage(e) {
-        console.log(e);
-    }
-    onClose() {
-        console.error("Wall socket closed unexpectedly");
-        setTimeout(() => {
-            this.connect();
-        }, this.connectionTimeout);
-    }
 }
 
 export function deepCopy(data) {
@@ -280,10 +362,7 @@ export function widgetGenerateUpdate(widget, fields) {
 
 export function widgetGenerateDifference(newWidget, oldWidget) {
     var leftFields = [];
-    var fieldGroups = [
-        store.state.settings.widget.general_fields,
-        store.state.settings.widget.position_fields,
-    ];
+    var fieldGroups = [store.state.settings.widget.general_fields, store.state.settings.widget.position_fields];
     var allFields = [
         ...store.state.settings.widget.general_fields,
         ...store.state.settings.widget.position_fields,
@@ -318,4 +397,5 @@ export default {
     sleep,
     env,
     api,
+    handleUnexpected,
 };

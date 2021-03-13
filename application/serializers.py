@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from application import models
 from django.contrib.auth.models import User
+from application.utils import get_version_hash
 
 
 class ObjectSerializer(serializers.BaseSerializer):
@@ -49,7 +50,14 @@ class ObjectSerializer(serializers.BaseSerializer):
 
 
 class CustomModelSerializer(serializers.ModelSerializer):
-    pass
+    type = serializers.ReadOnlyField()
+    uid = serializers.ReadOnlyField()
+
+    def to_representation(self, instance):
+        """Add version hash"""
+        representation = super().to_representation(instance)
+        representation['version'] = get_version_hash(representation)
+        return representation
 
 
 class UserSerializer(CustomModelSerializer):
@@ -63,39 +71,30 @@ class UserSerializer(CustomModelSerializer):
 
 
 class SimpleTextSerializer(CustomModelSerializer):
-    type = serializers.ReadOnlyField(default=models.SimpleText.type)
-
     class Meta:
-        model = models.SimpleText
         fields = '__all__'
+        model = models.SimpleText
 
 
 class URLSerializer(CustomModelSerializer):
-    type = serializers.ReadOnlyField(default=models.URL.type)
-
     class Meta:
-        model = models.URL
         fields = '__all__'
+        model = models.URL
 
 
 class SimpleListSerializer(CustomModelSerializer):
-    type = serializers.ReadOnlyField(default=models.SimpleList.type)
-
     class Meta:
-        model = models.SimpleList
         fields = '__all__'
+        model = models.SimpleList
 
 
 class CounterSerializer(CustomModelSerializer):
-    type = serializers.ReadOnlyField(default=models.Counter.type)
-
     class Meta:
-        model = models.Counter
         fields = '__all__'
+        model = models.Counter
 
 
 class WallSerializer(CustomModelSerializer):
-    type = serializers.ReadOnlyField(default=models.Wall.type)
     widgets = [
         SimpleTextSerializer(many=True, read_only=True),
         URLSerializer(many=True, read_only=True),
@@ -107,5 +106,5 @@ class WallSerializer(CustomModelSerializer):
     )
 
     class Meta:
-        model = models.Wall
         fields = '__all__'
+        model = models.Wall

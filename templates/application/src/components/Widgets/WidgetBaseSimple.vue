@@ -16,7 +16,7 @@
         watch: {
             widget: {
                 handler() {
-                    this.$store.dispatch("updateWidget", this.widget);
+                    this.$store.dispatch("updateOrAddInstance", this.widget);
                 },
                 deep: true,
             },

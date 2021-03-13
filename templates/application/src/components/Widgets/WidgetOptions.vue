@@ -20,9 +20,7 @@
                 class="form-group d-flex justify-content-between align-items-center options-drag border-bottom cursor-move"
             >
                 <strong>Options</strong>
-                <a class="btn" @click="$env.dispatch('closeWidgetOptions')"
-                    ><i class="fas fa-times"></i
-                ></a>
+                <a class="btn" @click="$env.dispatch('closeWidgetOptions')"><i class="fas fa-times"></i></a>
             </div>
 
             <div class="form-group">
@@ -123,23 +121,11 @@
 
             <div class="form-group">
                 <label :for="_('text_color')">Text color</label>
-                <input
-                    type="color"
-                    :id="_('text_color')"
-                    v-model="widget.text_color"
-                    class="form-control"
-                />
+                <input type="color" :id="_('text_color')" v-model="widget.text_color" class="form-control" />
             </div>
             <div class="form-check">
-                <input
-                    type="checkbox"
-                    :id="_('border')"
-                    class="form-check-input"
-                    v-model="widget.border"
-                />
-                <label class="form-check-label" :for="_('border')"
-                    >Border</label
-                >
+                <input type="checkbox" :id="_('border')" class="form-check-input" v-model="widget.border" />
+                <label class="form-check-label" :for="_('border')">Border</label>
             </div>
             <hr />
             <!--Options by widget type========================================================================================================-->
@@ -172,19 +158,11 @@
             <template v-if="widget.type == URL.type">
                 <div class="form-group">
                     <label :for="_('href')">URL address </label>
-                    <input
-                        :id="_('href')"
-                        class="form-control"
-                        v-model="widget.href"
-                    />
+                    <input :id="_('href')" class="form-control" v-model="widget.href" />
                 </div>
                 <div class="form-group">
                     <label :for="_('text')">URL text </label>
-                    <input
-                        :id="_('text')"
-                        class="form-control"
-                        v-model="widget.text"
-                    />
+                    <input :id="_('text')" class="form-control" v-model="widget.text" />
                 </div>
             </template>
             <!--Simple List-->
@@ -202,9 +180,7 @@
 
             <!--Options by widget type========================================================================================================-->
             <div class="form-group d-flex justify-content-center">
-                <small class="text-secondary"
-                    >All changes are automatically saved</small
-                >
+                <small class="text-secondary">All changes are automatically saved</small>
             </div>
         </div>
     </vue-draggable-resizable>
@@ -237,9 +213,7 @@
         computed: {
             widget() {
                 if (this.$env.state.editWidget !== null) {
-                    return this.$store.state.widgets.filter(
-                        (widget) => widget.id == this.$env.state.editWidget.id
-                    )[0];
+                    return this.$store.state.widgets.filter((widget) => widget.id == this.$env.state.editWidget.id)[0];
                 }
                 return null;
             },
@@ -250,9 +224,7 @@
         methods: {
             setWarningFromResponse(response) {
                 this.unsetWarning();
-                for (var [field, error] of Object.entries(
-                    response.responseJSON
-                )) {
+                for (var [field, error] of Object.entries(response.responseJSON)) {
                     $(`[for='${this._(field)}']`)
                         .addClass("text-danger")
                         .append(
@@ -273,7 +245,7 @@
             widget: {
                 handler(widget) {
                     if (widget) {
-                        this.$store.dispatch("updateWidget", widget).then(
+                        this.$store.dispatch("updateOrAddInstance", widget).then(
                             () => {
                                 this.unsetWarning();
                             },

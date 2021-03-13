@@ -13,19 +13,18 @@
             </router-link>
             <SaveUtil></SaveUtil>
         </span>
-        <AlertUtil></AlertUtil>
-        <router-view></router-view>
+        <div class="w-100 h-100 d-flex flex-column">
+            <AlertUtil></AlertUtil>
+            <router-view></router-view>
+        </div>        
         <div class="w-100 p-1 d-flex bg-white border-top">
-            <WallSelectCreate
-                @createWall="onCreateWall"
-                @deleteWall="onDeleteWall"
-            ></WallSelectCreate>
+            <WallSelectCreate @createWall="onCreateWall" @deleteWall="onDeleteWall"></WallSelectCreate>
             <div class="d-flex w-100 overflow-auto">
                 <button
                     @click.stop="createWidget(SimpleText)"
                     class="mr-1 btn btn-sm bg-light border text-nowrap"
                     title="Add new widget of type Simple text"
-                    :disabled="$env.state.lockWidgets"
+                    :disabled="$env.state.lockChanges"
                 >
                     Simple text
                 </button>
@@ -33,7 +32,7 @@
                     @click.stop="createWidget(URL)"
                     class="mr-1 btn btn-sm bg-light border text-nowrap"
                     title="Add new widget of type URL"
-                    :disabled="$env.state.lockWidgets"
+                    :disabled="$env.state.lockChanges"
                 >
                     URL
                 </button>
@@ -41,7 +40,7 @@
                     @click.stop="createWidget(Counter)"
                     class="mr-1 btn btn-sm bg-light border text-nowrap"
                     title="Add new widget of type Counter"
-                    :disabled="$env.state.lockWidgets"
+                    :disabled="$env.state.lockChanges"
                 >
                     Counter
                 </button>
@@ -49,7 +48,7 @@
                     @click.stop="createWidget(SimpleList)"
                     class="mr-1 btn btn-sm bg-light border text-nowrap"
                     title="Add new widget of type Simple list"
-                    :disabled="$env.state.lockWidgets"
+                    :disabled="$env.state.lockChanges"
                 >
                     Simple list
                 </button>
@@ -81,7 +80,8 @@
                 SimpleList,
             };
         },
-        beforeRouteUpdate(to, from, next){  // from here all walls are valid
+        beforeRouteUpdate(to, from, next) {
+            // from here all walls are valid
             this.$store.dispatch("fetchWidgets", to.params.wallId).then(next);
         },
         methods: {
@@ -100,44 +100,19 @@
                 });
             },
             onDeleteWall() {
-                if (
-                    confirm("Are you sure? Wall will be permanently removed!")
-                ) {
-                    this.$store
-                        .dispatch("deleteWall", {
-                            id: this.$route.params.wallId,
-                        })
-                        .then(() => {
-                            this.$router.push(
-                                this.$store.state.walls.length
-                                    ? {
-                                          name: "wallEdit",
-                                          params: {
-                                              wallId: this.$store.state.walls[0]
-                                                  .id,
-                                          },
-                                      }
-                                    : {
-                                          name: "appEmpty",
-                                      }
-                            );
-                            this.$env.dispatch("showAlert", {
-                                msg: "Wall has been deleted!",
-                                klass: "success",
-                            });
-                        });
+                if (confirm("Are you sure? Wall will be permanently removed!")) {
+                    let wall = this.$store.state.walls.filter((w) => w.id == this.$route.params.wallId)[0];
+                    this.$store.dispatch("deleteInstance", wall).then(()=>{
+                        this.$env.dispatch("resolveWallDeleted");
+                    })
                 }
             },
             createWidget(klass) {
-                this.$env.dispatch("lockWidgets");
                 this.$store
                     .dispatch("createWidget", {
                         type: klass.type,
                         wall: this.$route.params.wallId,
                     })
-                    .then(() => {
-                        this.$env.dispatch("unlockWidgets");
-                    });
             },
         },
     };

@@ -1,7 +1,7 @@
 import Vuex from "vuex";
 import Vue from "vue";
 import $ from "jquery";
-import { api, updateManager } from "./common";
+import { api, updateManager, env } from "./common";
 
 Vue.use(Vuex);
 
@@ -13,56 +13,51 @@ export default new Vuex.Store({
         settings: null,
     },
     mutations: {
-        setUser(state, data) {
-            state.user = data;
+        setUser(state, user) {
+            state.user = user;
         },
-        setWalls(state, data) {
-            state.walls = data;
+        setWalls(state, walls) {
+            for (var wall of walls) {
+                wall.source = "walls";
+            }
+            state.walls = walls;
         },
-        setWidgets(state, data) {
-            state.widgets = data;
+        setWidgets(state, widgets) {
+            for (var widget of widgets) {
+                widget.source = "widgets";
+            }
+            state.widgets = widgets;
         },
-        setSettings(state, data) {
-            state.settings = data;
+        setSettings(state, settings) {
+            state.settings = settings;
         },
-        deleteWall(state, data) {
-            for (var i = 0; i < state.walls.length; i++) {
-                if (state.walls[i].id == data.id) {
-                    state.walls.splice(i, 1);
+        deleteInstance(state, instance) {
+            for (var i = 0; i < state[instance.source].length; i++) {
+                if (state[instance.source][i].uid == instance.uid) {
+                    state[instance.source].splice(i, 1);
                     break;
                 }
             }
         },
-        updateWall(state, data) {
-            Object.assign(
-                state.walls.filter((wall) => {
-                    return wall.id == data.id;
-                })[0],
-                data
-            );
-        },
-        addWall(state, data) {
-            state.walls.push(data);
-        },
-        deleteWidget(state, data) {
-            for (var i = 0; i < state.widgets.length; i++) {
-                var widget = state.widgets[i];
-                if (widget.id == data.id && widget.type == data.type) {
-                    state.widgets.splice(i, 1);
-                    break;
-                }
+        updateOrAddInstance(state, instance) {
+            if (instance.source == undefined) {
+                instance.source = instance.type == "wall" ? "walls" : "widgets";
+            }
+            var localInstance = state[instance.source].filter((i) => {
+                return i.uid == instance.uid;
+            })[0];
+            if (localInstance) {
+                Object.assign(localInstance, instance);
+            } else {
+                state[instance.source].push(instance);
             }
         },
-        updateWidget(state, data) {
-            Object.assign(
-                state.widgets.filter((widget) => {
-                    return widget.id == data.id && widget.type == data.type;
-                })[0],
-                data
-            );
+        addInstance(state, instance) {
+            instance.source = instance.type == "wall" ? "walls" : "widgets";
+            state[instance.source].push(instance);
         },
-        recalculateWidgets(state, data) {
-            var wall = state.walls.filter((wall) => wall.id == data.id)[0];
+        recalculateWidgets(state, newWall) {
+            var wall = state.walls.filter((wall) => wall.id == newWall.id)[0];
             for (var widget of state.widgets) {
                 if (widget.x + widget.w >= wall.w) {
                     var x = wall.w - widget.w;
@@ -79,9 +74,6 @@ export default new Vuex.Store({
                     widget.w = wall.w;
                 }
             }
-        },
-        addWidget(state, data) {
-            state.widgets.push(data);
         },
     },
     actions: {
@@ -113,55 +105,63 @@ export default new Vuex.Store({
         fetchWidgets(context, id) {
             return new Promise((resolve, reject) => {
                 api.retrieve("wall", id).then((response) => {
-                    context.commit("setWidgets", response);
+                    context.commit("setWidgets", response.widgets);
                     resolve();
+                }, reject);
+            });
+        },
+        fetchInstance(context, data) {
+            return new Promise((resolve, reject) => {
+                api.retrieve(data.type, data.id).then((response) => {
+                    response.source = data.source;
+                    env.dispatch("lockUpdateManager").then(() => {
+                        context.commit("updateOrAddInstance", response);
+                        Vue.nextTick(() => {
+                            env.dispatch("unlockUpdateManager");
+                        });
+                    });
+                    resolve(response);
                 }, reject);
             });
         },
         createWall(context) {
             return new Promise((resolve, reject) => {
-                api.create("wall").then((response) => {
-                    context.commit("addWall", response);
-                    resolve(response);
-                }, reject);
+                env.dispatch("lockChanges").then(() => {
+                    api.create("wall").then((response) => {
+                        context.commit("addInstance", response);
+                        Vue.nextTick(() => {
+                            env.dispatch("unlockChanges");
+                        });
+                        resolve(response);
+                    }, reject);
+                });
             });
-        },
-        deleteWall(context, data) {
-            return new Promise((resolve, reject) => {
-                api.delete("wall", data.id).then(() => {
-                    context.commit("deleteWall", data);
-                    resolve();
-                }, reject);
-            });
-        },
-        updateWall(context, data) {
-            context.commit("updateWall", data);
-            return updateManager.updated("walls", "wall", data.id);
         },
         validateWall(context, data) {
-            return context.state.walls.some(
-                (wall) => String(wall.id) == data.id
-            );
+            return context.state.walls.some((wall) => String(wall.id) == data.id);
         },
         createWidget(context, data) {
             return new Promise((resolve, reject) => {
-                api.create(data.type, data).then((response) => {
-                    context.commit("addWidget", response);
-                    resolve(response);
-                }, reject);
+                env.dispatch("lockChanges").then(() => {
+                    api.create(data.type, data).then((response) => {
+                        context.commit("addInstance", response);
+                        Vue.nextTick(() => {
+                            env.dispatch("unlockChanges");
+                        });
+                        resolve(response);
+                    }, reject);
+                });
             });
         },
-        deleteWidget(context, data) {
+        deleteInstance(context, data) {
             return new Promise((resolve, reject) => {
-                api.delete(data.type, data.id).then(() => {
-                    context.commit("deleteWidget", data);
-                    resolve();
-                }, reject);
+                context.commit("deleteInstance", data);
+                api.delete(data.type, data.id).then(resolve, reject);
             });
         },
-        updateWidget(context, data) {
-            context.commit("updateWidget", data);
-            return updateManager.updated("widgets", data.type, data.id);
+        updateOrAddInstance(context, data) {
+            context.commit("updateOrAddInstance", data);
+            return updateManager.proposeUpdate(data);
         },
         copyWidget(context, data) {
             return new Promise((resolve, reject) => {
@@ -171,29 +171,22 @@ export default new Vuex.Store({
                     y: data.y + 5,
                     id: undefined,
                 }).then((response) => {
-                    context.commit("addWidget", response);
+                    context.commit("addInstance", response);
                     resolve();
                 }, reject);
             });
         },
         validateWidget(context, data) {
-            return context.state.widgets.some(
-                (widget) =>
-                    String(widget.id) == data.id && widget.type == data.type
-            );
+            return context.state.widgets.some((widget) => String(widget.id) == data.id && widget.type == data.type);
         },
         recalculateWidgets(context, data) {
             context.commit("recalculateWidgets", data);
         },
-        filter(context, { source, type, id }) {
-            return context.state[source].filter((i) => {
-                return i.type == type && i.id == id;
-            });
-        },
         setTabTitle(context) {
-            $("#tab-title").text(
-                `${context.state.user.username} @ ${process.env.VUE_APP_TITLE}`
-            );
+            $("#tab-title").text(`${context.state.user.username} @ ${process.env.VUE_APP_TITLE}`);
+        },
+        getInstanceByUid(context, uid) {
+            return [...context.state.walls, ...context.state.widgets].filter((i) => i.uid == uid)[0];
         },
     },
 });

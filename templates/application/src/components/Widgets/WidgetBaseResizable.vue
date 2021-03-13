@@ -1,7 +1,7 @@
 <template>
     <vue-draggable-resizable
-        :draggable="!$env.state.lockWidgets"
-        :resizable="!$env.state.lockWidgets"
+        :draggable="!$env.state.lockChanges"
+        :resizable="!$env.state.lockChanges"
         @resizestop="onResize"
         @dragstop="onDrag"
         @click.native.stop
@@ -28,14 +28,14 @@
     >
         <div class="widget-quick-access" v-show="quickAccessVisible">
             <button
-                :disabled="$env.state.lockWidgets"
+                :disabled="$env.state.lockChanges"
                 class="btn btn-light border"
                 @click="$store.dispatch('copyWidget', widget)"
             >
                 <i class="fas fa-copy"></i>
             </button>
             <button
-                :disabled="$env.state.lockWidgets"
+                :disabled="$env.state.lockChanges"
                 class="btn btn-danger"
                 @click="deleteWidget"
             >
@@ -83,14 +83,14 @@
             },
             deleteWidget() {
                 if (confirm("Are you sure?")) {
-                    this.$store.dispatch("deleteWidget", this.widget);
+                    this.$store.dispatch("deleteInstance", this.widget);
                 }
             },
         },
         watch: {
             widget: {
                 handler() {
-                    this.$store.dispatch("updateWidget", this.widget);
+                    this.$store.dispatch("updateOrAddInstance", this.widget);
                 },
                 deep: true,
             },

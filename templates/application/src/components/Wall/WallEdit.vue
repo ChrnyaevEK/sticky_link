@@ -58,20 +58,14 @@
         },
         computed: {
             wall() {
-                return this.$store.state.walls.filter(
-                    (wall) => wall.id == this.$route.params.wallId
-                )[0];
+                return this.$store.state.walls.filter((wall) => wall.id == this.$route.params.wallId)[0];
             },
         },
         methods: {
             onResizeStop(x, y, w, h) {
                 this.wall.w = w;
                 this.wall.h = h;
-                this.$store.dispatch("updateWall", {
-                    id: this.wall.id,
-                    w,
-                    h,
-                });
+                this.$store.dispatch("updateOrAddInstance", this.wall);
                 this.$store.dispatch("recalculateWidgets", this.wall);
             },
             onResizing(x, y, w, h) {
@@ -81,10 +75,7 @@
             },
             onWallTitleUpdate(value) {
                 this.wall.title = value;
-                this.$store.dispatch("updateWall", {
-                    id: this.wall.id,
-                    title: value,
-                });
+                this.$store.dispatch("updateOrAddInstance", this.wall);
             },
         },
     };
