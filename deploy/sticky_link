@@ -1,6 +1,9 @@
 upstream django {
     server unix:///var/www/sticky_link/deploy/sticky_link.sock;
 }
+upstream django_channels {
+ server localhost:9001;
+}
 
 # configuration of the server
 server {
@@ -27,7 +30,7 @@ server {
     }
 
     location /wss/ {
-        proxy_pass http://django;
+        proxy_pass http://django_channels;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
