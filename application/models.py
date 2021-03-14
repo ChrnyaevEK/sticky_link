@@ -43,6 +43,7 @@ class Wall(Common):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     allowed_users = models.ManyToManyField(User, verbose_name='List of allowed users',
                                            related_name='related_walls', blank=True)
+    allow_anonymous_view = models.BooleanField('Allow anonymous view mode', default=False)
     title = models.CharField(verbose_name='Wall title', max_length=Default.title_length, default=Default.title)
     description = models.CharField(verbose_name='Wall description', max_length=Default.description_length,
                                    blank=True, null=True)
