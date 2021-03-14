@@ -336,7 +336,7 @@ export var ws = new Vue({
     methods: {
         connect(wallId) {
             this.wallId = wallId;
-            this.socket = new WebSocket(`wss://${process.env.VUE_APP_HOST}/wall/${wallId}`);
+            this.socket = new WebSocket(`wss://${process.env.VUE_APP_HOST}/wss/wall/${wallId}`);
             this.socket.onmessage = (e) => {
                 this.onMessage(e);
             };
