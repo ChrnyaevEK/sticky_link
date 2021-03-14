@@ -13,10 +13,10 @@
             </router-link>
             <SaveUtil></SaveUtil>
         </span>
-        <div class="w-100 h-100 d-flex flex-column">
+        <div class="w-100 h-100 d-flex flex-column align-items-center">
             <AlertUtil></AlertUtil>
             <router-view></router-view>
-        </div>        
+        </div>
         <div class="w-100 p-1 d-flex bg-white border-top">
             <WallSelectCreate @createWall="onCreateWall" @deleteWall="onDeleteWall"></WallSelectCreate>
             <div class="d-flex w-100 overflow-auto">
@@ -80,39 +80,25 @@
                 SimpleList,
             };
         },
-        beforeRouteUpdate(to, from, next) {
-            // from here all walls are valid
-            this.$store.dispatch("fetchWidgets", to.params.wallId).then(next);
-        },
         methods: {
             onCreateWall() {
-                this.$store.dispatch("createWall").then((response) => {
-                    this.$router.push({
-                        name: "wallEdit",
-                        params: {
-                            wallId: response.id,
-                        },
-                    });
-                    this.$env.dispatch("showAlert", {
-                        msg: "New wall has been created!",
-                        klass: "success",
-                    });
+                this.$store.dispatch("createWall").then((wall) => {
+                    this.$env.dispatch("resolveWallCreated", wall);
                 });
             },
             onDeleteWall() {
                 if (confirm("Are you sure? Wall will be permanently removed!")) {
-                    let wall = this.$store.state.walls.filter((w) => w.id == this.$route.params.wallId)[0];
-                    this.$store.dispatch("deleteInstance", wall).then(()=>{
-                        this.$env.dispatch("resolveWallDeleted");
-                    })
+                    let wall = this.$store.state.walls.filter((w) => w.id == this.$route.params.wallId)[0]; // Order is important
+                    this.$store.dispatch("deleteInstance", wall).then(() => {
+                        this.$env.dispatch("resolveWallDeleted", wall);
+                    });
                 }
             },
             createWidget(klass) {
-                this.$store
-                    .dispatch("createWidget", {
-                        type: klass.type,
-                        wall: this.$route.params.wallId,
-                    })
+                this.$store.dispatch("createWidget", {
+                    type: klass.type,
+                    wall: this.$route.params.wallId,
+                });
             },
         },
     };

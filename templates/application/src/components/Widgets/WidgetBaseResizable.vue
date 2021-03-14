@@ -12,9 +12,7 @@
         class="widget"
         :class="[
             widget.border ? 'widget-border' : 'widget-no-border',
-            $env.state.editWidget &&
-            $env.state.editWidget.id == widget.id &&
-            $env.state.editWidget.type == widget.type
+            $env.state.editWidget && $env.state.editWidget.id == widget.id && $env.state.editWidget.type == widget.type
                 ? 'shadow'
                 : '',
         ]"
@@ -34,20 +32,11 @@
             >
                 <i class="fas fa-copy"></i>
             </button>
-            <button
-                :disabled="$env.state.lockChanges"
-                class="btn btn-danger"
-                @click="deleteWidget"
-            >
+            <button :disabled="$env.state.lockChanges" class="btn btn-danger" @click="deleteWidget">
                 <i class="fas fa-trash"></i>
             </button>
         </div>
-        <div
-            class="w-100 h-100"
-            @contextmenu.stop.prevent="
-                $env.dispatch('openWidgetOptions', widget)
-            "
-        >
+        <div class="w-100 h-100" @contextmenu.stop.prevent="$env.dispatch('openWidgetOptions', widget)">
             <slot name="content"></slot>
         </div>
     </vue-draggable-resizable>
@@ -90,7 +79,9 @@
         watch: {
             widget: {
                 handler() {
-                    this.$store.dispatch("updateOrAddInstance", this.widget);
+                    if (!this.$env.lockChanges){
+                        this.$store.dispatch("updateOrAddInstance", this.widget);
+                    }
                 },
                 deep: true,
             },

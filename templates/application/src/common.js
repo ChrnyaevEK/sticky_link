@@ -21,6 +21,130 @@ function getCookie(name) {
     return cookieValue;
 }
 
+export var io = new Vue({
+    data: {
+        alertUtil: {
+            html: null,
+            type: null,
+            visible: false,
+        },
+        saveUtil: {
+            state: null,
+            type: null,
+            states: {
+                saving: "Processing...",
+                saved: "Saved",
+                idle: "Auto save",
+            },
+            timeoutId: null,
+            timeoutDuration: 5000,
+        },
+        changeUtil: {
+            state: null,
+            states: {
+                newVersionAvailable: "The wall has changed",
+                lastVersion: null,
+            },
+            timeoutId: null,
+            timeoutDuration: 1000,
+        },
+    },
+    methods: {
+        alert(html, type) {
+            this.alertUtil.html = html;
+            this.alertUtil.type = type;
+            this.alertUtil.visible = true;
+        },
+        save(active) {
+            if (active) {
+                this.saveUtil.state = this.saveUtil.states.saving;
+            } else {
+                clearTimeout(this.saveUtil.timeoutId);
+                this.saveUtil.state = this.saveUtil.states.saved;
+                this.saveUtil.type = "success";
+                this.saveUtil.timeoutId = setTimeout(() => {
+                    this.saveUtil.state = this.saveUtil.states.idle;
+                    this.saveUtil.type = null;
+                }, this.saveUtil.timeoutDuration);
+            }
+        },
+        change(active) {
+            if (active) {
+                this.changeUtil.state = this.changeUtil.states.newVersionAvailable;
+            } else {
+                clearTimeout(this.changeUtil.timeoutId);
+                this.changeUtil.timeoutId = setTimeout(() => {
+                    this.changeUtil.state = this.changeUtil.states.lastVersion;
+                }, this.changeUtil.timeoutDuration);
+            }
+        },
+    },
+});
+
+export var env = new Vuex.Store({
+    state: {
+        lockChanges: false,
+        lockUpdateManager: false,
+
+        editWidget: null,
+    },
+    mutations: {
+        lockChanges(state) {
+            state.lockChanges = true;
+        },
+        unlockChanges(state) {
+            state.lockChanges = false;
+        },
+        lockUpdateManager(state) {
+            state.lockUpdateManager = true;
+        },
+        unlockUpdateManager(state) {
+            state.lockUpdateManager = false;
+        },
+        openWidgetOptions(state, data) {
+            state.editWidget = data;
+        },
+        closeWidgetOptions(state) {
+            state.editWidget = null;
+        },
+    },
+    actions: {
+        openWidgetOptions(context, data) {
+            context.commit("openWidgetOptions", data);
+        },
+        closeWidgetOptions(context) {
+            context.commit("closeWidgetOptions");
+        },
+        lockChanges(context) {
+            context.commit("lockChanges");
+        },
+        unlockChanges(context) {
+            context.commit("unlockChanges");
+        },
+        lockUpdateManager(context) {
+            context.commit("lockUpdateManager");
+        },
+        unlockUpdateManager(context) {
+            context.commit("unlockUpdateManager");
+        },
+        resolveWallDeleted(context, wall) {
+            io.alert(`Wall <strong>${wall.title}</strong> has been deleted!`, "success");
+            router.push({
+                name: "appEmpty",
+            });
+        },
+        resolveWallCreated(context, wall) {
+            io.alert("New wall has been created!", "success");
+            this.$router.push({
+                name: "wallEdit",
+                params: {
+                    wallId: wall.id,
+                },
+            });
+        },
+    },
+});
+
 export var updateManager = new Vue({
     data: {
         coolDown: 1000,
@@ -73,7 +197,7 @@ export var updateManager = new Vue({
             }
         },
         populateRemoteDestroy(update) {
-            env.dispatch("updateStart");
+            io.change(true);
             store.dispatch("getInstanceByUid", update.instance.uid).then((localInstance) => {
                 if (localInstance) {
                     store.commit("deleteInstance", localInstance);
@@ -81,19 +205,19 @@ export var updateManager = new Vue({
                         env.dispatch("resolveWallDeleted");
                     }
                 }
-                env.dispatch("updateStop");
+                io.change(false);
             });
         },
         resolveNewVersion(instance) {
-            env.dispatch("updateStart");
+            io.change(true);
             return store.dispatch("getInstanceByUid", instance.uid).then((localInstance) => {
                 if (localInstance) {
                     store.dispatch("fetchInstance", localInstance).then(() => {
-                        env.dispatch("updateStop");
+                        io.change(false);
                     });
                 } else {
                     store.dispatch("fetchInstance", instance).then(() => {
-                        env.dispatch("updateStop");
+                        io.change(false);
                     });
                 }
             });
@@ -113,10 +237,7 @@ export class DefaultDict {
 }
 
 export function handleUnexpected() {
-    env.dispatch("showAlert", {
-        msg: "Something went wrong...",
-        klass: "danger",
-    });
+    io.alert("Something went wrong...", "danger");
 }
 
 export var api = {
@@ -124,15 +245,19 @@ export var api = {
     csrfToken: getCookie("csrftoken"),
     ajax(settings) {
         var token = this.csrfToken;
-        env.dispatch("savingStart");
+        io.save(true);
         return $.ajax({
             ...settings,
             headers: {
                 "X-CSRFToken": token,
             },
-        }).always(() => {
-            env.dispatch("savingStop");
-        });
+        })
+            .fail((response) => {
+                io.alert(response.responseJSON.detail, "danger");
+            })
+            .always(() => {
+                io.save(false);
+            });
     },
     get(path) {
         return this.ajax({
@@ -190,140 +315,6 @@ export var api = {
         });
     },
 };
-
-export var env = new Vuex.Store({
-    state: {
-        versionState: null,
-        versionStates: {
-            updateAvailable: "Updating...",
-            lastVersion: null,
-        },
-
-        savingState: null,
-        savingStates: {
-            saving: "Saving...",
-            saved: "Saved",
-            idle: "Auto save",
-        },
-        savingTimeoutId: null,
-        savingTimeoutDuration: 5000,
-
-        alertShow: false,
-        alertMessage: null,
-        alertClass: "info",
-
-        lockChanges: false,
-        lockUpdateManager: false,
-
-        editWidget: null,
-    },
-    mutations: {
-        setSaved(state) {
-            state.savingState = state.savingStates.saved;
-        },
-        setSaving(state) {
-            state.savingState = state.savingStates.saving;
-        },
-        setSavingIdle(state) {
-            state.savingState = state.savingStates.idle;
-            state.savingTimeoutId = null;
-        },
-        setSavingTimeoutId(state, id) {
-            state.savingTimeoutId = id;
-        },
-        setUpdateAvailable(state) {
-            state.versionState = state.versionStates.updateAvailable;
-        },
-        setLastVersion(state) {
-            state.versionState = state.versionStates.lastVersion;
-        },
-        setAlert(state, data) {
-            state.alertClass = data.alertClass;
-            state.alertMessage = data.alertMessage;
-            state.alertShow = true;
-        },
-        unsetAlert(state) {
-            state.alertClass = "info";
-            state.alertMessage = null;
-            state.alertShow = false;
-        },
-        lockChanges(state) {
-            state.lockChanges = true;
-        },
-        unlockChanges(state) {
-            state.lockChanges = false;
-        },
-        lockUpdateManager(state) {
-            state.lockUpdateManager = true;
-        },
-        unlockUpdateManager(state) {
-            state.lockUpdateManager = false;
-        },
-        openWidgetOptions(state, data) {
-            state.editWidget = data;
-        },
-        closeWidgetOptions(state) {
-            state.editWidget = null;
-        },
-    },
-    actions: {
-        openWidgetOptions(context, data) {
-            context.commit("openWidgetOptions", data);
-        },
-        closeWidgetOptions(context) {
-            context.commit("closeWidgetOptions");
-        },
-        savingStart(context) {
-            context.commit("setSaving");
-        },
-        savingStop(context) {
-            context.commit("setSaved");
-            clearTimeout(context.state.savingTimeoutId);
-            context.commit(
-                "setSavingTimeoutId",
-                setTimeout(() => {
-                    context.commit("setSavingIdle");
-                }, context.state.savingTimeoutDuration)
-            );
-        },
-        updateStart(context) {
-            context.commit("setUpdateAvailable");
-        },
-        updateStop(context) {
-            context.commit("setLastVersion");
-        },
-        showAlert(context, { msg, klass }) {
-            context.commit("setAlert", {
-                alertMessage: msg,
-                alertClass: klass,
-            });
-        },
-        hideAlert(context) {
-            context.commit("unsetAlert");
-        },
-        lockChanges(context) {
-            context.commit("lockChanges");
-        },
-        unlockChanges(context) {
-            context.commit("unlockChanges");
-        },
-        lockUpdateManager(context) {
-            context.commit("lockUpdateManager");
-        },
-        unlockUpdateManager(context) {
-            context.commit("unlockUpdateManager");
-        },
-        resolveWallDeleted(context) {
-            router.push({
-                name: "appEmpty",
-            });
-            context.dispatch("showAlert", {
-                msg: "Wall has been deleted!",
-                klass: "success",
-            });
-        },
-    },
-});
 
 export var ws = new Vue({
     data: {

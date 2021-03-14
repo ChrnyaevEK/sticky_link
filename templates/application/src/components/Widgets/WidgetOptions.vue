@@ -244,7 +244,7 @@
         watch: {
             widget: {
                 handler(widget) {
-                    if (widget) {
+                    if (widget && !this.$env.lockChanges) {
                         this.$store.dispatch("updateOrAddInstance", widget).then(
                             () => {
                                 this.unsetWarning();

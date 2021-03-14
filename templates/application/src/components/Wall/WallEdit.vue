@@ -22,12 +22,9 @@
                 <WidgetList :base="WidgetBaseResizable"></WidgetList>
             </vue-draggable-resizable>
             <WidgetOptions></WidgetOptions>
-            <span class="wall-title col-12 col-md-4 col-lg-3 p-0"
-                ><input
-                    @input="onWallTitleUpdate($event.target.value)"
-                    class="form-control border-0"
-                    :value="wall.title"
-            /></span>
+            <div class="wall-edit px-1">
+                <input v-model="wall.title" class="form-control border-0 px-1" />
+            </div>
         </div>
     </div>
 </template>
@@ -46,6 +43,9 @@
             WidgetList,
             WidgetOptions,
         },
+        beforeRouteUpdate(to, from, next) {
+            this.$store.dispatch("fetchWidgets", to.params.wallId).then(next);
+        },
         created() {
             $(document).keyup((e) => {
                 if (e.keyCode === 27) this.$env.dispatch("closeWidgetOptions"); // esc
@@ -54,28 +54,29 @@
         data() {
             return {
                 WidgetBaseResizable,
+                wall: this.$store.state.walls.filter((wall) => wall.id == this.$route.params.wallId)[0],
             };
         },
-        computed: {
-            wall() {
-                return this.$store.state.walls.filter((wall) => wall.id == this.$route.params.wallId)[0];
-            },
-        },
+
         methods: {
             onResizeStop(x, y, w, h) {
                 this.wall.w = w;
                 this.wall.h = h;
-                this.$store.dispatch("updateOrAddInstance", this.wall);
-                this.$store.dispatch("recalculateWidgets", this.wall);
             },
             onResizing(x, y, w, h) {
                 this.wall.w = w;
                 this.wall.h = h;
-                this.$store.dispatch("recalculateWidgets", this.wall);
             },
-            onWallTitleUpdate(value) {
-                this.wall.title = value;
-                this.$store.dispatch("updateOrAddInstance", this.wall);
+        },
+        watch: {
+            wall: {
+                handler() {
+                    if (!this.$env.state.lockChanges) {
+                        this.$store.dispatch("updateOrAddInstance", this.wall);
+                        this.$store.dispatch("recalculateWidgets", this.wall);
+                    }
+                },
+                deep: true,
             },
         },
     };
@@ -85,13 +86,12 @@
     .wall-container {
         position: relative;
     }
-    .wall-alert,
-    .wall-title {
+    .wall-edit {
         position: absolute;
         bottom: 0;
         left: auto;
     }
-    .wall-title input {
+    .wall-edit input {
         background-color: transparent;
     }
 </style>

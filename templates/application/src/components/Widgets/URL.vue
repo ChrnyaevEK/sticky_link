@@ -1,9 +1,7 @@
 <template id="url-template">
     <component :is="base" v-bind="{ ...$props, ...$attrs }">
         <template slot="content">
-            <div
-                class="w-100 h-100 d-flex justify-content-center align-items-center"
-            >
+            <div class="w-100 h-100 d-flex justify-content-center align-items-center">
                 <span class="btn btn-default p-2 border" @click="openHref">
                     <a
                         :href="widget.href"
@@ -13,9 +11,7 @@
                         :disabled="widget.href ? false : true"
                         ><u>{{ widget.text || widget.href }}</u></a
                     >
-                    <i
-                        class="fas fa-external-link-square-alt text-muted mx-1"
-                    ></i>
+                    <i class="fas fa-external-link-square-alt text-muted mx-1"></i>
                 </span>
             </div>
         </template>

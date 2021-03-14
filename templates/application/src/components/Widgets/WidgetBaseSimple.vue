@@ -16,7 +16,9 @@
         watch: {
             widget: {
                 handler() {
-                    this.$store.dispatch("updateOrAddInstance", this.widget);
+                    if (!this.$env.lockChanges) {
+                        this.$store.dispatch("updateOrAddInstance", this.widget);
+                    }
                 },
                 deep: true,
             },
@@ -35,6 +37,6 @@
                     font-weight:${this.widget.font_weight};
                 `;
             },
-        }
+        },
     };
 </script>

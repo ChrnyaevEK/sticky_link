@@ -1,7 +1,7 @@
 import Vuex from "vuex";
 import Vue from "vue";
 import $ from "jquery";
-import { api, updateManager, env } from "./common";
+import { env, api, updateManager } from "./common";
 
 Vue.use(Vuex);
 
@@ -127,12 +127,12 @@ export default new Vuex.Store({
         createWall(context) {
             return new Promise((resolve, reject) => {
                 env.dispatch("lockChanges").then(() => {
-                    api.create("wall").then((response) => {
-                        context.commit("addInstance", response);
+                    api.create("wall").then((wall) => {
+                        context.commit("addInstance", wall);
                         Vue.nextTick(() => {
                             env.dispatch("unlockChanges");
+                            resolve(wall);
                         });
-                        resolve(response);
                     }, reject);
                 });
             });
@@ -153,10 +153,10 @@ export default new Vuex.Store({
                 });
             });
         },
-        deleteInstance(context, data) {
+        deleteInstance(context, instance) {
             return new Promise((resolve, reject) => {
-                context.commit("deleteInstance", data);
-                api.delete(data.type, data.id).then(resolve, reject);
+                context.commit("deleteInstance", instance);
+                api.delete(instance.type, instance.id).then(resolve, reject);
             });
         },
         updateOrAddInstance(context, data) {

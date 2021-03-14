@@ -1,13 +1,24 @@
 <template>
     <span
-        class="w-100 py-1 px-2 m-0 alert alert-dismissible fade show position-absolute"
+        class="w-75 alert alert-dismissible fade show position-absolute"
         style="z-index: 1;"
-        v-show="$env.state.alertShow"
-        :class="'alert-' + $env.state.alertClass"
-        @mouseout="$env.dispatch('hideAlert')"
-        >{{ $env.state.alertMessage }}
-        <a class="close btn py-1 px-2" aria-label="Close" @click="$env.dispatch('hideAlert')">
+        v-show="io.alertUtil.visible"
+        :class="'alert-' + io.alertUtil.type"
+        @mouseout="io.alertUtil.visible = false"
+        v-html="io.alertUtil.html"
+        >
+        <a class="close btn" aria-label="Close" @click="io.alertUtil.visible = false">
             <span aria-hidden="true">&times;</span>
         </a></span
     >
 </template>
+<script>
+    import { io } from "../../common";
+    export default {
+        data() {
+            return {
+                io,
+            };
+        },
+    };
+</script>

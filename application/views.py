@@ -11,7 +11,7 @@ from application.consumers import Event as ConsumerEvent, WallConsumer
 from asgiref.sync import async_to_sync
 
 
-def _get_protected_queryset(model, user):
+def _get_protected_queryset(model, user, consider_anonymous_access=False):
     if model == models.Wall:
         return model.objects.filter(owner=user)
     return model.objects.filter(wall__owner=user)
@@ -110,7 +110,7 @@ class WallViewSet(CustomModelViewSet):
         return _get_protected_queryset(models.Wall, self.request.user)
 
     def retrieve(self, request, pk=None):
-        walls_query = _get_protected_queryset(models.Wall, request.user)
+        walls_query = _get_protected_queryset(models.Wall, request.user)  # Retrieve only!
         try:
             wall = walls_query.get(pk=pk)
         except models.Wall.DoesNotExist:

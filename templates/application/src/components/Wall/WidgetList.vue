@@ -1,9 +1,23 @@
 <template>
     <div class="w-100 h-100">
-        <SimpleText v-for="widget of filterWidget(SimpleText)" :key="widget.type + widget.id" :parent="true" :base="base" :widget="widget"> </SimpleText>
+        <SimpleText
+            v-for="widget of filterWidget(SimpleText)"
+            :key="widget.type + widget.id"
+            :parent="true"
+            :base="base"
+            :widget="widget"
+        >
+        </SimpleText>
         <URL v-for="widget of filterWidget(URL)" :key="widget.type + widget.id" :widget="widget" :base="base"> </URL>
-        <Counter v-for="widget of filterWidget(Counter)" :key="widget.type + widget.id" :widget="widget" :base="base"> </Counter>
-        <SimpleList v-for="widget of filterWidget(SimpleList)" :key="widget.type + widget.id" :widget="widget" :base="base"> </SimpleList>
+        <Counter v-for="widget of filterWidget(Counter)" :key="widget.type + widget.id" :widget="widget" :base="base">
+        </Counter>
+        <SimpleList
+            v-for="widget of filterWidget(SimpleList)"
+            :key="widget.type + widget.id"
+            :widget="widget"
+            :base="base"
+        >
+        </SimpleList>
     </div>
 </template>
 
