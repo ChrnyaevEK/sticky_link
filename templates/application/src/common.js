@@ -73,6 +73,7 @@ export var updateManager = new Vue({
             }
         },
         populateRemoteDestroy(update) {
+            env.dispatch("updateStart");
             store.dispatch("getInstanceByUid", update.instance.uid).then((localInstance) => {
                 if (localInstance) {
                     store.commit("deleteInstance", localInstance);
@@ -80,14 +81,20 @@ export var updateManager = new Vue({
                         env.dispatch("resolveWallDeleted");
                     }
                 }
+                env.dispatch("updateStop");
             });
         },
         resolveNewVersion(instance) {
-            store.dispatch("getInstanceByUid", instance.uid).then((localInstance) => {
+            env.dispatch("updateStart");
+            return store.dispatch("getInstanceByUid", instance.uid).then((localInstance) => {
                 if (localInstance) {
-                    store.dispatch("fetchInstance", localInstance);
+                    store.dispatch("fetchInstance", localInstance).then(() => {
+                        env.dispatch("updateStop");
+                    });
                 } else {
-                    store.dispatch("fetchInstance", instance);
+                    store.dispatch("fetchInstance", instance).then(() => {
+                        env.dispatch("updateStop");
+                    });
                 }
             });
         },
@@ -105,11 +112,11 @@ export class DefaultDict {
     }
 }
 
-export function handleUnexpected(){
+export function handleUnexpected() {
     env.dispatch("showAlert", {
         msg: "Something went wrong...",
         klass: "danger",
-    })
+    });
 }
 
 export var api = {
@@ -186,10 +193,10 @@ export var api = {
 
 export var env = new Vuex.Store({
     state: {
-        loadingState: null,
-        loadingStates: {
-            loading: true,
-            ready: false,
+        versionState: null,
+        versionStates: {
+            updateAvailable: "Updating...",
+            lastVersion: null,
         },
 
         savingState: null,
@@ -223,6 +230,12 @@ export var env = new Vuex.Store({
         },
         setSavingTimeoutId(state, id) {
             state.savingTimeoutId = id;
+        },
+        setUpdateAvailable(state) {
+            state.versionState = state.versionStates.updateAvailable;
+        },
+        setLastVersion(state) {
+            state.versionState = state.versionStates.lastVersion;
         },
         setAlert(state, data) {
             state.alertClass = data.alertClass;
@@ -272,6 +285,12 @@ export var env = new Vuex.Store({
                     context.commit("setSavingIdle");
                 }, context.state.savingTimeoutDuration)
             );
+        },
+        updateStart(context) {
+            context.commit("setUpdateAvailable");
+        },
+        updateStop(context) {
+            context.commit("setLastVersion");
         },
         showAlert(context, { msg, klass }) {
             context.commit("setAlert", {
