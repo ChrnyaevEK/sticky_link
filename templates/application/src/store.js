@@ -156,7 +156,8 @@ export default new Vuex.Store({
         deleteInstance(context, instance) {
             return new Promise((resolve, reject) => {
                 context.commit("deleteInstance", instance);
-                api.delete(instance.type, instance.id).then(resolve, reject);
+                updateManager.clearUpdate(instance.uid)
+                api.delete(instance.type, instance.id, instance.uid).then(resolve, reject);
             });
         },
         updateOrAddInstance(context, data) {

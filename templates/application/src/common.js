@@ -196,6 +196,10 @@ export var updateManager = new Vue({
                 }, this.coolDown);
             });
         },
+        clearUpdate(uid){  // Cancel any pending updates
+            clearTimeout(this.waiter[uid]);
+            delete this.handler[uid], this.waiter[uid];
+        },
         populateRemoteUpdate(update) {
             if (this.handler[update.instance.uid] !== undefined) {
                 // Http is pending right now
