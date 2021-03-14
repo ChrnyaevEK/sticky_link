@@ -88,10 +88,12 @@
             },
             onDeleteWall() {
                 if (confirm("Are you sure? Wall will be permanently removed!")) {
-                    let wall = this.$store.state.walls.filter((w) => w.id == this.$route.params.wallId)[0]; // Order is important
-                    this.$store.dispatch("deleteInstance", wall).then(() => {
-                        this.$env.dispatch("resolveWallDeleted", wall);
-                    });
+                    if (this.$store.state.walls) {
+                        let wall = this.$store.state.walls.filter((w) => w.id == this.$route.params.wallId)[0]; // Order is important
+                        this.$store.dispatch("deleteInstance", wall).then(() => {
+                            this.$env.dispatch("resolveWallDeleted", wall);
+                        });
+                    }
                 }
             },
             createWidget(klass) {

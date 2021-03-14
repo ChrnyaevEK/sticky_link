@@ -7,8 +7,8 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
-        walls: [],
-        widgets: [],
+        walls: null,
+        widgets: null,
         user: null,
         settings: null,
     },
