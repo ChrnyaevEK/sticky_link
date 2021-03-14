@@ -9,8 +9,8 @@ export default new Vuex.Store({
     state: {
         walls: [],
         widgets: [],
-        user: {},
-        settings: {},
+        user: null,
+        settings: null,
     },
     mutations: {
         setUser(state, user) {
