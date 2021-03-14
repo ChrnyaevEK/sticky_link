@@ -15,7 +15,7 @@ from sticky_link import env
 import logging
 from systemd import journal
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logging.root.addHandler(journal.JournaldLogHandler())
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
