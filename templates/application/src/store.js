@@ -7,10 +7,10 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
-        walls: null,
-        widgets: null,
-        user: null,
-        settings: null,
+        walls: [],
+        widgets: [],
+        user: {},
+        settings: {},
     },
     mutations: {
         setUser(state, user) {

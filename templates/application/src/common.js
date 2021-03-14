@@ -144,7 +144,7 @@ export var env = new Vuex.Store({
         },
         resolveWallCreated(context, wall) {
             io.alert("New wall has been created!", "success");
-            this.$router.push({
+            router.push({
                 name: "wallEdit",
                 params: {
                     wallId: wall.id,
