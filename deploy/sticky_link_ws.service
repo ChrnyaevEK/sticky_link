@@ -1,0 +1,13 @@
+[Unit]
+Description= WS Django connections
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/sticky_link
+ExecStart=venv/bin/daphne -b 0.0.0.0 -p 9001 sticky_link.asgi:application
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

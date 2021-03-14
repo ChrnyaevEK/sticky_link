@@ -1,12 +1,12 @@
 [Unit]
-Description= Serve sticky_link project
+Description= HTTP Django connections
 After=network.target
 
 [Service]
 User=www-data
 Group=www-data
 WorkingDirectory=/var/www/sticky_link
-ExecStart=sh /var/www/sticky_link/deploy/run-production.sh
+ExecStart=uwsgi --ini /var/www/sticky_link/deploy/production.ini
 ExecStop=uwsgi --stop /var/www/sticky_link/deploy/uwsgi_master.pid
 
 [Install]
