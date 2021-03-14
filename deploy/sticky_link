@@ -26,7 +26,12 @@ server {
         include     /var/www/sticky_link/deploy/uwsgi_params;
     }
 
-
+    location /wss/ {
+        proxy_pass http://127.0.0.1:6379;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
 
     listen 443 ssl; # managed by Certbot
     ssl_certificate /etc/letsencrypt/live/www.sticky-link.com/fullchain.pem; # managed by Certbot
