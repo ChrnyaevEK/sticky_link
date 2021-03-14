@@ -1,6 +1,9 @@
 upstream django {
     server unix:///var/www/sticky_link/deploy/sticky_link.sock;
 }
+upstream ws_django {
+    server unix:///var/www/sticky_link/deploy/sticky_link.sock;
+}
 
 # configuration of the server
 server {
@@ -27,7 +30,7 @@ server {
     }
 
     location /wss/ {
-        proxy_pass ws://django;
+        proxy_pass ws://ws_django;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
