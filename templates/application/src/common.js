@@ -5,6 +5,15 @@ import store from "./store";
 import router from "./router";
 
 Vue.use(Vuex);
+var Rollbar = require("rollbar");
+export var rollbar = new Rollbar({
+    accessToken: "352f084b3c4b4a60951b25ce2252fb6f",
+    captureUncaught: process.env.NODE_ENV == "production",
+    captureUnhandledRejections: process.env.NODE_ENV == "production",
+    payload: {
+        environment: "production"
+    }
+});
 
 function getCookie(name) {
     let cookieValue = null;
@@ -166,15 +175,15 @@ export var updateManager = new Vue({
                     return resolve();
                 }
                 var update = () => {
-                    return api.update_partial(instance.type, instance.id, instance).then((response) => {
-                        if (this.remote[response.uid] !== undefined) {
+                    return api.update_partial(instance.type, instance.id, instance).then((newInstance) => {
+                        if (this.remote[newInstance.uid] !== undefined) {
                             // Ws finished before http - resolve miss match
-                            if (this.remote[response.uid] !== response.version) {
-                                this.resolveNewVersion(response);
+                            if (this.remote[newInstance.uid] !== newInstance.version) {
+                                this.resolveNewVersion(newInstance);
                             }
-                            delete this.remote[response.uid]; // Unset remote version
+                            delete this.remote[newInstance.uid]; // Unset remote version
                         }
-                        resolve(response);
+                        resolve(newInstance);
                     }, reject);
                 };
 
@@ -253,7 +262,9 @@ export var api = {
             },
         })
             .fail((response) => {
-                io.alert(response.responseJSON.detail, "danger");
+                if (response.responseJSON.detail) {
+                    io.alert(response.responseJSON.detail, "danger");
+                }
             })
             .always(() => {
                 io.save(false);
@@ -408,4 +419,5 @@ export default {
     env,
     api,
     handleUnexpected,
+    rollbar,
 };
