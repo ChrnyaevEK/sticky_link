@@ -43,3 +43,5 @@ Twisted==20.3.0
 txaio==21.2.1
 uWSGI==2.0.19.1
 zope.interface==5.2.0
+
+systemd~=0.16.1
