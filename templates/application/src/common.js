@@ -273,7 +273,7 @@ export var api = {
             .fail((response) => {
                 if (response.responseJSON && response.responseJSON.detail) {
                     io.alert(response.responseJSON.detail, "danger");
-                } else {
+                } else if (response.status != 400) { // Handled else were
                     io.alert("Server error occurred", "danger");
                 }
             })
