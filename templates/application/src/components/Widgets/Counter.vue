@@ -36,7 +36,6 @@
         },
         methods: {
             changeValue(diff) {
-                console.log(123)
                 var value = this.widget.value + diff;
                 this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { value }));
             },

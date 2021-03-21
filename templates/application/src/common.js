@@ -185,10 +185,12 @@ export var updateManager = new Vue({
                 });
             }
             this.handler[uid] = update;
-            if (this.waiter[uid] === undefined) {
+            if (!this.waiter[uid]) {
                 this.waiter[uid] = new Promise((resolve, reject) => {
                     setTimeout(() => {
+                        delete this.waiter[uid];
                         api.update_partial(type, id, this.handler[uid]).then((newInstance) => {
+                            delete this.handler[uid];
                             if (this.remote[uid] !== undefined) {
                                 // Ws finished before http - resolve miss match
                                 if (this.remote[uid] !== newInstance.version) {
@@ -199,8 +201,6 @@ export var updateManager = new Vue({
                             resolve(newInstance);
                         }, reject);
                     }, this.coolDown);
-                    delete this.handler[uid];
-                    delete this.waiter[uid];
                 });
             }
             return this.waiter[uid];
