@@ -136,6 +136,16 @@
                     class="form-control"
                 />
             </div>
+            <div class="form-group">
+                <label :for="_('help')">Help text</label>
+                <input
+                    :id="_('help')"
+                    :maxlength="$store.state.settings.widget.help_length"
+                    class="form-control"
+                    v-model="instance.help"
+                    @input="push"
+                />
+            </div>
             <div class="form-check">
                 <input
                     type="checkbox"
@@ -212,12 +222,7 @@
         <template v-if="instance.type == SimpleSwitch.type">
             <div class="form-group">
                 <label :for="_('title')">Title </label>
-                <input
-                    :id="_('title')"
-                    class="form-control"
-                    v-model="instance.title"
-                    @input="push"
-                />
+                <input :id="_('title')" class="form-control" v-model="instance.title" @input="push" />
             </div>
         </template>
 

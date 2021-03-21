@@ -1,5 +1,5 @@
 <template>
-    <div class="widget" :class="[widget.border ? 'widget-border' : 'widget-no-border']" :style="style">
+    <div class="widget" :class="[widget.border ? 'widget-border' : 'widget-no-border']" :style="style" :title="widget.help">
         <slot name="content"></slot>
     </div>
 </template>

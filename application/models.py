@@ -86,9 +86,10 @@ class Widget(Common):
         min_height = 2
         height = 150
         border = True
+        help_length = 200
         protected_fields = [
             'id', 'uid', 'wall', 'type', 'date_of_creation', 'last_update',
-            'font_size', 'font_weight', 'background_color', 'text_color', 'border',
+            'font_size', 'font_weight', 'background_color', 'text_color', 'border', 'help',
             'w', 'h', 'z', 'x', 'y',
         ]
 
@@ -114,6 +115,7 @@ class Widget(Common):
     background_color = models.CharField(max_length=9, validators=[ColorValidator], default=Default.background_color)
     text_color = models.CharField(max_length=9, validators=[ColorValidator], default=Default.text_color)
     border = models.BooleanField(default=Default.border)
+    help = models.CharField(max_length=Default.help_length, null=True, blank=True)
 
     class Meta:
         abstract = True

@@ -20,7 +20,8 @@
             </vue-draggable-resizable>
             <Options></Options>
             <div class="wall-edit px-2">
-                {{ wall.title }}
+                <span>{{ wall.title }}</span>
+                <span v-show="wall.lock_widgets" title="Widgets are locked" class="text-secondary px-1"><i class="fas fa-lock"></i></span>
             </div>
         </div>
     </div>

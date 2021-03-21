@@ -18,6 +18,7 @@
                 ? 'shadow'
                 : '',
         ]"
+        :title="widget.help"
         :style="style"
         :parent="true"
         :w="widget.w"
