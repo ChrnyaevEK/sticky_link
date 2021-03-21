@@ -65,6 +65,10 @@ class CustomModelSerializer(serializers.ModelSerializer):
             protected_fields = models.Wall.Default.protected_fields if instance.type == models.Wall.type else models.Widget.Default.protected_fields
             if set(protected_fields).intersection(validated_data.keys()):
                 raise PermissionDenied()
+        else:
+            owner = instance.owner if instance.type == models.Wall.type else instance.wall.owner
+            if owner != self.context['request'].user:
+                raise PermissionDenied()
         return super().update(instance, validated_data)
 
 

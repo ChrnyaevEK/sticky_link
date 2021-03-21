@@ -3,7 +3,6 @@ import VueRouter from "vue-router";
 import AppEdit from "./components/App/AppEdit";
 import AppView from "./components/App/AppView";
 import AppEmpty from "./components/App/AppEmpty";
-import AppForbidden from "./components/App/AppForbidden";
 import WallEdit from "./components/Wall/WallEdit";
 import WallView from "./components/Wall/WallView";
 import WallEmpty from "./components/Wall/WallEmpty";
@@ -84,7 +83,7 @@ const router = new VueRouter({
                         if (store.state.user.is_authenticated) {
                             store.dispatch("fetchWalls").then(next);
                         } else {
-                            next()
+                            next();
                         }
                     },
                 },
@@ -92,7 +91,14 @@ const router = new VueRouter({
         },
         {
             path: "/app",
-            component: AppForbidden,
+            component: AppEmpty,
+            beforeEnter(to, from, next) {
+                if (store.state.user.is_authenticated) {
+                    store.dispatch("fetchWalls").then(next);
+                } else {
+                    next();
+                }
+            },
             children: [
                 {
                     name: "wallEditForbidden",

@@ -143,6 +143,11 @@ class WallViewSet(CustomModelViewSet):
         wall['widgets'] = widgets
         return Response(wall)
 
+    def list(self, request, *args, **kwargs):
+        walls_query = _get_protected_queryset(models.Wall, request.user).filter(owner=request.user)
+        walls = self.serializer_class(walls_query, many=True).data
+        return Response(walls)
+
 
 class SimpleTextViewSet(CustomModelViewSet):
     serializer_class = serializers.SimpleTextSerializer
