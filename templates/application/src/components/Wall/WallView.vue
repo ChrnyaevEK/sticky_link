@@ -12,12 +12,14 @@
     import WidgetBaseSimple from "../Widgets/WidgetBaseSimple";
 
     export default {
-        name: 'WallView',
+        name: "WallView",
         components: { WidgetList },
         data() {
             return {
                 WidgetBaseSimple,
-                wall: this.$store.state.walls.filter((wall) => wall.id == this.$route.params.wallId)[0] || this.$store.state.requestedWall,
+                wall:
+                    this.$store.state.walls.filter((wall) => wall.id == this.$route.params.wallId)[0] ||
+                    this.$store.state.requestedWall,
             };
         },
     };
@@ -28,8 +30,8 @@
         position: relative;
     }
     .wall-title {
-        position: absolute;
+        position: fixed;
         bottom: 0;
-        left: auto;
+        left: 0;
     }
 </style>
