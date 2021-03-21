@@ -59,15 +59,18 @@ class CustomModelSerializer(serializers.ModelSerializer):
         representation['version'] = get_version_hash(representation)
         return representation
 
+    def update(self, instance, validated_data):
+        if self.context['request'].user.is_anonymous:  # Check if no protected fields are to be updated
+            if set(instance.Default.protected_fields).intersection(validated_data.keys):
+                raise serializers.ValidationError()
+        return super().update(instance, validated_data)
+
 
 class UserSerializer(CustomModelSerializer):
 
-    def get_queryset(self):
-        return models.User.objects.filter(pk=self.request.user.id)
-
     class Meta:
         model = User
-        fields = ['username', 'email', 'id']
+        fields = ['username', 'email']
 
 
 class SimpleTextSerializer(CustomModelSerializer):

@@ -9,12 +9,19 @@ from django.core.exceptions import PermissionDenied
 from channels.layers import get_channel_layer
 from application.consumers import Event as ConsumerEvent, WallConsumer
 from asgiref.sync import async_to_sync
+from django.db.models import Q
 
 
-def _get_protected_queryset(model, user, consider_anonymous_access=False):
+def _get_protected_queryset(model, user):
     if model == models.Wall:
-        return model.objects.filter(owner=user)
-    return model.objects.filter(wall__owner=user)
+        q = Q(allow_anonymous_view=True)
+        if not user.is_anonymous:
+            q.add(Q(owner=user), Q.OR)
+    else:
+        q = Q(wall__allow_anonymous_view=True)
+        if not user.is_anonymous:
+            q.add(Q(wall__owner=user), Q.OR)
+    return model.objects.filter(q)
 
 
 class Event:
@@ -33,9 +40,6 @@ class Static:
 
 class UserViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.UserSerializer
-
-    def get_queryset(self):
-        return models.User.objects.filter(pk=self.request.user.id)
 
     def retrieve(self, request, *args, **kwargs):
         return self._get(request, *args, **kwargs)

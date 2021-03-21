@@ -2,7 +2,7 @@
     <vue-draggable-resizable
         :draggable="!$env.state.lockChanges"
         :resizable="!$env.state.lockChanges"
-        @resizestop="onResize"
+        @resizestop="onResizeStop"
         @dragstop="onDrag"
         @click.native.stop
         @mousedown.native.stop
@@ -12,7 +12,9 @@
         class="widget"
         :class="[
             widget.border ? 'widget-border' : 'widget-no-border',
-            $env.state.editWidget && $env.state.editWidget.id == widget.id && $env.state.editWidget.type == widget.type
+            $env.state.editInstance &&
+            $env.state.editInstance.id == widget.id &&
+            $env.state.editInstance.type == widget.type
                 ? 'shadow'
                 : '',
         ]"
@@ -36,7 +38,7 @@
                 <i class="fas fa-trash"></i>
             </button>
         </div>
-        <div class="w-100 h-100" @contextmenu.stop.prevent="$env.dispatch('openWidgetOptions', widget)">
+        <div class="w-100 h-100" @contextmenu.stop.prevent="$env.dispatch('openOptions', Object.assign({}, widget))">
             <slot name="content"></slot>
         </div>
     </vue-draggable-resizable>
@@ -55,35 +57,27 @@
                 required: true,
             },
         },
-        data: function() {
+        data() {
             return {
                 quickAccessClass: "widget-quick-access",
                 quickAccessVisible: false,
             };
         },
         methods: {
-            onResize(x, y, w, h) {
-                this.widget.w = w;
-                this.widget.h = h;
+            onResizeStop(x, y, w, h) {
+                if (!this.$env.lockChanges) {
+                    this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { w, h }));
+                }
             },
             onDrag(x, y) {
-                this.widget.x = x;
-                this.widget.y = y;
+                if (!this.$env.lockChanges) {
+                    this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { x, y }));
+                }
             },
             deleteWidget() {
                 if (confirm("Are you sure?")) {
                     this.$store.dispatch("deleteInstance", this.widget);
                 }
-            },
-        },
-        watch: {
-            widget: {
-                handler() {
-                    if (!this.$env.lockChanges){
-                        this.$store.dispatch("updateOrAddInstance", this.widget);
-                    }
-                },
-                deep: true,
             },
         },
         components: {

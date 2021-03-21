@@ -36,6 +36,13 @@ class Wall(Common):
         height = 600
         min_width = 300
         min_height = 300
+        allow_anonymous_view = False
+        center_horizontally = False
+        protected_fields = [
+            'id', 'uid', 'type', 'date_of_creation', 'last_update',
+            'owner', 'allowed_users', 'allow_anonymous_view', 'title', 'description',
+            'w', 'h',
+        ]
 
     type = Default.type
     w = models.IntegerField(verbose_name='Wall width', default=Default.width)
@@ -43,7 +50,7 @@ class Wall(Common):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     allowed_users = models.ManyToManyField(User, verbose_name='List of allowed users',
                                            related_name='related_walls', blank=True)
-    allow_anonymous_view = models.BooleanField('Allow anonymous view mode', default=False)
+    allow_anonymous_view = models.BooleanField('Allow anonymous view mode', default=Default.allow_anonymous_view)
     title = models.CharField(verbose_name='Wall title', max_length=Default.title_length, default=Default.title)
     description = models.CharField(verbose_name='Wall description', max_length=Default.description_length,
                                    blank=True, null=True)
@@ -65,8 +72,6 @@ class Widget(Common):
         min_x = 0
         min_y = 0
         max_z = 1000
-        left = 0
-        top = 0
         font_size = 16
         min_font_size = 8
         max_font_size = 40
@@ -78,9 +83,11 @@ class Widget(Common):
         min_height = 2
         height = 100
         border = True
-        static_fields = ['id', 'wall', 'type', 'date_of_creation', 'last_update']
-        general_fields = ['font_size', 'font_weight', 'background_color', 'text_color', 'border']
-        position_fields = ['w', 'h', 'z', 'x', 'y']
+        protected_fields = [
+            'id', 'uid', 'wall', 'type', 'date_of_creation', 'last_update',
+            'font_size', 'font_weight', 'background_color', 'text_color', 'border',
+            'w', 'h', 'z', 'x', 'y',
+        ]
 
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
     w = models.IntegerField(verbose_name='Widget width', default=Default.width)
@@ -88,10 +95,10 @@ class Widget(Common):
     z = models.IntegerField(verbose_name='Widget z index(stack position)', default=Default.z, validators=[
         MaxValueValidator(Default.max_z), MinValueValidator(Default.min_z)
     ])
-    x = models.IntegerField(verbose_name='Offset left from parent', default=Default.left, validators=[
+    x = models.IntegerField(verbose_name='Offset left from parent', default=Default.min_x, validators=[
         MinValueValidator(Default.min_x)
     ])
-    y = models.IntegerField(verbose_name='Offset top from parent', default=Default.top, validators=[
+    y = models.IntegerField(verbose_name='Offset top from parent', default=Default.min_y, validators=[
         MinValueValidator(Default.min_y)
     ])
     font_size = models.IntegerField(verbose_name='Widget font size', default=Default.font_size,

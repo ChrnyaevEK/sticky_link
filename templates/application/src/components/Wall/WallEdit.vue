@@ -1,11 +1,8 @@
 <template>
     <div class="w-100 h-100 overflow-hidden">
-        <div
-            v-if="wall"
-            class="w-100 h-100 wall-container overflow-auto"
-            @click.stop="$env.dispatch('closeWidgetOptions')"
-        >
+        <div class="w-100 h-100 wall-container overflow-auto" @click.stop="$env.dispatch('closeOptions')">
             <vue-draggable-resizable
+                @contextmenu.native.stop.prevent="$env.dispatch('openOptions', Object.assign({}, wall))"
                 @resizestop="onResizeStop"
                 @resizing="onResizing"
                 :resizable="true"
@@ -21,7 +18,7 @@
             >
                 <WidgetList :base="WidgetBaseResizable"></WidgetList>
             </vue-draggable-resizable>
-            <WidgetOptions></WidgetOptions>
+            <Options></Options>
             <div class="wall-edit px-1">
                 <input v-model="wall.title" class="form-control border-0 px-1" />
             </div>
@@ -32,7 +29,7 @@
 <script>
     import WidgetList from "./WidgetList";
     import WidgetBaseResizable from "../Widgets/WidgetBaseResizable";
-    import WidgetOptions from "../Widgets/WidgetOptions";
+    import Options from "../Utils/Options";
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
     import $ from "jquery";
@@ -41,14 +38,14 @@
         components: {
             VueDraggableResizable,
             WidgetList,
-            WidgetOptions,
+            Options,
         },
         beforeRouteUpdate(to, from, next) {
             this.$store.dispatch("fetchWidgets", to.params.wallId).then(next);
         },
         created() {
             $(document).keyup((e) => {
-                if (e.keyCode === 27) this.$env.dispatch("closeWidgetOptions"); // esc
+                if (e.keyCode === 27) this.$env.dispatch("closeOptions"); // esc
             });
         },
         data() {
@@ -57,39 +54,33 @@
                 wall: this.$store.state.walls.filter((wall) => wall.id == this.$route.params.wallId)[0],
             };
         },
-
         methods: {
             onResizeStop(x, y, w, h) {
-                this.wall.w = w;
-                this.wall.h = h;
+                if (!this.$env.state.lockChanges) {
+                    this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.wall, { x, y, w, h }));
+                }
             },
             onResizing(x, y, w, h) {
-                this.wall.w = w;
-                this.wall.h = h;
-            },
-        },
-        watch: {
-            wall: {
-                handler() {
-                    if (!this.$env.state.lockChanges) {
-                        this.$store.dispatch("updateOrAddInstance", this.wall);
-                        this.$store.dispatch("recalculateWidgets", this.wall);
-                    }
-                },
-                deep: true,
+                if (!this.$env.state.lockChanges) {
+                    this.$store.dispatch("recalculateWidgets", Object.assign({}, this.wall, { w, h }));
+                }
             },
         },
     };
 </script>
 
 <style scoped>
+    .centered {
+        display: flex;
+        justify-content: center;
+    }
     .wall-container {
         position: relative;
     }
     .wall-edit {
         position: absolute;
         bottom: 0;
-        left: auto;
+        left: 0;
     }
     .wall-edit input {
         background-color: transparent;

@@ -3,17 +3,9 @@ import Vue from "vue";
 import Vuex from "vuex";
 import store from "./store";
 import router from "./router";
+import _ from "lodash";
 
 Vue.use(Vuex);
-var Rollbar = require("rollbar");
-export var rollbar = new Rollbar({
-    accessToken: "352f084b3c4b4a60951b25ce2252fb6f",
-    captureUncaught: process.env.NODE_ENV == "production",
-    captureUnhandledRejections: process.env.NODE_ENV == "production",
-    payload: {
-        environment: "production"
-    }
-});
 
 function getCookie(name) {
     let cookieValue = null;
@@ -95,7 +87,7 @@ export var env = new Vuex.Store({
         lockChanges: false,
         lockUpdateManager: false,
 
-        editWidget: null,
+        editInstance: null,
     },
     mutations: {
         lockChanges(state) {
@@ -110,19 +102,19 @@ export var env = new Vuex.Store({
         unlockUpdateManager(state) {
             state.lockUpdateManager = false;
         },
-        openWidgetOptions(state, data) {
-            state.editWidget = data;
+        openOptions(state, instance) {
+            state.editInstance = instance;
         },
-        closeWidgetOptions(state) {
-            state.editWidget = null;
+        closeOptions(state) {
+            state.editInstance = null;
         },
     },
     actions: {
-        openWidgetOptions(context, data) {
-            context.commit("openWidgetOptions", data);
+        openOptions(context, instance) {
+            context.commit("openOptions", instance);
         },
-        closeWidgetOptions(context) {
-            context.commit("closeWidgetOptions");
+        closeOptions(context) {
+            context.commit("closeOptions");
         },
         lockChanges(context) {
             context.commit("lockChanges");
@@ -161,44 +153,40 @@ export var updateManager = new Vue({
             // uid: timeout id
         },
         handler: {
-            // uid: function to call real update
+            // uid: new version to send
         },
         remote: {
             // uid: version from ws
         },
     },
     methods: {
-        proposeUpdate(instance) {
+        proposeUpdate(update, { type, id, uid }) {
             // Require Type, Id, Uid
-            return new Promise((resolve, reject) => {
-                if (env.state.lockUpdateManager) {
-                    return resolve();
-                }
-                var update = () => {
-                    return api.update_partial(instance.type, instance.id, instance).then((newInstance) => {
-                        if (this.remote[newInstance.uid] !== undefined) {
-                            // Ws finished before http - resolve miss match
-                            if (this.remote[newInstance.uid] !== newInstance.version) {
-                                this.resolveNewVersion(newInstance);
+            if (this.$env.state.lockUpdateManager) {
+                return new Promise((resolve) => {
+                    resolve();
+                });
+            }
+            this.handler[uid] = update;
+            if (this.waiter[uid] === undefined) {
+                this.waiter[uid] = new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        api.update_partial(type, id, this.handler[uid]).then((newInstance) => {
+                            if (this.remote[uid] !== undefined) {
+                                // Ws finished before http - resolve miss match
+                                if (this.remote[uid] !== newInstance.version) {
+                                    this.resolveNewVersion(newInstance);
+                                }
+                                delete this.remote[newInstance.uid]; // Unset remote version
                             }
-                            delete this.remote[newInstance.uid]; // Unset remote version
-                        }
-                        resolve(newInstance);
-                    }, reject);
-                };
-
-                this.handler[instance.uid] = update;
-                clearTimeout(this.waiter[instance.uid]); // Unset last update
-                this.waiter[instance.uid] = setTimeout(() => {
-                    this.handler[instance.uid]().then(() => {
-                        delete this.handler[instance.uid], this.waiter[instance.uid];
-                    }); // Call real update
-                }, this.coolDown);
-            });
-        },
-        clearUpdate(uid){  // Cancel any pending updates
-            clearTimeout(this.waiter[uid]);
-            delete this.handler[uid], this.waiter[uid];
+                            delete this.handler[uid];
+                            delete this.waiter[uid];
+                            resolve(newInstance);
+                        }, reject);
+                    }, this.coolDown);
+                });
+            }
+            return this.waiter[uid];
         },
         populateRemoteUpdate(update) {
             if (this.handler[update.instance.uid] !== undefined) {
@@ -266,8 +254,10 @@ export var api = {
             },
         })
             .fail((response) => {
-                if (response.responseJSON.detail) {
+                if (response.responseJSON && response.responseJSON.detail) {
                     io.alert(response.responseJSON.detail, "danger");
+                } else {
+                    io.alert("Server error occurred", "danger");
                 }
             })
             .always(() => {
@@ -340,7 +330,9 @@ export var ws = new Vue({
     methods: {
         connect(wallId) {
             this.wallId = wallId;
-            this.socket = new WebSocket(`wss://${process.env.VUE_APP_HOST}/wss/${wallId}`);
+            this.socket = new WebSocket(
+                `${process.env.NODE_ENV == "production" ? "wss" : "ws"}://${process.env.VUE_APP_HOST}/wss/${wallId}`
+            );
             this.socket.onmessage = (e) => {
                 this.onMessage(e);
             };
@@ -377,51 +369,36 @@ export function generateId(property) {
     return `${this._uid}-${property}`;
 }
 
-export function widgetGenerateUpdate(widget, fields) {
-    var update = {};
-    for (var field of fields) {
-        update[field] = widget[field];
-    }
-    return update;
+function deepDiff(a, b, r, reversible) {
+    _.each(a, function(v, k) {
+        // already checked this or equal...
+        // eslint-disable-next-line no-prototype-builtins
+        if (r.hasOwnProperty(k) || b[k] === v) return;
+        // but what if it returns an empty object? still attach?
+        r[k] = _.isObject(v) ? _.diff(v, b[k], reversible) : v;
+    });
 }
 
-export function widgetGenerateDifference(newWidget, oldWidget) {
-    var leftFields = [];
-    var fieldGroups = [store.state.settings.widget.general_fields, store.state.settings.widget.position_fields];
-    var allFields = [
-        ...store.state.settings.widget.general_fields,
-        ...store.state.settings.widget.position_fields,
-        ...store.state.settings.widget.static_fields,
-    ];
-    for (let field of Object.getOwnPropertyNames(newWidget)) {
-        if (allFields.indexOf(field) == -1) {
-            leftFields.push(field);
-        }
-    }
-    fieldGroups.push(leftFields);
-    for (let fields of fieldGroups) {
-        for (let field of fields) {
-            if (oldWidget[field] !== newWidget[field]) {
-                return widgetGenerateUpdate(newWidget, fields);
-            }
-        }
-    }
-    return {};
-}
-
-export function widgetApplyUpdate(widget, source, fields) {
-    for (var field of fields) {
-        widget[field] = source[field];
-    }
-}
+/* the function */
+_.mixin({
+    shallowDiff: function(a, b) {
+        return _.omit(a, function(v, k) {
+            return b[k] === v;
+        });
+    },
+    diff: function(a, b, reversible) {
+        var r = {};
+        deepDiff(a, b, r, reversible);
+        if (reversible) deepDiff(b, a, r, reversible);
+        return r;
+    },
+});
 
 export default {
-    widgetApplyUpdate,
     generateId,
     updateManager,
     sleep,
     env,
     api,
     handleUnexpected,
-    rollbar,
 };

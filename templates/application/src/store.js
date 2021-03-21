@@ -1,11 +1,13 @@
 import Vuex from "vuex";
 import Vue from "vue";
 import $ from "jquery";
+import _ from "lodash";
 import { env, api, updateManager } from "./common";
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
+    strict: true,
     state: {
         walls: null,
         widgets: null,
@@ -156,13 +158,20 @@ export default new Vuex.Store({
         deleteInstance(context, instance) {
             return new Promise((resolve, reject) => {
                 context.commit("deleteInstance", instance);
-                updateManager.clearUpdate(instance.uid)
                 api.delete(instance.type, instance.id, instance.uid).then(resolve, reject);
             });
         },
-        updateOrAddInstance(context, data) {
-            context.commit("updateOrAddInstance", data);
-            return updateManager.proposeUpdate(data);
+        updateOrAddInstance(context, instance) {
+            return new Promise((resolve, reject) => {
+                context.dispatch("getInstanceByUid", instance.uid).then((localInstance) => {
+                    var update = instance;
+                    if (localInstance) {
+                        update = _.diff(instance, localInstance);
+                    }
+                    context.commit("updateOrAddInstance", instance);
+                    return updateManager.proposeUpdate(update, instance).then(resolve, reject);
+                });
+            });
         },
         copyWidget(context, data) {
             return new Promise((resolve, reject) => {
