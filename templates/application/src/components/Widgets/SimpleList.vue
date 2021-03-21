@@ -29,6 +29,7 @@
 </template>
 
 <script>
+    import { deepCopy } from "../../common";
     export default {
         type: "simple_list",
         name: "SimpleList",
@@ -51,15 +52,18 @@
         methods: {
             addItem() {
                 if (this.item) {
-                    if (!this.widget.items) {
-                        this.widget.items = [];
-                    }
-                    this.widget.items.push(this.item);
+                    var items = this.widget.items ? deepCopy(this.widget.items) : [];
+                    items.push(this.item);
                     this.item = undefined;
+                    this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { items }));
                 }
             },
             removeItem(i) {
-                this.widget.items.splice(i, 1);
+                if (this.widget.items) {
+                    var items = deepCopy(this.widget.items);
+                    items.splice(i, 1);
+                    this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { items }));
+                }
             },
         },
     };

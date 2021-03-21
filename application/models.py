@@ -81,7 +81,7 @@ class Widget(Common):
         min_width = 2
         width = 200
         min_height = 2
-        height = 100
+        height = 150
         border = True
         protected_fields = [
             'id', 'uid', 'wall', 'type', 'date_of_creation', 'last_update',

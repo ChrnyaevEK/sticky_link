@@ -10,6 +10,7 @@ from channels.layers import get_channel_layer
 from application.consumers import Event as ConsumerEvent, WallConsumer
 from asgiref.sync import async_to_sync
 from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated
 
 
 def _get_protected_queryset(model, user):
@@ -89,6 +90,16 @@ class CustomModelViewSet(ModelViewSet):
                     'uid': instance.uid(),
                 }
             })
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.action in ('list', 'retrieve', 'partial_update', 'update'):
+            permission_classes = []
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)

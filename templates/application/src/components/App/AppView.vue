@@ -3,6 +3,7 @@
         <span class=" w-100 p-1 bg-white border-bottom">
             <a href="/" class="m-3"> Sticky link </a>
             <router-link
+                v-if="$store.state.user.is_authenticated"
                 class="mr-3"
                 :to="{
                     name: 'wallEdit',
@@ -10,6 +11,9 @@
                 }"
                 >Edit</router-link
             >
+            <span v-if="$store.state.user.is_anonymous" class="badge badge-warning">
+                {{ $store.state.user.username }}
+            </span>
             <SaveUtil></SaveUtil>
         </span>
         <div class="w-100 h-100 d-flex flex-column align-items-center">

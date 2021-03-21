@@ -13,16 +13,6 @@
                 required: true,
             },
         },
-        watch: {
-            widget: {
-                handler() {
-                    if (!this.$env.lockChanges) {
-                        this.$store.dispatch("updateOrAddInstance", this.widget);
-                    }
-                },
-                deep: true,
-            },
-        },
         computed: {
             style() {
                 return `

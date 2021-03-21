@@ -142,19 +142,23 @@
                     :id="_('border')"
                     class="form-check-input"
                     v-model="instance.border"
-                    @input="push"
+                    @change="push"
                 />
                 <label class="form-check-label" :for="_('border')">Border</label>
             </div>
         </template>
         <template v-if="instance.type == 'wall'">
+            <div class="form-group">
+                <label :for="_('title')">Title </label>
+                <input :id="_('title')" class="form-control" v-model="instance.title" @input="push" />
+            </div>
             <div class="form-check">
                 <input
                     type="checkbox"
                     :id="_('allow_anonymous_view')"
                     class="form-check-input"
                     v-model="instance.allow_anonymous_view"
-                    @input="push"
+                    @change="push"
                 />
                 <label class="form-check-label" :for="_('allow_anonymous_view')">Allow anonymous view mode</label>
             </div>
@@ -169,23 +173,11 @@
         <template v-if="instance.type == Counter.type">
             <div class="form-group">
                 <label :for="_('value')">Value </label>
-                <input
-                    :id="_('value')"
-                    class="form-control"
-                    v-model.number="instance.value"
-                    @input="push"
-                    :aria-describedby="_('valueHelp')"
-                />
+                <input :id="_('value')" class="form-control" v-model.number="instance.value" @input="push" />
             </div>
             <div class="form-group">
                 <label :for="_('title')">Title </label>
-                <input
-                    :id="_('title')"
-                    class="form-control"
-                    v-model.number="instance.title"
-                    @input="push"
-                    :aria-describedby="_('titleHelp')"
-                />
+                <input :id="_('title')" class="form-control" v-model="instance.title" @input="push" />
             </div>
         </template>
         <!--URL-->
@@ -203,13 +195,7 @@
         <template v-if="instance.type == SimpleList.type">
             <div class="form-group">
                 <label :for="_('title')">Title </label>
-                <input
-                    :id="_('title')"
-                    class="form-control"
-                    v-model.number="widget.title"
-                    @input="push"
-                    :aria-describedby="_('titleHelp')"
-                />
+                <input :id="_('title')" class="form-control" v-model="widget.title" @input="push" />
             </div>
         </template>
 

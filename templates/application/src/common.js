@@ -3,9 +3,26 @@ import Vue from "vue";
 import Vuex from "vuex";
 import store from "./store";
 import router from "./router";
-import _ from "lodash";
+
+const transform = require("lodash.transform");
+const isEqual = require("lodash.isequal");
+const isArray = require("lodash.isarray");
+const isObject = require("lodash.isobject");
 
 Vue.use(Vuex);
+
+export function difference(origObj, newObj) {
+    function changes(newObj, origObj) {
+        let arrayIndexCounter = 0;
+        return transform(newObj, function(result, value, key) {
+            if (!isEqual(value, origObj[key])) {
+                let resultKey = isArray(origObj) ? arrayIndexCounter++ : key;
+                result[resultKey] = isObject(value) && isObject(origObj[key]) ? changes(value, origObj[key]) : value;
+            }
+        });
+    }
+    return changes(newObj, origObj);
+}
 
 function getCookie(name) {
     let cookieValue = null;
@@ -369,32 +386,8 @@ export function generateId(property) {
     return `${this._uid}-${property}`;
 }
 
-function deepDiff(a, b, r, reversible) {
-    _.each(a, function(v, k) {
-        // already checked this or equal...
-        // eslint-disable-next-line no-prototype-builtins
-        if (r.hasOwnProperty(k) || b[k] === v) return;
-        // but what if it returns an empty object? still attach?
-        r[k] = _.isObject(v) ? _.diff(v, b[k], reversible) : v;
-    });
-}
-
-/* the function */
-_.mixin({
-    shallowDiff: function(a, b) {
-        return _.omit(a, function(v, k) {
-            return b[k] === v;
-        });
-    },
-    diff: function(a, b, reversible) {
-        var r = {};
-        deepDiff(a, b, r, reversible);
-        if (reversible) deepDiff(b, a, r, reversible);
-        return r;
-    },
-});
-
 export default {
+    difference,
     generateId,
     updateManager,
     sleep,

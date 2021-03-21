@@ -12,6 +12,7 @@
     import WidgetBaseSimple from "../Widgets/WidgetBaseSimple";
 
     export default {
+        name: 'WallView',
         components: { WidgetList },
         data() {
             return {

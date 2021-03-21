@@ -2,6 +2,7 @@ from rest_framework import serializers
 from application import models
 from django.contrib.auth.models import User
 from application.utils import get_version_hash
+from django.core.exceptions import PermissionDenied
 
 
 class ObjectSerializer(serializers.BaseSerializer):
@@ -61,16 +62,16 @@ class CustomModelSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         if self.context['request'].user.is_anonymous:  # Check if no protected fields are to be updated
-            if set(instance.Default.protected_fields).intersection(validated_data.keys):
-                raise serializers.ValidationError()
+            protected_fields = models.Wall.Default.protected_fields if instance.type == models.Wall.type else models.Widget.Default.protected_fields
+            if set(protected_fields).intersection(validated_data.keys()):
+                raise PermissionDenied()
         return super().update(instance, validated_data)
 
 
 class UserSerializer(CustomModelSerializer):
-
     class Meta:
         model = User
-        fields = ['username', 'email']
+        fields = ['username', 'email', 'is_anonymous', 'is_authenticated']
 
 
 class SimpleTextSerializer(CustomModelSerializer):

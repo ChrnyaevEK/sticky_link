@@ -3,6 +3,7 @@ import VueRouter from "vue-router";
 import AppEdit from "./components/App/AppEdit";
 import AppView from "./components/App/AppView";
 import AppEmpty from "./components/App/AppEmpty";
+import AppForbidden from "./components/App/AppForbidden";
 import WallEdit from "./components/Wall/WallEdit";
 import WallView from "./components/Wall/WallView";
 import WallEmpty from "./components/Wall/WallEmpty";
@@ -23,15 +24,26 @@ const router = new VueRouter({
                     path: "wall/:wallId",
                     component: WallEdit,
                     beforeEnter(to, from, next) {
-                        store.dispatch("validateWall", { id: to.params.wallId }).then((ok) => {
-                            if (ok) {
-                                store.dispatch("fetchWidgets", to.params.wallId).then(next);
-                            } else {
-                                next({
-                                    name: "wallEditForbidden",
+                        if (store.state.user.is_anonymous) {
+                            next({
+                                name: "wallView",
+                                params: {
+                                    wallId: to.params.wallId,
+                                },
+                            });
+                        } else {
+                            store.dispatch("fetchWalls").then(() => {
+                                store.dispatch("validateWall", { id: to.params.wallId }).then((ok) => {
+                                    if (ok) {
+                                        store.dispatch("fetchWidgets", to.params.wallId).then(next);
+                                    } else {
+                                        next({
+                                            name: "wallEditForbidden",
+                                        });
+                                    }
                                 });
-                            }
-                        });
+                            });
+                        }
                     },
                 },
             ],
@@ -45,14 +57,16 @@ const router = new VueRouter({
                     path: "wall/:wallId",
                     component: WallView,
                     beforeEnter(to, from, next) {
-                        store.dispatch("validateWall", { id: to.params.wallId }).then((ok) => {
-                            if (ok) {
-                                store.dispatch("fetchWidgets", to.params.wallId).then(next);
-                            } else {
-                                next({
-                                    name: "wallViewForbidden",
-                                });
-                            }
+                        store.dispatch("fetchWalls").then(() => {
+                            store.dispatch("validateWall", { id: to.params.wallId }).then((ok) => {
+                                if (ok) {
+                                    store.dispatch("fetchWidgets", to.params.wallId).then(next);
+                                } else {
+                                    next({
+                                        name: "wallViewForbidden",
+                                    });
+                                }
+                            });
                         });
                     },
                 },
@@ -66,15 +80,28 @@ const router = new VueRouter({
                     name: "appEmpty",
                     path: "",
                     component: WallEmpty,
+                    beforeEnter(to, from, next) {
+                        if (store.state.user.is_authenticated) {
+                            store.dispatch("fetchWalls").then(next);
+                        } else {
+                            next()
+                        }
+                    },
                 },
+            ],
+        },
+        {
+            path: "/app",
+            component: AppForbidden,
+            children: [
                 {
                     name: "wallEditForbidden",
-                    path: "edit/forbidden",
+                    path: "edit",
                     component: WallForbidden,
                 },
                 {
                     name: "wallViewForbidden",
-                    path: "view/forbidden",
+                    path: "view",
                     component: WallForbidden,
                 },
             ],
@@ -87,9 +114,7 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    Promise.all([store.dispatch("fetchUser"), store.dispatch("fetchSettings"), store.dispatch("fetchWalls")]).then(
-        next
-    );
+    Promise.all([store.dispatch("fetchUser"), store.dispatch("fetchSettings")]).then(next);
 });
 
 export default router;

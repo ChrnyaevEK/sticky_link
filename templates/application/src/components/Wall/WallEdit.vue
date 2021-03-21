@@ -19,8 +19,8 @@
                 <WidgetList :base="WidgetBaseResizable"></WidgetList>
             </vue-draggable-resizable>
             <Options></Options>
-            <div class="wall-edit px-1">
-                <input v-model="wall.title" class="form-control border-0 px-1" />
+            <div class="wall-edit px-2">
+                {{ wall.title }}
             </div>
         </div>
     </div>
@@ -33,6 +33,7 @@
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
     import $ from "jquery";
+    import { deepCopy } from "../../common";
 
     export default {
         components: {
@@ -55,6 +56,7 @@
             };
         },
         methods: {
+            deepCopy: deepCopy,
             onResizeStop(x, y, w, h) {
                 if (!this.$env.state.lockChanges) {
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.wall, { x, y, w, h }));

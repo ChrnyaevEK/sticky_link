@@ -1,8 +1,7 @@
 import Vuex from "vuex";
 import Vue from "vue";
 import $ from "jquery";
-import _ from "lodash";
-import { env, api, updateManager } from "./common";
+import { env, api, updateManager, difference } from "./common";
 
 Vue.use(Vuex);
 
@@ -16,6 +15,9 @@ export default new Vuex.Store({
     },
     mutations: {
         setUser(state, user) {
+            if (user.is_anonymous) {
+                user.username = "anonymous";
+            }
             state.user = user;
         },
         setWalls(state, walls) {
@@ -166,7 +168,7 @@ export default new Vuex.Store({
                 context.dispatch("getInstanceByUid", instance.uid).then((localInstance) => {
                     var update = instance;
                     if (localInstance) {
-                        update = _.diff(instance, localInstance);
+                        update = difference(localInstance, instance);
                     }
                     context.commit("updateOrAddInstance", instance);
                     return updateManager.proposeUpdate(update, instance).then(resolve, reject);
