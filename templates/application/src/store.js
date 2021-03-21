@@ -1,7 +1,7 @@
 import Vuex from "vuex";
 import Vue from "vue";
 import $ from "jquery";
-import { env, api, updateManager, difference } from "./common";
+import { env, api, updateManager, difference, deepCopy } from "./common";
 
 Vue.use(Vuex);
 
@@ -59,24 +59,6 @@ export default new Vuex.Store({
         addInstance(state, instance) {
             instance.source = instance.type == "wall" ? "walls" : "widgets";
             state[instance.source].push(instance);
-        },
-        recalculateWidgets(state, wall) {
-            for (var widget of state.widgets) {
-                if (widget.x + widget.w >= wall.w) {
-                    var x = wall.w - widget.w;
-                    widget.x = x < 0 ? 0 : x;
-                }
-                if (widget.y + widget.h >= wall.h) {
-                    var y = wall.h - widget.h;
-                    widget.y = y < 0 ? 0 : y;
-                }
-                if (widget.h >= wall.h) {
-                    widget.h = wall.h;
-                }
-                if (widget.w >= wall.w) {
-                    widget.w = wall.w;
-                }
-            }
         },
     },
     actions: {
@@ -190,8 +172,31 @@ export default new Vuex.Store({
         validateWidget(context, data) {
             return context.state.widgets.some((widget) => String(widget.id) == data.id && widget.type == data.type);
         },
-        recalculateWidgets(context, data) {
-            context.commit("recalculateWidgets", data);
+        recalculateWidgets(context, wall) {
+            var updateArray = [];
+            for (var widget of context.state.widgets) {
+                let update = deepCopy(widget);
+                if (update.x + update.w >= wall.w) {
+                    var x = wall.w - update.w;
+                    update.x = x < 0 ? 0 : x;
+                }
+                if (update.y + update.h >= wall.h) {
+                    var y = wall.h - update.h;
+                    update.y = y < 0 ? 0 : y;
+                }
+                if (update.h >= wall.h) {
+                    update.h = wall.h;
+                }
+                if (update.w >= wall.w) {
+                    update.w = wall.w;
+                }
+                var diff = difference(widget, update);
+                context.commit("updateOrAddInstance", update);
+                if (Object.getOwnPropertyNames(diff).length){
+                    updateArray.push(updateManager.proposeUpdate(diff, widget));
+                }
+            }
+            return Promise.all(updateArray);
         },
         setTabTitle(context) {
             $("#tab-title").text(`${context.state.user.username} @ ${process.env.VUE_APP_TITLE}`);

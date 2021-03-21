@@ -37,7 +37,7 @@ const router = new VueRouter({
                                         store.dispatch("fetchWidgets", to.params.wallId).then(next);
                                     } else {
                                         next({
-                                            name: "wallEditForbidden",
+                                            name: "wallForbidden",
                                         });
                                     }
                                 });
@@ -62,7 +62,7 @@ const router = new VueRouter({
                                     store.dispatch("fetchWidgets", to.params.wallId).then(next);
                                 } else {
                                     next({
-                                        name: "wallViewForbidden",
+                                        name: "wallForbidden",
                                     });
                                 }
                             });
@@ -101,13 +101,8 @@ const router = new VueRouter({
             },
             children: [
                 {
-                    name: "wallEditForbidden",
-                    path: "edit",
-                    component: WallForbidden,
-                },
-                {
-                    name: "wallViewForbidden",
-                    path: "view",
+                    name: "wallForbidden",
+                    path: "",
                     component: WallForbidden,
                 },
             ],

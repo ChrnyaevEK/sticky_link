@@ -33,6 +33,7 @@ class Event:
         return HttpResponse(render(request, template))
 
 
+
 class Static:
     @staticmethod
     def settings(request):

@@ -184,7 +184,7 @@ export var updateManager = new Vue({
                     resolve();
                 });
             }
-            this.handler[uid] = update;
+            this.handler[uid] = Object.assign({}, this.handler[uid], update)
             if (!this.waiter[uid]) {
                 this.waiter[uid] = new Promise((resolve, reject) => {
                     setTimeout(() => {
@@ -273,7 +273,8 @@ export var api = {
             .fail((response) => {
                 if (response.responseJSON && response.responseJSON.detail) {
                     io.alert(response.responseJSON.detail, "danger");
-                } else if (response.status != 400) { // Handled else were
+                } else if (response.status != 400) {
+                    // Handled else were
                     io.alert("Server error occurred", "danger");
                 }
             })
