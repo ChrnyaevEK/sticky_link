@@ -52,8 +52,12 @@
         data() {
             return {
                 WidgetBaseResizable,
-                wall: this.$store.state.walls.filter((wall) => wall.id == this.$route.params.wallId)[0],
             };
+        },
+        computed: {
+            wall() {
+                return this.$store.state.walls.filter((wall) => wall.id == this.$route.params.wallId)[0];
+            },
         },
         methods: {
             deepCopy: deepCopy,
