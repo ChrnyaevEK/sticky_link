@@ -178,3 +178,10 @@ class CounterViewSet(CustomModelViewSet):
 
     def get_queryset(self):
         return _get_protected_queryset(models.Counter, self.request.user)
+
+
+class SwitchViewSet(CustomModelViewSet):
+    serializer_class = serializers.SwitchSerializer
+
+    def get_queryset(self):
+        return _get_protected_queryset(models.Switch, self.request.user)

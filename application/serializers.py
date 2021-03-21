@@ -100,6 +100,12 @@ class CounterSerializer(CustomModelSerializer):
         model = models.Counter
 
 
+class SwitchSerializer(CustomModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = models.Switch
+
+
 class WallSerializer(CustomModelSerializer):
     widgets = [
         SimpleTextSerializer(many=True, read_only=True),

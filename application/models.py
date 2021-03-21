@@ -64,6 +64,7 @@ class ColorValidator(BaseValidator):
         return self.regex.match(a)
 
 
+# TODO - help_text
 class Widget(Common):
     class Default:
         background_color = '#ffffff'
@@ -165,6 +166,17 @@ class Counter(Widget):
     type = Default.type
     title = models.CharField(max_length=Default.title_length, blank=True, null=True)
     value = models.BigIntegerField(default=Default.initial_value)
+
+
+class Switch(Widget):
+    class Default:
+        type = 'switch'
+        title_length = 200
+        initial_value = False
+
+    type = Default.type
+    title = models.CharField(max_length=Default.title_length, blank=True, null=True)
+    value = models.BooleanField(default=Default.initial_value)
 
 
 class Settings:
