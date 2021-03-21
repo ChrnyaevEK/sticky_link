@@ -13,11 +13,12 @@ Vue.use(Vuex);
 
 export function difference(origObj, newObj) {
     function changes(newObj, origObj) {
-        let arrayIndexCounter = 0;
         return transform(newObj, function(result, value, key) {
             if (!isEqual(value, origObj[key])) {
-                let resultKey = isArray(origObj) ? arrayIndexCounter++ : key;
-                result[resultKey] = isObject(value) && isObject(origObj[key]) ? changes(value, origObj[key]) : value;
+                result[key] =
+                    !isArray(value) && isObject(value) && isObject(origObj[key])
+                        ? changes(value, origObj[key])
+                        : value;
             }
         });
     }
@@ -184,7 +185,7 @@ export var updateManager = new Vue({
                     resolve();
                 });
             }
-            this.handler[uid] = Object.assign({}, this.handler[uid], update)
+            this.handler[uid] = Object.assign({}, this.handler[uid], update);
             if (!this.waiter[uid]) {
                 this.waiter[uid] = new Promise((resolve, reject) => {
                     setTimeout(() => {
