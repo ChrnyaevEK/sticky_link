@@ -12,6 +12,7 @@ export default new Vuex.Store({
         widgets: null,
         user: null,
         settings: null,
+        requestedWall: null, // Will be set from fetch widgets for anonymous access
     },
     mutations: {
         setUser(state, user) {
@@ -25,6 +26,10 @@ export default new Vuex.Store({
                 wall.source = "walls";
             }
             state.walls = walls;
+        },
+        setRequestedWall(state, response) {
+            state.requestedWall = response;
+            delete state.requestedWall.widgets;
         },
         setWidgets(state, widgets) {
             for (var widget of widgets) {
@@ -91,6 +96,7 @@ export default new Vuex.Store({
             return new Promise((resolve, reject) => {
                 api.retrieve("wall", id).then((response) => {
                     context.commit("setWidgets", response.widgets);
+                    context.commit("setRequestedWall", response);
                     resolve();
                 }, reject);
             });
@@ -121,9 +127,6 @@ export default new Vuex.Store({
                     }, reject);
                 });
             });
-        },
-        validateWall(context, data) {
-            return context.state.walls.some((wall) => String(wall.id) == data.id);
         },
         createWidget(context, data) {
             return new Promise((resolve, reject) => {
@@ -192,7 +195,7 @@ export default new Vuex.Store({
                 }
                 var diff = difference(widget, update);
                 context.commit("updateOrAddInstance", update);
-                if (Object.getOwnPropertyNames(diff).length){
+                if (Object.getOwnPropertyNames(diff).length) {
                     updateArray.push(updateManager.proposeUpdate(diff, widget));
                 }
             }

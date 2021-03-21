@@ -17,7 +17,7 @@
         data() {
             return {
                 WidgetBaseSimple,
-                wall: this.$store.state.walls.filter((wall) => wall.id == this.$route.params.wallId)[0],
+                wall: this.$store.state.walls.filter((wall) => wall.id == this.$route.params.wallId)[0] || this.$store.state.requestedWall,
             };
         },
     };

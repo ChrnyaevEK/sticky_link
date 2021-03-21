@@ -23,24 +23,15 @@ const router = new VueRouter({
                     path: "wall/:wallId",
                     component: WallEdit,
                     beforeEnter(to, from, next) {
-                        if (store.state.user.is_anonymous) {
-                            next({
-                                name: "wallView",
-                                params: {
-                                    wallId: to.params.wallId,
-                                },
+                        if (store.state.walls.some((wall) => String(wall.id) == to.params.wallId)) {
+                            store.dispatch("fetchWidgets", to.params.wallId).then(next, () => {
+                                next({
+                                    name: "wallForbidden",
+                                });
                             });
                         } else {
-                            store.dispatch("fetchWalls").then(() => {
-                                store.dispatch("validateWall", { id: to.params.wallId }).then((ok) => {
-                                    if (ok) {
-                                        store.dispatch("fetchWidgets", to.params.wallId).then(next);
-                                    } else {
-                                        next({
-                                            name: "wallForbidden",
-                                        });
-                                    }
-                                });
+                            next({
+                                name: "wallForbidden",
                             });
                         }
                     },
@@ -56,15 +47,9 @@ const router = new VueRouter({
                     path: "wall/:wallId",
                     component: WallView,
                     beforeEnter(to, from, next) {
-                        store.dispatch("fetchWalls").then(() => {
-                            store.dispatch("validateWall", { id: to.params.wallId }).then((ok) => {
-                                if (ok) {
-                                    store.dispatch("fetchWidgets", to.params.wallId).then(next);
-                                } else {
-                                    next({
-                                        name: "wallForbidden",
-                                    });
-                                }
+                        store.dispatch("fetchWidgets", to.params.wallId).then(next, () => {
+                            next({
+                                name: "wallForbidden",
                             });
                         });
                     },
@@ -115,7 +100,9 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    Promise.all([store.dispatch("fetchUser"), store.dispatch("fetchSettings")]).then(next);
+    Promise.all([store.dispatch("fetchUser"), store.dispatch("fetchSettings"), store.dispatch("fetchWalls")]).then(
+        next
+    );
 });
 
 export default router;
