@@ -196,11 +196,11 @@ export var updateManager = new Vue({
                                 }
                                 delete this.remote[newInstance.uid]; // Unset remote version
                             }
-                            delete this.handler[uid];
-                            delete this.waiter[uid];
                             resolve(newInstance);
                         }, reject);
                     }, this.coolDown);
+                    delete this.handler[uid];
+                    delete this.waiter[uid];
                 });
             }
             return this.waiter[uid];
