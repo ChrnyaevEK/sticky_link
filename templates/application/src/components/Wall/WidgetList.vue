@@ -1,23 +1,14 @@
 <template>
     <div class="w-100 h-100">
-        <SimpleText
-            v-for="widget of filterWidget(SimpleText)"
-            :key="widget.type + widget.id"
+        <component
+            v-for="widget of $store.state.widgets"
+            :is="typed(widget)"
             :parent="true"
             :base="base"
-            :widget="widget"
-        >
-        </SimpleText>
-        <URL v-for="widget of filterWidget(URL)" :key="widget.type + widget.id" :widget="widget" :base="base"> </URL>
-        <Counter v-for="widget of filterWidget(Counter)" :key="widget.type + widget.id" :widget="widget" :base="base">
-        </Counter>
-        <SimpleList
-            v-for="widget of filterWidget(SimpleList)"
             :key="widget.type + widget.id"
             :widget="widget"
-            :base="base"
         >
-        </SimpleList>
+        </component>
     </div>
 </template>
 
@@ -27,27 +18,14 @@
     import Counter from "../Widgets/Counter";
     import SimpleList from "../Widgets/SimpleList";
 
-    var components = {
-        SimpleText,
-        URL,
-        Counter,
-        SimpleList,
-    };
-
     export default {
         name: "WidgetList",
-        components,
         props: {
             base: null,
         },
-        data() {
-            return components;
-        },
         methods: {
-            filterWidget(klass) {
-                return this.$store.state.widgets.filter(function(widget) {
-                    return widget.type == klass.type;
-                });
+            typed(widget) {
+                return [SimpleText, URL, Counter, SimpleList].filter((klass) => widget.type == klass.type)[0];
             },
         },
     };

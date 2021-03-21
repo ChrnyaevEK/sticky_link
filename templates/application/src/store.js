@@ -60,8 +60,7 @@ export default new Vuex.Store({
             instance.source = instance.type == "wall" ? "walls" : "widgets";
             state[instance.source].push(instance);
         },
-        recalculateWidgets(state, newWall) {
-            var wall = state.walls.filter((wall) => wall.id == newWall.id)[0];
+        recalculateWidgets(state, wall) {
             for (var widget of state.widgets) {
                 if (widget.x + widget.w >= wall.w) {
                     var x = wall.w - widget.w;

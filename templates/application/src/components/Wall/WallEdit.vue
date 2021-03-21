@@ -33,7 +33,6 @@
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
     import $ from "jquery";
-    import { deepCopy } from "../../common";
 
     export default {
         components: {
@@ -60,7 +59,6 @@
             },
         },
         methods: {
-            deepCopy: deepCopy,
             onResizeStop(x, y, w, h) {
                 if (!this.$env.state.lockChanges) {
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.wall, { x, y, w, h }));
