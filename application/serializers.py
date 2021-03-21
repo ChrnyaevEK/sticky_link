@@ -61,13 +61,11 @@ class CustomModelSerializer(serializers.ModelSerializer):
         return representation
 
     def update(self, instance, validated_data):
-        if self.context['request'].user.is_anonymous:  # Check if no protected fields are to be updated
+        owner = instance.owner if instance.type == models.Wall.type else instance.wall.owner
+        user = self.context['request'].user
+        if user.is_anonymous or owner != user:  # Check if no protected fields are to be updated
             protected_fields = models.Wall.Default.protected_fields if instance.type == models.Wall.type else models.Widget.Default.protected_fields
             if set(protected_fields).intersection(validated_data.keys()):
-                raise PermissionDenied()
-        else:
-            owner = instance.owner if instance.type == models.Wall.type else instance.wall.owner
-            if owner != self.context['request'].user:
                 raise PermissionDenied()
         return super().update(instance, validated_data)
 
