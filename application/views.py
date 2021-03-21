@@ -144,8 +144,11 @@ class WallViewSet(CustomModelViewSet):
         return Response(wall)
 
     def list(self, request, *args, **kwargs):
-        walls_query = _get_protected_queryset(models.Wall, request.user).filter(owner=request.user)
-        walls = self.serializer_class(walls_query, many=True).data
+        if request.user.is_authenticated:
+            walls_query = _get_protected_queryset(models.Wall, request.user).filter(owner=request.user)
+            walls = self.serializer_class(walls_query, many=True).data
+        else:
+            walls = []
         return Response(walls)
 
 
