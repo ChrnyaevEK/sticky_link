@@ -3,6 +3,12 @@
 @import "vue-select/src/scss/vue-select.scss";
 @import '~quill/dist/quill.core.css';
 @import '~quill/dist/quill.snow.css';
+
+.dropdown-item.active, .dropdown-item:active {
+    background-color: $gray-400;
+    color: unset;
+}
+
 .overflow-auto::-webkit-scrollbar {
     display: none;
 }

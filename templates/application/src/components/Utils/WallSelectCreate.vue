@@ -15,12 +15,12 @@
                 class="dropdown-item btn btn-sm"
                 v-for="wall of $store.state.walls"
                 :key="wall.id"
-                :class="{ active: wall.id == $route.params.wallId }"
+                :class="{ active: wall.id == $route.params.wallId, 'text-secondary': !wall.title}"
                 :to="{
                     name: 'wallEdit',
                     params: { wallId: wall.id },
                 }"
-                >{{ wall.title }}</router-link
+                >{{ wall.title || '[no title]' }}</router-link
             >
         </div>
         <a
