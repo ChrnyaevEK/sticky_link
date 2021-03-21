@@ -16,9 +16,7 @@ export function difference(origObj, newObj) {
         return transform(newObj, function(result, value, key) {
             if (!isEqual(value, origObj[key])) {
                 result[key] =
-                    !isArray(value) && isObject(value) && isObject(origObj[key])
-                        ? changes(value, origObj[key])
-                        : value;
+                    !isArray(value) && isObject(value) && isObject(origObj[key]) ? changes(value, origObj[key]) : value;
             }
         });
     }
@@ -104,10 +102,17 @@ export var env = new Vuex.Store({
     state: {
         lockChanges: false,
         lockUpdateManager: false,
+        lockWidgets: false, // Should disable widgets actions
 
         editInstance: null,
     },
     mutations: {
+        lockWidgets(state) {
+            state.lockWidgets = true;
+        },
+        unlockWidgets(state) {
+            state.lockWidgets = false;
+        },
         lockChanges(state) {
             state.lockChanges = true;
         },
@@ -133,6 +138,12 @@ export var env = new Vuex.Store({
         },
         closeOptions(context) {
             context.commit("closeOptions");
+        },
+        lockWidgets(context) {
+            context.commit("lockWidgets");
+        },
+        unlockWidgets(context) {
+            context.commit("unlockWidgets");
         },
         lockChanges(context) {
             context.commit("lockChanges");

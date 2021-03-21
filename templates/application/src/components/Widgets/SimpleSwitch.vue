@@ -5,11 +5,12 @@
                 <input
                     type="checkbox"
                     @change="changeValue"
-                    :value="widget.value"
+                    :checked="widget.value"
                     :id="_('value')"
+                    :disabled="$env.state.lockWidgets"
                     class="custom-control-input"
                 />
-                <label class="custom-control-label w-100 h-100" :for="_('value')">{{widget.title}}</label>
+                <label class="custom-control-label w-100 h-100" :for="_('value')">{{ widget.title }}</label>
             </div>
         </template>
     </component>
@@ -32,10 +33,12 @@
         },
         methods: {
             changeValue() {
-                this.$store.dispatch(
-                    "updateOrAddInstance",
-                    Object.assign({}, this.widget, { value: !this.widget.value })
-                );
+                if (!this.$env.state.lockWidgets) {
+                    this.$store.dispatch(
+                        "updateOrAddInstance",
+                        Object.assign({}, this.widget, { value: !this.widget.value })
+                    );
+                }
             },
         },
     };

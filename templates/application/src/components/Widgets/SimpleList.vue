@@ -10,7 +10,9 @@
                         <span class="w-100 p-1">
                             {{ val }}
                         </span>
-                        <a @click.stop="removeItem(i)" class="btn"><i class="fas fa-times"></i></a>
+                        <a @click.stop="removeItem(i)" :disabled="$env.state.lockWidgets" class="btn"
+                            ><i class="fas fa-times"></i
+                        ></a>
                     </div>
                 </div>
                 <div class="d-flex">
@@ -21,7 +23,9 @@
                         @keyup.enter="addItem"
                         class="form-control"
                     />
-                    <a @click.stop="addItem" class="btn"><i class="fas fa-plus"></i></a>
+                    <a @click.stop="addItem" :disabled="$env.state.lockWidgets" class="btn"
+                        ><i class="fas fa-plus"></i
+                    ></a>
                 </div>
             </div>
         </template>
@@ -51,7 +55,7 @@
         },
         methods: {
             addItem() {
-                if (this.item) {
+                if (this.item && !this.$env.state.lockWidgets) {
                     var items = this.widget.items ? deepCopy(this.widget.items) : [];
                     items.push(this.item);
                     this.item = undefined;
@@ -59,7 +63,7 @@
                 }
             },
             removeItem(i) {
-                if (this.widget.items) {
+                if (this.widget.items && !this.$env.state.lockWidgets) {
                     var items = deepCopy(this.widget.items);
                     items.splice(i, 1);
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { items }));

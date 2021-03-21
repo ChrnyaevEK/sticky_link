@@ -162,6 +162,16 @@
                 />
                 <label class="form-check-label" :for="_('allow_anonymous_view')">Allow anonymous view mode</label>
             </div>
+            <div class="form-check">
+                <input
+                    type="checkbox"
+                    :id="_('lock_widgets')"
+                    class="form-check-input"
+                    v-model="instance.lock_widgets"
+                    @change="push"
+                />
+                <label class="form-check-label" :for="_('lock_widgets')">Lock widget actions</label>
+            </div>
         </template>
         <hr />
         <!--Options by widget type========================================================================================================-->
@@ -202,7 +212,12 @@
         <template v-if="instance.type == SimpleSwitch.type">
             <div class="form-group">
                 <label :for="_('title')">Title </label>
-                <input :id="_('title')" class="form-control" v-model="instance.title" @input="push" />
+                <input
+                    :id="_('title')"
+                    class="form-control"
+                    v-model="instance.title"
+                    @input="push"
+                />
             </div>
         </template>
 

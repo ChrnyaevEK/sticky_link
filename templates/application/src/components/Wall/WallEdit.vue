@@ -41,9 +41,14 @@
             Options,
         },
         beforeRouteUpdate(to, from, next) {
+            if (this.wall.lock_widgets) this.$env.dispatch("unlockWidgets");
             this.$store.dispatch("fetchWidgets", to.params.wallId).then(next);
         },
+        beforeRouteLeave(to, from, next) {
+            this.$env.dispatch("unlockWidgets").then(next);
+        },
         created() {
+            if (this.wall.lock_widgets) this.$env.dispatch("lockWidgets");
             $(document).keyup((e) => {
                 if (e.keyCode === 27) this.$env.dispatch("closeOptions"); // esc
             });
@@ -55,7 +60,7 @@
         },
         computed: {
             wall() {
-                return this.$store.state.walls.filter((wall) => wall.id == this.$route.params.wallId)[0];
+                return this.$store.state.walls.filter((w) => w.id == this.$route.params.wallId)[0];
             },
         },
         methods: {
@@ -68,6 +73,11 @@
                 if (!this.$env.state.lockChanges) {
                     this.$store.dispatch("recalculateWidgets", Object.assign({}, this.wall, { w, h }));
                 }
+            },
+        },
+        watch: {
+            "wall.lock_widgets"() {
+                this.$env.dispatch(this.wall.lock_widgets ? "lockWidgets" : "unlockWidgets");
             },
         },
     };

@@ -37,10 +37,10 @@ class Wall(Common):
         min_width = 300
         min_height = 300
         allow_anonymous_view = False
-        center_horizontally = False
+        lock_widgets = False
         protected_fields = [
             'id', 'uid', 'type', 'date_of_creation', 'last_update',
-            'owner', 'allowed_users', 'allow_anonymous_view', 'title', 'description',
+            'owner', 'allowed_users', 'allow_anonymous_view', 'title', 'description', 'lock_widgets',
             'w', 'h',
         ]
 
@@ -55,6 +55,7 @@ class Wall(Common):
                              null=True, blank=True)
     description = models.CharField(verbose_name='Wall description', max_length=Default.description_length,
                                    blank=True, null=True)
+    lock_widgets = models.BooleanField(verbose_name='Lock widgets custom actions', default=Default.lock_widgets)
 
 
 class ColorValidator(BaseValidator):
