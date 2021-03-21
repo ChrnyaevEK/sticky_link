@@ -51,7 +51,8 @@ class Wall(Common):
     allowed_users = models.ManyToManyField(User, verbose_name='List of allowed users',
                                            related_name='related_walls', blank=True)
     allow_anonymous_view = models.BooleanField('Allow anonymous view mode', default=Default.allow_anonymous_view)
-    title = models.CharField(verbose_name='Wall title', max_length=Default.title_length, default=Default.title)
+    title = models.CharField(verbose_name='Wall title', max_length=Default.title_length, default=Default.title,
+                             null=True, blank=True)
     description = models.CharField(verbose_name='Wall description', max_length=Default.description_length,
                                    blank=True, null=True)
 
