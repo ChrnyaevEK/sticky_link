@@ -1,9 +1,9 @@
 <template>
-    <div class="w-100 h-100 wall-container">
-        <WidgetList :base="WidgetBaseSimple"></WidgetList>
-        <span class="wall-title col-12 col-md-4 col-lg-3">
-            <span class="font-weight-bold text-primary">{{ wall.title }}</span>
-        </span>
+    <div class="w-100 h-100 wall-container overflow-auto">
+        <div class="w-100 h-100 wall-container">
+            <WidgetList :base="WidgetBaseSimple"></WidgetList>
+            <span class="font-weight-bold text-primary wall-title col-12 col-md-4 col-lg-3">{{ wall.title }}</span>
+        </div>
     </div>
 </template>
 
