@@ -195,7 +195,7 @@
         <template v-if="instance.type == SimpleList.type">
             <div class="form-group">
                 <label :for="_('title')">Title </label>
-                <input :id="_('title')" class="form-control" v-model="widget.title" @input="push" />
+                <input :id="_('title')" class="form-control" v-model="instance.title" @input="push" />
             </div>
         </template>
 
