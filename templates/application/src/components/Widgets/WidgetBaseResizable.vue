@@ -8,7 +8,8 @@
         @mousedown.native.stop
         @mouseup.native.stop
         @mousemove.native.stop
-        @contextmenu.stop.prevent
+        @contextmenu.native.stop.prevent
+        @touchstart.native.stop.prevent
         class="widget"
         :class="[
             widget.border ? 'widget-border' : 'widget-no-border',

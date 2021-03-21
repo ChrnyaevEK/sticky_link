@@ -1,10 +1,7 @@
 <template id="save-util-template">
-    <span class="m-3 small font-weight-bold">
-        <span :class="io.saveUtil.type ? 'text-' + io.saveUtil.type : 'text-secondary'">
+    <span class="m-1 small font-weight-bold holder">
+        <span class="text-overflow" :class="io.saveUtil.type ? 'text-' + io.saveUtil.type : 'text-secondary'">
             {{ io.saveUtil.state }}
-        </span>
-        <span class="px-5 text-secondary">
-            {{ io.changeUtil.state }}
         </span>
     </span>
 </template>
@@ -18,3 +15,13 @@
         },
     };
 </script>
+<style scoped>
+    .holder {
+        width: 450px;
+    }
+    .text-overflow {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+</style>

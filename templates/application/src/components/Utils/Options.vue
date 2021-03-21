@@ -6,13 +6,11 @@
         @mousemove.native.stop
         dragHandle=".options-drag"
         @click.native.stop
+        @touchstart.native.stop.prevent
         h="auto"
-        :w="w"
         :z="100"
-        :x="x"
-        :y="y"
         :resizable="false"
-        :parent="true"
+        :parent="false"
         class="bg-white border overflow-auto shadow rounded options-position options-size p-3"
     >
         <div
@@ -254,17 +252,11 @@
                 Counter,
                 SimpleList,
                 SimpleSwitch,
-                w: 400,
-                h: 450,
-                y: 0,
             };
         },
         computed: {
             instance() {
                 return this.$env.state.editInstance;
-            },
-            x() {
-                return window.innerWidth - this.w;
             },
         },
         methods: {
@@ -309,10 +301,13 @@
 <style scoped>
     .options-size {
         max-height: 600px;
+        min-width: 200px;
+        max-width: 400px;
+        width: 50% !important;
     }
     .options-position {
-        position: absolute;
+        position: fixed;
         top: 0;
-        left: 0;
+        right: 0;
     }
 </style>
