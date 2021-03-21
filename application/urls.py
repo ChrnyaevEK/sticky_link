@@ -10,7 +10,7 @@ router.register('simple_text', views.SimpleTextViewSet, basename='simple_text')
 router.register('url', views.URLViewSet, 'url')
 router.register('simple_list', views.SimpleListViewSet, basename='simple_list')
 router.register('counter', views.CounterViewSet, basename='counter')
-router.register('switch', views.SwitchViewSet, basename='switch')
+router.register('simple_switch', views.SimpleSwitchViewSet, basename='simple_switch')
 router.register('user', views.UserViewSet, basename='user')
 
 urlpatterns = [

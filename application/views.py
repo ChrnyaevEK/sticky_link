@@ -136,6 +136,7 @@ class WallViewSet(CustomModelViewSet):
                 (models.URL, serializers.URLSerializer),
                 (models.SimpleList, serializers.SimpleListSerializer),
                 (models.Counter, serializers.CounterSerializer),
+                (models.SimpleSwitch, serializers.SimpleSwitchSerializer),
         ):
             for widget in model.objects.filter(wall=wall):
                 widgets.append(serializer(widget).data)
@@ -180,8 +181,8 @@ class CounterViewSet(CustomModelViewSet):
         return _get_protected_queryset(models.Counter, self.request.user)
 
 
-class SwitchViewSet(CustomModelViewSet):
-    serializer_class = serializers.SwitchSerializer
+class SimpleSwitchViewSet(CustomModelViewSet):
+    serializer_class = serializers.SimpleSwitchSerializer
 
     def get_queryset(self):
-        return _get_protected_queryset(models.Switch, self.request.user)
+        return _get_protected_queryset(models.SimpleSwitch, self.request.user)

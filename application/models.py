@@ -168,9 +168,9 @@ class Counter(Widget):
     value = models.BigIntegerField(default=Default.initial_value)
 
 
-class Switch(Widget):
+class SimpleSwitch(Widget):
     class Default:
-        type = 'switch'
+        type = 'simple_switch'
         title_length = 200
         initial_value = False
 
@@ -186,3 +186,4 @@ class Settings:
     url = URL.Default
     simple_list = SimpleList.Default
     counter = Counter.Default
+    simple_switch = SimpleSwitch.Default

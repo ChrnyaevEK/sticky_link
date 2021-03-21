@@ -100,10 +100,10 @@ class CounterSerializer(CustomModelSerializer):
         model = models.Counter
 
 
-class SwitchSerializer(CustomModelSerializer):
+class SimpleSwitchSerializer(CustomModelSerializer):
     class Meta:
         fields = '__all__'
-        model = models.Switch
+        model = models.SimpleSwitch
 
 
 class WallSerializer(CustomModelSerializer):

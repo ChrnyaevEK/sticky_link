@@ -26,7 +26,7 @@
                     title="Add new widget of type Simple text"
                     :disabled="$env.state.lockChanges"
                 >
-                    Simple text
+                    Text
                 </button>
                 <button
                     @click.stop="createWidget(URL)"
@@ -50,7 +50,15 @@
                     title="Add new widget of type Simple list"
                     :disabled="$env.state.lockChanges"
                 >
-                    Simple list
+                    List
+                </button>
+                <button
+                    @click.stop="createWidget(SimpleSwitch)"
+                    class="mr-1 btn btn-sm bg-light border text-nowrap"
+                    title="Add new widget of type Switch"
+                    :disabled="$env.state.lockChanges"
+                >
+                    Switch
                 </button>
             </div>
         </div>
@@ -65,6 +73,7 @@
     import URL from "../Widgets/URL";
     import Counter from "../Widgets/Counter";
     import SimpleList from "../Widgets/SimpleList";
+    import SimpleSwitch from "../Widgets/SimpleSwitch";
 
     export default {
         components: {
@@ -78,6 +87,7 @@
                 URL,
                 Counter,
                 SimpleList,
+                SimpleSwitch,
             };
         },
         methods: {

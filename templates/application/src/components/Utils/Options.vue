@@ -198,6 +198,13 @@
                 <input :id="_('title')" class="form-control" v-model="instance.title" @input="push" />
             </div>
         </template>
+        <!--Simple Switch-->
+        <template v-if="instance.type == SimpleSwitch.type">
+            <div class="form-group">
+                <label :for="_('title')">Title </label>
+                <input :id="_('title')" class="form-control" v-model="instance.title" @input="push" />
+            </div>
+        </template>
 
         <!--Options by widget type========================================================================================================-->
         <div class="form-group d-flex justify-content-center">
@@ -216,6 +223,7 @@
     import URL from "../Widgets/URL";
     import Counter from "../Widgets/Counter";
     import SimpleList from "../Widgets/SimpleList";
+    import SimpleSwitch from "../Widgets/SimpleSwitch";
 
     export default {
         name: "Options",
@@ -225,6 +233,7 @@
                 URL,
                 Counter,
                 SimpleList,
+                SimpleSwitch,
                 w: 400,
                 h: 450,
                 y: 0,

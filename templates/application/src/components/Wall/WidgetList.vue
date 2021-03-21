@@ -17,6 +17,7 @@
     import URL from "../Widgets/URL";
     import Counter from "../Widgets/Counter";
     import SimpleList from "../Widgets/SimpleList";
+    import SimpleSwitch from "../Widgets/SimpleSwitch";
 
     export default {
         name: "WidgetList",
@@ -25,7 +26,7 @@
         },
         methods: {
             typed(widget) {
-                return [SimpleText, URL, Counter, SimpleList].filter((klass) => widget.type == klass.type)[0];
+                return [SimpleText, URL, Counter, SimpleList, SimpleSwitch].filter((klass) => widget.type == klass.type)[0];
             },
         },
     };
