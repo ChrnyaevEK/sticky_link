@@ -13,6 +13,9 @@ export default new Vuex.Store({
         user: null,
         settings: null,
         requestedWall: null, // Will be set from fetch widgets for anonymous access
+        app: {
+            title: process.env.VUE_APP_TITLE,
+        },
     },
     mutations: {
         setUser(state, user) {
@@ -133,6 +136,7 @@ export default new Vuex.Store({
                 env.dispatch("lockChanges").then(() => {
                     api.create(data.type, data).then((response) => {
                         context.commit("addInstance", response);
+                        context.dispatch("recalculateWidgets", response.wall);
                         Vue.nextTick(() => {
                             env.dispatch("unlockChanges");
                         });
@@ -176,22 +180,18 @@ export default new Vuex.Store({
             return context.state.widgets.some((widget) => String(widget.id) == data.id && widget.type == data.type);
         },
         recalculateWidgets(context, wall) {
+            if (typeof wall == "number") {
+                wall = context.state.walls.filter((w) => w.id == wall)[0];
+            }
             var updateArray = [];
             for (var widget of context.state.widgets) {
                 let update = deepCopy(widget);
-                if (update.x + update.w >= wall.w) {
-                    var x = wall.w - update.w;
-                    update.x = x < 0 ? 0 : x;
-                }
                 if (update.y + update.h >= wall.h) {
                     var y = wall.h - update.h;
                     update.y = y < 0 ? 0 : y;
                 }
                 if (update.h >= wall.h) {
                     update.h = wall.h;
-                }
-                if (update.w >= wall.w) {
-                    update.w = wall.w;
                 }
                 var diff = difference(widget, update);
                 context.commit("updateOrAddInstance", update);

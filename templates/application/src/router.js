@@ -15,6 +15,13 @@ const router = new VueRouter({
     mode: "history",
     routes: [
         {
+            path: "/",
+            name: "home",
+            beforeEnter() {
+                window.location.replace(location.origin);
+            },
+        },
+        {
             path: "/app/edit",
             component: AppEdit,
             children: [

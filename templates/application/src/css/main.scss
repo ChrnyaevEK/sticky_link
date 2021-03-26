@@ -1,10 +1,12 @@
 @import "custom";
 @import "~bootstrap/scss/bootstrap";
 @import "vue-select/src/scss/vue-select.scss";
-@import '~quill/dist/quill.core.css';
-@import '~quill/dist/quill.snow.css';
+@import "~quill/dist/quill.core.css";
+@import "~quill/dist/quill.snow.css";
+@import "~vue-draggable-resizable/dist/VueDraggableResizable.css";
 
-.dropdown-item.active, .dropdown-item:active {
+.dropdown-item.active,
+.dropdown-item:active {
     background-color: $gray-400;
     color: unset;
 }
@@ -36,4 +38,14 @@
 }
 .widget-no-border {
     border-width: 0px;
+}
+
+.wall-only > .handle {
+    text-align: center;
+    background-color: $success;
+    color: $gray-500;
+    border-radius: 2px;
+    width: 20px;
+    height: 10px;
+    border-color: $gray-500;
 }

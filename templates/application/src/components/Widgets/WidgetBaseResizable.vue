@@ -19,6 +19,8 @@
                 ? 'shadow'
                 : '',
         ]"
+        :enableNativeDrag="true"
+        :grid="[10, 10]"
         :title="widget.help"
         :style="style"
         :parent="true"
@@ -27,6 +29,7 @@
         :y="widget.y"
         :x="widget.x"
         :z="widget.z"
+        :minHeight="$store.state.settings.widget.min_height"
     >
         <div class="widget-quick-access" v-show="quickAccessVisible">
             <button

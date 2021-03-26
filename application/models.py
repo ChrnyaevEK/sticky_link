@@ -32,10 +32,8 @@ class Wall(Common):
         title = 'Untitled'
         title_length = 200
         description_length = 500
-        width = 900
         height = 600
-        min_width = 300
-        min_height = 300
+        min_height = 100
         allow_anonymous_view = False
         lock_widgets = False
         protected_fields = [
@@ -45,7 +43,6 @@ class Wall(Common):
         ]
 
     type = Default.type
-    w = models.IntegerField(verbose_name='Wall width', default=Default.width)
     h = models.IntegerField(verbose_name='Wall height', default=Default.height)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     allowed_users = models.ManyToManyField(User, verbose_name='List of allowed users',
@@ -81,9 +78,9 @@ class Widget(Common):
         font_weight = 400
         min_font_weight = 100
         max_font_weight = 900
-        min_width = 2
+        min_width = 50
         width = 200
-        min_height = 2
+        min_height = 50
         height = 150
         border = True
         help_length = 200
