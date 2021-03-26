@@ -29,7 +29,8 @@
         :y="widget.y"
         :x="widget.x"
         :z="widget.z"
-        :minHeight="$store.state.settings.widget.min_height"
+        :minHeight="50"
+        :minWidth="50"
     >
         <div class="widget-quick-access" v-show="quickAccessVisible">
             <button

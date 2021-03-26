@@ -11,7 +11,6 @@ export default new Vuex.Store({
         walls: null,
         widgets: null,
         user: null,
-        settings: null,
         requestedWall: null, // Will be set from fetch widgets for anonymous access
         app: {
             title: process.env.VUE_APP_TITLE,
@@ -39,9 +38,6 @@ export default new Vuex.Store({
                 widget.source = "widgets";
             }
             state.widgets = widgets;
-        },
-        setSettings(state, settings) {
-            state.settings = settings;
         },
         deleteInstance(state, instance) {
             for (var i = 0; i < state[instance.source].length; i++) {
@@ -75,14 +71,6 @@ export default new Vuex.Store({
                 api.get("user").then((response) => {
                     context.commit("setUser", response);
                     context.dispatch("setTabTitle");
-                    resolve();
-                }, reject);
-            });
-        },
-        fetchSettings(context) {
-            return new Promise((resolve, reject) => {
-                api.get("settings").then((response) => {
-                    context.commit("setSettings", response);
                     resolve();
                 }, reject);
             });

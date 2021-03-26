@@ -64,7 +64,7 @@ class CustomModelSerializer(serializers.ModelSerializer):
         owner = instance.owner if instance.type == models.Wall.type else instance.wall.owner
         user = self.context['request'].user
         if user.is_anonymous or owner != user:  # Check if no protected fields are to be updated
-            protected_fields = models.Wall.Default.protected_fields if instance.type == models.Wall.type else models.Widget.Default.protected_fields
+            protected_fields = models.Wall.protected_fields if instance.type == models.Wall.type else models.Widget.protected_fields
             if set(protected_fields).intersection(validated_data.keys()):
                 raise PermissionDenied()
         return super().update(instance, validated_data)

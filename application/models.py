@@ -27,32 +27,22 @@ class Common(models.Model):
 
 
 class Wall(Common):
-    class Default:
-        type = 'wall'
-        title = 'Untitled'
-        title_length = 200
-        description_length = 500
-        height = 600
-        min_height = 100
-        allow_anonymous_view = False
-        lock_widgets = False
-        protected_fields = [
-            'id', 'uid', 'type', 'date_of_creation', 'last_update',
-            'owner', 'allowed_users', 'allow_anonymous_view', 'title', 'description', 'lock_widgets',
-            'w', 'h',
-        ]
+    type = 'wall'
+    protected_fields = [
+        'id', 'uid', 'type', 'date_of_creation', 'last_update',
+        'owner', 'allowed_users', 'allow_anonymous_view', 'title', 'description', 'lock_widgets',
+        'w', 'h',
+    ]
 
-    type = Default.type
-    h = models.IntegerField(verbose_name='Wall height', default=Default.height)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    allowed_users = models.ManyToManyField(User, verbose_name='List of allowed users',
-                                           related_name='related_walls', blank=True)
-    allow_anonymous_view = models.BooleanField('Allow anonymous view mode', default=Default.allow_anonymous_view)
-    title = models.CharField(verbose_name='Wall title', max_length=Default.title_length, default=Default.title,
-                             null=True, blank=True)
-    description = models.CharField(verbose_name='Wall description', max_length=Default.description_length,
-                                   blank=True, null=True)
-    lock_widgets = models.BooleanField(verbose_name='Lock widgets custom actions', default=Default.lock_widgets)
+    allow_anonymous_view = models.BooleanField('Allow anonymous view mode', default=False)
+    title = models.CharField(verbose_name='Wall title', max_length=200, default='Untitled', null=True, blank=True)
+    description = models.CharField(verbose_name='Wall description', max_length=500, blank=True, null=True)
+    lock_widgets = models.BooleanField(verbose_name='Lock widgets custom actions', default=False)
+
+
+class Container(Common):
+    wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
 
 
 class ColorValidator(BaseValidator):
@@ -62,128 +52,58 @@ class ColorValidator(BaseValidator):
         return self.regex.match(a)
 
 
-# TODO - help_text
 class Widget(Common):
-    class Default:
-        background_color = '#ffffff'
-        text_color = '#000000'
-        z = 0
-        min_z = 0
-        min_x = 0
-        min_y = 0
-        max_z = 1000
-        font_size = 16
-        min_font_size = 8
-        max_font_size = 40
-        font_weight = 400
-        min_font_weight = 100
-        max_font_weight = 900
-        min_width = 50
-        width = 200
-        min_height = 50
-        height = 150
-        border = True
-        help_length = 200
-        protected_fields = [
-            'id', 'uid', 'wall', 'type', 'date_of_creation', 'last_update',
-            'font_size', 'font_weight', 'background_color', 'text_color', 'border', 'help',
-            'w', 'h', 'z', 'x', 'y',
-        ]
+    protected_fields = [
+        'id', 'uid', 'wall', 'type', 'date_of_creation', 'last_update',
+        'font_size', 'font_weight', 'background_color', 'text_color', 'border', 'help',
+        'w', 'h', 'z', 'x', 'y',
+    ]
+    container = models.ForeignKey(Container, on_delete=models.CASCADE)
 
-    wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
-    w = models.IntegerField(verbose_name='Widget width', default=Default.width)
-    h = models.IntegerField(verbose_name='Widget height', default=Default.height)
-    z = models.IntegerField(verbose_name='Widget z index(stack position)', default=Default.z, validators=[
-        MaxValueValidator(Default.max_z), MinValueValidator(Default.min_z)
-    ])
-    x = models.IntegerField(verbose_name='Offset left from parent', default=Default.min_x, validators=[
-        MinValueValidator(Default.min_x)
-    ])
-    y = models.IntegerField(verbose_name='Offset top from parent', default=Default.min_y, validators=[
-        MinValueValidator(Default.min_y)
-    ])
-    font_size = models.IntegerField(verbose_name='Widget font size', default=Default.font_size,
-                                    validators=[MaxValueValidator(Default.max_font_size),
-                                                MinValueValidator(Default.min_font_size)])
-    font_weight = models.IntegerField(verbose_name='Widget font weight', default=Default.font_weight,
-                                      validators=[MaxValueValidator(Default.max_font_weight),
-                                                  MinValueValidator(Default.min_font_weight)])
-
-    background_color = models.CharField(max_length=9, validators=[ColorValidator], default=Default.background_color)
-    text_color = models.CharField(max_length=9, validators=[ColorValidator], default=Default.text_color)
-    border = models.BooleanField(default=Default.border)
-    help = models.CharField(max_length=Default.help_length, null=True, blank=True)
+    w = models.IntegerField(verbose_name='Widget width', default=200, validators=[MinValueValidator(50)])
+    h = models.IntegerField(verbose_name='Widget height', default=100, validators=[MinValueValidator(50)])
+    z = models.IntegerField(verbose_name='Widget z index(stack position)', default=0,
+                            validators=[MaxValueValidator(100), MinValueValidator(0)])
+    x = models.IntegerField(verbose_name='Offset left from parent', default=0, validators=[MinValueValidator(0)])
+    y = models.IntegerField(verbose_name='Offset top from parent', default=0, validators=[MinValueValidator(0)])
+    font_size = models.IntegerField(verbose_name='Widget font size', default=16,
+                                    validators=[MaxValueValidator(40), MinValueValidator(6)])
+    font_weight = models.IntegerField(verbose_name='Widget font weight', default=400,
+                                      validators=[MaxValueValidator(900), MinValueValidator(100)])
+    background_color = models.CharField(max_length=9, validators=[ColorValidator], default='#ffffff')
+    text_color = models.CharField(max_length=9, validators=[ColorValidator], default='#000000')
+    border = models.BooleanField(default=True)
+    help = models.CharField(max_length=200, null=True, blank=True)
 
     class Meta:
         abstract = True
 
 
 class SimpleText(Widget):
-    class Default:
-        type = 'simple_text'
-
-    type = Default.type
-    text_content = models.TextField(verbose_name='Text content of widget', null=True,
-                                    blank=True)
+    type = 'simple_text'
+    text_content = models.TextField(verbose_name='Text content of widget', null=True, blank=True)
 
 
 class URL(Widget):
-    class Default:
-        type = 'url'
-        url_length = 2048
-
-    type = Default.type
+    type = 'url'
     href = models.URLField(null=True, blank=True)
-    text = models.CharField(max_length=Default.url_length, null=True, blank=True)
-
-
-class SimpleListValidator(BaseValidator):
-
-    def compare(self, a, b):
-        # Check type, items amount and length of each item
-        isinstance(a, list) and all([len(i) <= SimpleList.Default.item_length for i in a])
+    text = models.CharField(max_length=2048, null=True, blank=True)
 
 
 class SimpleList(Widget):
-    class Default:
-        type = 'simple_list'
-        item_length = 200
-        title_length = 100
-        description_length = 200
-
-    type = Default.type
-    title = models.CharField(max_length=Default.title_length, null=True, blank=True)
-    description = models.CharField(max_length=Default.description_length, null=True, blank=True)
-    items = models.JSONField(default=list, validators=[SimpleListValidator(None)])
+    type = 'simple_list'
+    title = models.CharField(max_length=100, null=True, blank=True)
+    description = models.CharField(max_length=200, null=True, blank=True)
+    items = models.JSONField(default=list)
 
 
 class Counter(Widget):
-    class Default:
-        type = 'counter'
-        title_length = 200
-        initial_value = 0
-
-    type = Default.type
-    title = models.CharField(max_length=Default.title_length, blank=True, null=True)
-    value = models.BigIntegerField(default=Default.initial_value)
+    type = 'counter'
+    title = models.CharField(max_length=200, blank=True, null=True)
+    value = models.BigIntegerField(default=0)
 
 
 class SimpleSwitch(Widget):
-    class Default:
-        type = 'simple_switch'
-        title_length = 200
-        initial_value = False
-
-    type = Default.type
-    title = models.CharField(max_length=Default.title_length, blank=True, null=True)
-    value = models.BooleanField(default=Default.initial_value)
-
-
-class Settings:
-    widget = Widget.Default
-    wall = Wall.Default
-    simple_text = SimpleText.Default
-    url = URL.Default
-    simple_list = SimpleList.Default
-    counter = Counter.Default
-    simple_switch = SimpleSwitch.Default
+    type = 'simple_switch'
+    title = models.CharField(max_length=200, blank=True, null=True)
+    value = models.BooleanField(default=False)

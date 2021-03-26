@@ -23,93 +23,93 @@
             <div class="form-group">
                 <label :for="_('x')">X coordinate</label>
                 <input
-                    class="form-control"
+                    :id="_('x')"
                     v-model.number="instance.x"
                     @input="push"
+                    class="form-control"
                     type="number"
-                    :id="_('x')"
-                    step="1"
-                    :min="$store.state.settings.widget.min_x"
+                    step="10"
+                    min="0"
                 />
             </div>
 
             <div class="form-group">
                 <label :for="_('y')">Y coordinate</label>
                 <input
-                    class="form-control"
+                    :id="_('y')"
                     v-model.number="instance.y"
                     @input="push"
+                    class="form-control"
                     type="number"
-                    :id="_('y')"
-                    step="1"
-                    :min="$store.state.settings.widget.min_y"
+                    step="10"
+                    min="0"
                 />
             </div>
 
             <div class="form-group">
                 <label :for="_('z')">Z coordinate</label>
                 <input
-                    class="form-control"
+                    :id="_('z')"
                     v-model.number="instance.z"
                     @input="push"
+                    class="form-control"
                     type="number"
-                    :id="_('z')"
                     step="1"
-                    :min="$store.state.settings.widget.min_z"
-                    :max="$store.state.settings.widget.max_z"
+                    min="0"
+                    max="10"
                 />
             </div>
 
             <div class="form-group">
                 <label :for="_('w')">Width</label>
                 <input
-                    class="form-control"
+                    :id="_('w')"
                     v-model.number="instance.w"
                     @input="push"
+                    class="form-control"
                     type="number"
-                    :id="_('w')"
                     step="1"
-                    :min="$store.state.settings.widget.min_width"
+                    min="50"
                 />
             </div>
 
             <div class="form-group">
                 <label :for="_('h')">Height</label>
                 <input
-                    class="form-control"
+                    :id="_('h')"
                     v-model.number="instance.h"
                     @input="push"
+                    class="form-control"
                     type="number"
-                    :id="_('h')"
                     step="1"
-                    :min="$store.state.settings.widget.min_height"
+                    min="50"
                 />
             </div>
             <div class="form-group">
                 <label :for="_('font_size')">Font size</label>
                 <input
-                    class="form-control"
+                    :id="_('font_size')"
                     v-model.number="instance.font_size"
                     @input="push"
+                    class="form-control"
                     type="number"
                     step="1"
-                    :id="_('font_size')"
-                    :min="$store.state.settings.widget.min_font_size"
-                    :max="$store.state.settings.widget.max_font_size"
+                    min="6"
+                    max="40"
                 />
             </div>
 
             <div class="form-group">
                 <label :for="_('font_weight')">Font weight</label>
                 <input
-                    class="form-control"
+                    :id="_('font_weight')"
                     v-model.number="instance.font_weight"
                     @input="push"
+                    class="form-control"
                     type="number"
                     step="100"
-                    :id="_('font_weight')"
-                    :min="$store.state.settings.widget.min_font_weight"
-                    :max="$store.state.settings.widget.max_font_weight"
+                    min="100"
+                    max="900"
                 />
             </div>
 
@@ -138,10 +138,10 @@
                 <label :for="_('help')">Help text</label>
                 <input
                     :id="_('help')"
-                    :maxlength="$store.state.settings.widget.help_length"
                     class="form-control"
                     v-model="instance.help"
                     @input="push"
+                    maxlength="200"
                 />
             </div>
             <div class="form-check">

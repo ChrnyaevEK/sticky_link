@@ -46,24 +46,6 @@ const router = new VueRouter({
             ],
         },
         {
-            path: "/app/view",
-            component: AppView,
-            children: [
-                {
-                    name: "wallView",
-                    path: "wall/:wallId",
-                    component: WallView,
-                    beforeEnter(to, from, next) {
-                        store.dispatch("fetchWidgets", to.params.wallId).then(next, () => {
-                            next({
-                                name: "wallForbidden",
-                            });
-                        });
-                    },
-                },
-            ],
-        },
-        {
             path: "/app",
             component: AppEmpty,
             children: [
@@ -107,7 +89,7 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    Promise.all([store.dispatch("fetchUser"), store.dispatch("fetchSettings"), store.dispatch("fetchWalls")]).then(
+    Promise.all([store.dispatch("fetchUser"), store.dispatch("fetchWalls")]).then(
         next
     );
 });

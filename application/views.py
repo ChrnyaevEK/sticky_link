@@ -1,7 +1,7 @@
 from application import models
 from application import serializers
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework.response import Response
 from django.http import HttpResponse
@@ -31,12 +31,6 @@ class Event:
         # Entry point for users - resolve on enter redirections, return client app
         template = 'application/dist/index.html'
         return HttpResponse(render(request, template))
-
-
-class Static:
-    @staticmethod
-    def settings(request):
-        return JsonResponse(serializers.ObjectSerializer(models.Settings).data)
 
 
 class UserViewSet(ReadOnlyModelViewSet):
