@@ -25,12 +25,42 @@ def _get_protected_queryset(model, user):
     return model.objects.filter(q)
 
 
-class Event:
+class App:
     @staticmethod
     def enter(request):
         # Entry point for users - resolve on enter redirections, return client app
         template = 'application/dist/index.html'
         return HttpResponse(render(request, template))
+
+    @staticmethod
+    def state(request, wall_id=None):
+        try:
+            wall = _get_protected_queryset(models.Wall, request.user).get(pk=wall_id)
+        except models.Wall.DoesNotExist:
+            wall = None
+            containers = None
+            widgets = None
+        else:
+            wall = serializers.WallSerializer(wall).data
+            containers = _get_protected_queryset(models.Container, request.user).filter(wall=wall)
+            containers = [serializers.ContainerSerializer(c).validated_data for c in containers]
+            widgets = []
+            for model, serializer in (
+                    (models.SimpleText, serializers.SimpleTextSerializer),
+                    (models.URL, serializers.URLSerializer),
+                    (models.SimpleList, serializers.SimpleListSerializer),
+                    (models.Counter, serializers.CounterSerializer),
+                    (models.SimpleSwitch, serializers.SimpleSwitchSerializer),
+            ):
+                for widget in model.objects.filter(wall=wall):
+                    widgets.append(serializer(widget).data)
+        return Response({
+            'user': serializers.UserSerializer(request.user).validated_data,
+            'wall': wall,
+            'containers': containers,
+            'widgets': widgets,
+            'walls': WallViewSet.get_list(request)
+        })
 
 
 class UserViewSet(ReadOnlyModelViewSet):
@@ -118,33 +148,23 @@ class WallViewSet(CustomModelViewSet):
     def get_queryset(self):
         return _get_protected_queryset(models.Wall, self.request.user)
 
-    def retrieve(self, request, pk=None):
-        walls_query = _get_protected_queryset(models.Wall, request.user)  # Retrieve only!
-        try:
-            wall = walls_query.get(pk=pk)
-        except models.Wall.DoesNotExist:
-            raise PermissionDenied  # Wall exist, but access is not granted
-        widgets = []
-        for model, serializer in (
-                (models.SimpleText, serializers.SimpleTextSerializer),
-                (models.URL, serializers.URLSerializer),
-                (models.SimpleList, serializers.SimpleListSerializer),
-                (models.Counter, serializers.CounterSerializer),
-                (models.SimpleSwitch, serializers.SimpleSwitchSerializer),
-        ):
-            for widget in model.objects.filter(wall=wall):
-                widgets.append(serializer(widget).data)
-        wall = self.serializer_class(wall).data
-        wall['widgets'] = widgets
-        return Response(wall)
-
     def list(self, request, *args, **kwargs):
+        return Response(self.get_list(request))
+
+    @classmethod
+    def get_list(cls, request):
         if request.user.is_authenticated:
             walls_query = _get_protected_queryset(models.Wall, request.user).filter(owner=request.user)
-            walls = self.serializer_class(walls_query, many=True).data
+            return cls.serializer_class(walls_query, many=True).data
         else:
-            walls = []
-        return Response(walls)
+            return []
+
+
+class ContainerViewSet(CustomModelViewSet):
+    serializer_class = serializers.ContainerSerializer
+
+    def get_queryset(self):
+        return _get_protected_queryset(models.Container, self.request.user)
 
 
 class SimpleTextViewSet(CustomModelViewSet):

@@ -31,18 +31,22 @@ class Wall(Common):
     protected_fields = [
         'id', 'uid', 'type', 'date_of_creation', 'last_update',
         'owner', 'allowed_users', 'allow_anonymous_view', 'title', 'description', 'lock_widgets',
-        'w', 'h',
     ]
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     allow_anonymous_view = models.BooleanField('Allow anonymous view mode', default=False)
     title = models.CharField(verbose_name='Wall title', max_length=200, default='Untitled', null=True, blank=True)
     description = models.CharField(verbose_name='Wall description', max_length=500, blank=True, null=True)
-    lock_widgets = models.BooleanField(verbose_name='Lock widgets custom actions', default=False)
+    lock_widgets = models.BooleanField(verbose_name='Lock widgets at wall', default=False)
 
 
 class Container(Common):
+    type = 'container'
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
+    index = models.IntegerField(verbose_name='Index of container in wall', validators=[MinValueValidator(0)])
+    h = models.IntegerField(verbose_name='Container height', default=100, validators=[MinValueValidator(50)])
+    title = models.CharField(verbose_name='Container title', max_length=200, null=True, blank=True)
+    description = models.CharField(verbose_name='Container description', max_length=500, blank=True, null=True)
 
 
 class ColorValidator(BaseValidator):

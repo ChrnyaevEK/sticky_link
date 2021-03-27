@@ -7,7 +7,7 @@
                     @change="changeValue"
                     :checked="widget.value"
                     :id="_('value')"
-                    :disabled="$env.state.lockWidgets"
+                    :disabled="$env.lockWidgets"
                     class="custom-control-input"
                 />
                 <label class="custom-control-label w-100 h-100" :for="_('value')">{{ widget.title }}</label>
@@ -33,7 +33,7 @@
         },
         methods: {
             changeValue() {
-                if (!this.$env.state.lockWidgets) {
+                if (!this.$env.lockWidgets) {
                     this.$store.dispatch(
                         "updateOrAddInstance",
                         Object.assign({}, this.widget, { value: !this.widget.value })

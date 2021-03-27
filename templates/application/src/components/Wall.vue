@@ -1,11 +1,12 @@
 <template>
     <div
         class="w-100 h-100"
-        @click.native="$env.dispatch('closeOptions')"
-        @touchstart.native="$env.dispatch('closeOptions')"
-        @contextmenu.native.stop.prevent="$env.dispatch('openOptions', Object.assign({}, wall))"
+        @click.native="$env.closeOptions"
+        @touchstart.native="$env.closeOptions"
+        @contextmenu.native.stop.prevent="$env.openOptions(Object.assign({}, $store.state.wall))"
     >
         <vue-draggable-resizable
+            v-if="$store.state.wall"
             v-for="containser of widgetContainers"
             @resizing="onResizing"
             :resizable="true"
@@ -13,20 +14,22 @@
             :parent="false"
             :handles="['bm']"
             :minHeight="100"
-            :h="100"
             class="border wall wall-only my-4"
         >
             <component
                 v-for="widget of container"
                 :is="toComponent(widget)"
                 :parent="true"
-                :base="WidgetBaseResizable"
                 :key="widget.type + widget.id"
                 :widget="widget"
             >
             </component>
         </vue-draggable-resizable>
-        <Options></Options>
+        <div v-else>
+            <span v-if="$store.state.user.is_authenticated">No wall is selected...</span>
+            <span v-else>No wall is available...</span>
+        </div>
+        <Options v-if="$store.state.wall"></Options>
     </div>
 </template>
 
@@ -37,7 +40,6 @@
     import SimpleList from "../Widgets/SimpleList";
     import SimpleSwitch from "../Widgets/SimpleSwitch";
 
-    import WidgetBaseResizable from "../Widgets/WidgetBaseResizable";
     import Options from "../Utils/Options";
 
     import VueDraggableResizable from "vue-draggable-resizable";
@@ -51,36 +53,35 @@
             Options,
         },
         async beforeRouteUpdate(to, from, next) {
-            if (this.wall.lock_widgets) await this.$env.dispatch("unlockWidgets");
-            await this.$store.dispatch("fetchWidgets", to.params.wallId);
+            if (this.wall.lock_widgets) await this.$env.unlockWidgets();
+            await this.$store.dispatch("fetchState", to.params.wallId);
             next();
         },
         async beforeRouteLeave(to, from, next) {
-            await this.$env.dispatch("unlockWidgets");
+            await this.$env.unlockWidgets();
             next();
         },
         created() {
-            if (this.wall.lock_widgets) this.$env.dispatch("lockWidgets");
+            if (this.wall.lock_widgets) this.$env.lockWidgets();
             $(document).keyup((e) => {
-                if (e.keyCode === 27) this.$env.dispatch("closeOptions"); // esc
+                if (e.keyCode === 27) this.$env.closeOptions(); // esc
             });
         },
-        data() {
-            var wall = this.$store.state.walls.filter((w) => w.id == this.$route.params.wallId)[0];
-            var groups = new DefaultDict(() => []);
-            for (let widget of this.$store.state.widgets) {
-                groups[widget.container].push(widget);
-            }
-            var widgetContainers = Object.values(groups);
-            return {
-                WidgetBaseResizable,
-                widgetContainers,
-                wall,
-            };
+        computed: {
+            wall() {
+                return this.$store.state.walls.filter((w) => w.id == this.$route.params.wallId)[0];
+            },
+            widgetContainers() {
+                var groups = new DefaultDict(() => []);
+                for (let widget of this.$store.state.widgets) {
+                    groups[widget.container].push(widget);
+                }
+                return Object.values(groups);
+            },
         },
         methods: {
             onResizing(x, y, w, h) {
-                if (!this.$env.state.lockChanges) {
+                if (!this.$env.lockChanges) {
                     this.$el.querySelector(".handle-bm").scrollIntoView({ behavior: "smooth", block: "center" });
                     this.$store.dispatch("recalculateWidgets", Object.assign({}, this.wall, { h }));
                 }
@@ -93,7 +94,7 @@
         },
         watch: {
             "wall.lock_widgets"() {
-                this.$env.dispatch(this.wall.lock_widgets ? "lockWidgets" : "unlockWidgets");
+                this.wall.lock_widgets ? this.$env.lockWidgets() : this.$env.unlockWidgets();
             },
         },
     };

@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 
 router = routers.DefaultRouter()
 router.register('wall', views.WallViewSet, basename='wall')
+router.register('container', views.ContainerViewSet, basename='container')
 router.register('simple_text', views.SimpleTextViewSet, basename='simple_text')
 router.register('url', views.URLViewSet, 'url')
 router.register('simple_list', views.SimpleListViewSet, basename='simple_list')
@@ -14,8 +15,10 @@ router.register('simple_switch', views.SimpleSwitchViewSet, basename='simple_swi
 router.register('user', views.UserViewSet, basename='user')
 
 urlpatterns = [
-    path('', views.Event.enter, name="enter"),
+    path('', views.App.enter, name="enter"),
+    path('state/', views.App.state, name="state"),
+    path('state/<int:wall_id>/', views.App.state, name="state"),
     path('api/', include(router.urls), name="api"),
     *static(settings.STATIC_URL, document_root='templates/application/dist/static'),
-    re_path('.*', views.Event.enter, name="enter"),
+    re_path('.*', views.App.enter, name="enter"),
 ]

@@ -8,16 +8,23 @@
                         <router-link class="nav-link" :to="{ name: 'home' }">Home </router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link
-                            class="nav-link"
-                            :to="{
-                                name: 'wallView',
-                                params: { wallId: $route.params.wallId },
-                            }"
-                            >View
-                        </router-link>
+                        <a
+                            v-show="$store.state.wall"
+                            class="btn btn-defaul"
+                            @click.stop.prevent="$env.viewMode ? $env.closeViewMode() : $env.openViewMode()"
+                            role="button"
+                            >{{ $env.viewMode ? "Edit" : "View" }}</a
+                        >
                     </li>
-                    <li></li>
+                    <li v-show="!$store.state.wall">
+                        <span v-if="$store.state.user.is_authenticated">
+                            Select or create a <span class="text-success font-weight-bold">wall</span> to continue
+                        </span>
+                        <span v-else
+                            >Please <a href="/accounts/login/" class="text-success font-weight-bold">login</a> to
+                            continue</span
+                        >
+                    </li>
                 </ul>
             </div>
             <SaveUtil></SaveUtil>
@@ -36,14 +43,21 @@
         <AlertUtil></AlertUtil>
         <div class="h-100 container d-flex flex-column justify-content-between align-items-center">
             <router-view></router-view>
-            <div class="m-2 p-1 w-100 shadow d-flex justify-content-between">
-                <WallSelectCreate @createWall="onCreateWall" @deleteWall="onDeleteWall" :deleteWall="Boolean($store.state.walls)"></WallSelectCreate>
-                <span class="overflow-auto d-flex">
+            <div
+                class="m-2 p-1 w-100 shadow d-flex justify-content-between"
+                v-if="!$env.viewMode && $store.state.user.is_authenticated"
+            >
+                <WallSelectCreate
+                    @createWall="onCreateWall"
+                    @deleteWall="onDeleteWall"
+                    :deleteWall="Boolean($store.state.walls)"
+                ></WallSelectCreate>
+                <span class="overflow-auto d-flex" v-if="$store.state.wall">
                     <button
                         @click.stop="createWidget(SimpleText)"
                         class="mr-1 btn btn-sm bg-light border text-nowrap"
                         title="Add new widget of type Simple text"
-                        :disabled="$env.state.lockChanges"
+                        :disabled="$env.lockChanges"
                     >
                         Text
                     </button>
@@ -51,7 +65,7 @@
                         @click.stop="createWidget(URL)"
                         class="mr-1 btn btn-sm bg-light border text-nowrap"
                         title="Add new widget of type URL"
-                        :disabled="$env.state.lockChanges"
+                        :disabled="$env.lockChanges"
                     >
                         URL
                     </button>
@@ -59,7 +73,7 @@
                         @click.stop="createWidget(Counter)"
                         class="mr-1 btn btn-sm bg-light border text-nowrap"
                         title="Add new widget of type Counter"
-                        :disabled="$env.state.lockChanges"
+                        :disabled="$env.lockChanges"
                     >
                         Counter
                     </button>
@@ -67,7 +81,7 @@
                         @click.stop="createWidget(SimpleList)"
                         class="mr-1 btn btn-sm bg-light border text-nowrap"
                         title="Add new widget of type Simple list"
-                        :disabled="$env.state.lockChanges"
+                        :disabled="$env.lockChanges"
                     >
                         List
                     </button>
@@ -75,7 +89,7 @@
                         @click.stop="createWidget(SimpleSwitch)"
                         class="mr-1 btn btn-sm bg-light border text-nowrap"
                         title="Add new widget of type Switch"
-                        :disabled="$env.state.lockChanges"
+                        :disabled="$env.lockChanges"
                     >
                         Switch
                     </button>
@@ -113,13 +127,18 @@
         methods: {
             async onCreateWall() {
                 var wall = await this.$store.dispatch("createWall");
-                this.$env.dispatch("resolveWallCreated", wall);
+                io.alert("New wall has been created!", "success");
+                router.push({
+                    name: "wall",
+                    params: {
+                        wallId: wall.id,
+                    },
+                });
             },
             async onDeleteWall() {
                 if (confirm("Are you sure? Wall will be permanently removed!")) {
                     let wall = this.$store.state.walls.filter((w) => w.id == this.$route.params.wallId)[0]; // Order is important
                     await this.$store.dispatch("deleteInstance", wall);
-                    this.$env.dispatch("resolveWallDeleted", wall);
                 }
             },
             createWidget(klass) {

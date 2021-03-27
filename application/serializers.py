@@ -71,6 +71,8 @@ class CustomModelSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(CustomModelSerializer):
+    type = serializers.ReadOnlyField(default='user')
+
     class Meta:
         model = User
         fields = ['username', 'email', 'is_anonymous', 'is_authenticated']
@@ -106,17 +108,13 @@ class SimpleSwitchSerializer(CustomModelSerializer):
         model = models.SimpleSwitch
 
 
-class WallSerializer(CustomModelSerializer):
-    widgets = [
-        SimpleTextSerializer(many=True, read_only=True),
-        URLSerializer(many=True, read_only=True),
-        CounterSerializer(many=True, read_only=True),
-        SimpleListSerializer(many=True, read_only=True),
-    ]
-    owner = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
+class ContainerSerializer(CustomModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = models.Container
 
+
+class WallSerializer(CustomModelSerializer):
     class Meta:
         fields = '__all__'
         model = models.Wall

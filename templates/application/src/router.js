@@ -1,12 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import AppEdit from "./components/App/AppEdit";
-import AppView from "./components/App/AppView";
-import AppEmpty from "./components/App/AppEmpty";
-import WallEdit from "./components/Wall/WallEdit";
-import WallView from "./components/Wall/WallView";
-import WallEmpty from "./components/Wall/WallEmpty";
-import WallForbidden from "./components/Wall/WallForbidden";
+import App from "./components/App";
+import Wall from "./components/Wall";
 import store from "./store";
 
 Vue.use(VueRouter);
@@ -22,62 +17,13 @@ const router = new VueRouter({
             },
         },
         {
-            path: "/app/edit",
-            component: AppEdit,
-            children: [
-                {
-                    name: "wallEdit",
-                    path: "wall/:wallId",
-                    component: WallEdit,
-                    beforeEnter(to, from, next) {
-                        if (store.state.walls.some((wall) => String(wall.id) == to.params.wallId)) {
-                            store.dispatch("fetchWidgets", to.params.wallId).then(next, () => {
-                                next({
-                                    name: "wallForbidden",
-                                });
-                            });
-                        } else {
-                            next({
-                                name: "wallForbidden",
-                            });
-                        }
-                    },
-                },
-            ],
-        },
-        {
             path: "/app",
-            component: AppEmpty,
+            component: App,
             children: [
                 {
-                    name: "appEmpty",
-                    path: "",
-                    component: WallEmpty,
-                    beforeEnter(to, from, next) {
-                        if (store.state.user.is_authenticated) {
-                            store.dispatch("fetchWalls").then(next);
-                        } else {
-                            next();
-                        }
-                    },
-                },
-            ],
-        },
-        {
-            path: "/app",
-            component: AppEmpty,
-            beforeEnter(to, from, next) {
-                if (store.state.user.is_authenticated) {
-                    store.dispatch("fetchWalls").then(next);
-                } else {
-                    next();
-                }
-            },
-            children: [
-                {
-                    name: "wallForbidden",
-                    path: "",
-                    component: WallForbidden,
+                    name: "wall",
+                    path: "wall/:wallId?",
+                    component: Wall,
                 },
             ],
         },
@@ -88,10 +34,9 @@ const router = new VueRouter({
     ],
 });
 
-router.beforeEach((to, from, next) => {
-    Promise.all([store.dispatch("fetchUser"), store.dispatch("fetchWalls")]).then(
-        next
-    );
+router.beforeEach(async (to, from, next) => {
+    await store.dispatch("fetchState", to.params.wallId)
+    next()
 });
 
 export default router;

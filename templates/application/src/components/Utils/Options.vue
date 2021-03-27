@@ -1,6 +1,6 @@
 <template>
     <vue-draggable-resizable
-        v-if="$env.state.editInstance !== null"
+        v-if="$env.openOptionsFor !== null"
         @mousedown.native.stop
         @mouseup.native.stop
         @mousemove.native.stop
@@ -17,7 +17,7 @@
             class="form-group d-flex justify-content-between align-items-center options-drag border-bottom cursor-move"
         >
             <strong>Options</strong>
-            <a class="btn" @click="$env.dispatch('closeOptions')"><i class="fas fa-times"></i></a>
+            <a class="btn" @click="$env.closeOptions()"><i class="fas fa-times"></i></a>
         </div>
         <template v-if="instance.type != 'wall'">
             <div class="form-group">
@@ -256,7 +256,7 @@
         },
         computed: {
             instance() {
-                return this.$env.state.editInstance;
+                return this.$env.openOptionsFor;
             },
         },
         methods: {

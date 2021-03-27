@@ -4,7 +4,7 @@ import "bootstrap";
 import "./css/main.scss";
 import "@fortawesome/fontawesome-free/js/all.js";
 import "@fortawesome/fontawesome-free/css/all.css";
-import { env, ws, generateId, handleUnexpected } from "./common";
+import { env, io, ws, generateId, handleUnexpected } from "./common";
 import store from "./store";
 import $ from "jquery";
 import Rollbar from "rollbar";
@@ -12,6 +12,7 @@ import JqueryRollbarPlugin from "rollbar-jquery";
 
 Vue.config.productionTip = true;
 Vue.prototype.$env = env;
+Vue.prototype.$io = io;
 Vue.prototype._ = generateId;
 
 window.jQuery = $; // Ref. to rollbar-jquery source code

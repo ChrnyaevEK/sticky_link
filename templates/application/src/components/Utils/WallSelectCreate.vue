@@ -28,7 +28,7 @@
             class="mr-1 btn btn-sm btn-success border"
             @click="$emit('createWall')"
             title="Add new wall"
-            :disabled="$env.state.lockChanges"
+            :disabled="$env.lockChanges"
         >
             <i class="fas fa-plus"></i>
         </a>
@@ -37,7 +37,7 @@
             class="mr-1 btn btn-sm btn-danger border"
             @click.stop="$emit('deleteWall')"
             title="Delete current wall"
-            :disabled="$env.state.lockChanges"
+            :disabled="$env.lockChanges"
         >
             <i class="fas fa-trash"></i>
         </a>

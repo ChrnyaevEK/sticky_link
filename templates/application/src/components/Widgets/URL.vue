@@ -2,13 +2,13 @@
     <component :is="base" v-bind="{ ...$props, ...$attrs }">
         <template slot="content">
             <div class="w-100 h-100 d-flex justify-content-center align-items-center">
-                <span class="btn btn-default p-2 border" @click="openHref" :disabled="$env.state.lockWidgets">
+                <span class="btn btn-default p-2 border" @click="openHref" :disabled="$env.lockWidgets">
                     <a
                         :href="widget.href"
                         @click.stop.prevent="openHref"
                         class="text-break"
                         :style="`color: ${widget.text_color};`"
-                        :disabled="$env.state.lockWidgets"
+                        :disabled="$env.lockWidgets"
                         ><u>{{ widget.text || widget.href }}</u></a
                     >
                     <i class="fas fa-external-link-square-alt text-muted mx-1"></i>
@@ -35,7 +35,7 @@
         },
         methods: {
             openHref() {
-                if (this.widget.href && !this.$env.state.lockWidgets) window.open(this.widget.href, "_blank");
+                if (this.widget.href && !this.$env.lockWidgets) window.open(this.widget.href, "_blank");
             },
         },
     };

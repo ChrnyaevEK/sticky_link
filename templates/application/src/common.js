@@ -98,79 +98,47 @@ export var io = new Vue({
     },
 });
 
-export var env = new Vuex.Store({
-    state: {
+export var env = new Vue({
+    data: {
         lockChanges: false,
         lockUpdateManager: false,
         lockWidgets: false, // Should disable widgets actions
-
-        editInstance: null,
+        openOptionsFor: null,
+        viewMode: false,
     },
-    mutations: {
-        lockWidgets(state) {
-            state.lockWidgets = true;
+    methods: {
+        lockWidgets() {
+            this.lockWidgets = true;
         },
-        unlockWidgets(state) {
-            state.lockWidgets = false;
+        unlockWidgets() {
+            this.lockWidgets = false;
         },
-        lockChanges(state) {
-            state.lockChanges = true;
+        lockChanges() {
+            this.lockChanges = true;
         },
-        unlockChanges(state) {
-            state.lockChanges = false;
+        unlockChanges() {
+            this.lockChanges = false;
         },
-        lockUpdateManager(state) {
-            state.lockUpdateManager = true;
+        lockUpdateManager() {
+            this.lockUpdateManager = true;
         },
-        unlockUpdateManager(state) {
-            state.lockUpdateManager = false;
+        unlockUpdateManager() {
+            this.lockUpdateManager = false;
         },
-        openOptions(state, instance) {
-            state.editInstance = instance;
+        openOptions(instance) {
+            this.openOptionsFor = instance;
         },
-        closeOptions(state) {
-            state.editInstance = null;
+        closeOptions() {
+            this.openOptionsFor = null;
         },
-    },
-    actions: {
-        openOptions(context, instance) {
-            context.commit("openOptions", instance);
+        openViewMode() {
+            this.viewMode = true;
         },
-        closeOptions(context) {
-            context.commit("closeOptions");
+        closeViewMode() {
+            this.viewMode = false;
         },
-        lockWidgets(context) {
-            context.commit("lockWidgets");
-        },
-        unlockWidgets(context) {
-            context.commit("unlockWidgets");
-        },
-        lockChanges(context) {
-            context.commit("lockChanges");
-        },
-        unlockChanges(context) {
-            context.commit("unlockChanges");
-        },
-        lockUpdateManager(context) {
-            context.commit("lockUpdateManager");
-        },
-        unlockUpdateManager(context) {
-            context.commit("unlockUpdateManager");
-        },
-        resolveWallDeleted(context, wall) {
-            io.alert(`Wall <strong>${wall.title}</strong> has been deleted!`, "success");
-            router.push({
-                name: "appEmpty",
-            });
-        },
-        resolveWallCreated(context, wall) {
-            io.alert("New wall has been created!", "success");
-            router.push({
-                name: "wallEdit",
-                params: {
-                    wallId: wall.id,
-                },
-            });
+        setTabTitle(context) {
+            $("#tab-title").text(`${context.state.user.username} @ ${process.env.VUE_APP_TITLE}`);
         },
     },
 });
@@ -189,68 +157,54 @@ export var updateManager = new Vue({
         },
     },
     methods: {
-        proposeUpdate(update, { type, id, uid }) {
+        async proposeUpdate(update, { type, id, uid }) {
             // Require Type, Id, Uid
-            if (this.$env.state.lockUpdateManager) {
-                return new Promise((resolve) => {
-                    resolve();
-                });
-            }
-            this.handler[uid] = Object.assign({}, this.handler[uid], update);
+            if (this.$env.lockUpdateManager) return;
+
+            this.handler[uid] = Object.assign({}, this.handler[uid], update); // Merge updates
             if (!this.waiter[uid]) {
-                this.waiter[uid] = new Promise((resolve, reject) => {
-                    setTimeout(() => {
+                // Already waiting to push update?
+                this.waiter[uid] = (async () => {
+                    setTimeout(async () => {
                         delete this.waiter[uid];
-                        api.update_partial(type, id, this.handler[uid]).then((newInstance) => {
-                            delete this.handler[uid];
-                            if (this.remote[uid] !== undefined) {
-                                // Ws finished before http - resolve miss match
-                                if (this.remote[uid] !== newInstance.version) {
-                                    this.resolveNewVersion(newInstance);
-                                }
-                                delete this.remote[newInstance.uid]; // Unset remote version
-                            }
-                            resolve(newInstance);
-                        }, reject);
+                        var newInstance = await api.update_partial(type, id, this.handler[uid]);
+                        delete this.handler[uid];
+                        if (this.remote[uid] !== undefined) {
+                            // Ws finished before http - resolve miss match
+                            if (this.remote[uid] !== newInstance.version) await this.resolveNewVersion(newInstance);
+                            delete this.remote[newInstance.uid]; // Unset remote version
+                        }
+                        return newInstance;
                     }, this.coolDown);
-                });
+                })();
             }
             return this.waiter[uid];
         },
-        populateRemoteUpdate(update) {
-            if (this.handler[update.instance.uid] !== undefined) {
+        async populateRemoteUpdate(event) {
+            if (this.handler[event.instance.uid] !== undefined) {
                 // Http is pending right now
-                this.remote[update.instance.uid] = update.instance.version;
+                this.remote[event.instance.uid] = update.instance.version;
             } else {
                 // Else fire off update for instance, somebody just changed it
-                this.resolveNewVersion(update.instance);
+                await this.resolveNewVersion(event.instance);
             }
         },
-        populateRemoteDestroy(update) {
+        async populateRemoteDestroy(event) {
             io.change(true);
-            store.dispatch("getInstanceByUid", update.instance.uid).then((localInstance) => {
-                if (localInstance) {
-                    store.commit("deleteInstance", localInstance);
-                    if (localInstance.type == "wall") {
-                        env.dispatch("resolveWallDeleted");
-                    }
+            localInstance = await store.dispatch("getInstanceByUid", event.instance.uid);
+            if (localInstance) {
+                store.commit("deleteInstance", localInstance);
+                if (localInstance.type == "wall") {
+                    env.resolveWallDeleted(localInstance);
                 }
-                io.change(false);
-            });
+            }
+            io.change(false);
         },
-        resolveNewVersion(instance) {
+        async resolveNewVersion(instance) {
             io.change(true);
-            return store.dispatch("getInstanceByUid", instance.uid).then((localInstance) => {
-                if (localInstance) {
-                    store.dispatch("fetchInstance", localInstance).then(() => {
-                        io.change(false);
-                    });
-                } else {
-                    store.dispatch("fetchInstance", instance).then(() => {
-                        io.change(false);
-                    });
-                }
-            });
+            var localInstance = await store.dispatch("getInstanceByUid", instance.uid);
+            await store.dispatch("fetchInstance", localInstance ? localInstance : instance);
+            io.change(false);
         },
     },
 });

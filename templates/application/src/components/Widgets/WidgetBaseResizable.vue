@@ -1,7 +1,7 @@
 <template>
     <vue-draggable-resizable
-        :draggable="!$env.state.lockChanges"
-        :resizable="!$env.state.lockChanges"
+        :draggable="!$env.lockChanges"
+        :resizable="!$env.lockChanges"
         @resizestop="onResizeStop"
         @dragstop="onDrag"
         @click.native.stop
@@ -13,9 +13,9 @@
         class="widget"
         :class="[
             widget.border ? 'widget-border' : 'widget-no-border',
-            $env.state.editInstance &&
-            $env.state.editInstance.id == widget.id &&
-            $env.state.editInstance.type == widget.type
+            $env.openOptionsFor &&
+            $env.openOptionsFor.id == widget.id &&
+            $env.openOptionsFor.type == widget.type
                 ? 'shadow'
                 : '',
         ]"
@@ -34,18 +34,18 @@
     >
         <div class="widget-quick-access" v-show="quickAccessVisible">
             <button
-                :disabled="$env.state.lockChanges"
+                :disabled="$env.lockChanges"
                 class="btn btn-light border"
                 @click="$store.dispatch('copyWidget', widget)"
             >
                 <i class="fas fa-copy"></i>
             </button>
-            <button :disabled="$env.state.lockChanges" class="btn btn-danger" @click="deleteWidget">
+            <button :disabled="$env.lockChanges" class="btn btn-danger" @click="deleteWidget">
                 <i class="fas fa-trash"></i>
             </button>
         </div>
-        <div class="w-100 h-100" @contextmenu.stop.prevent="$env.dispatch('openOptions', Object.assign({}, widget))">
-            <slot name="content"></slot>
+        <div class="w-100 h-100" @contextmenu.stop.prevent="$env.openOptions(Object.assign({}, widget))">
+            <slot></slot>
         </div>
     </vue-draggable-resizable>
 </template>
