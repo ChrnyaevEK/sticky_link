@@ -1,6 +1,6 @@
 <template id="simple-list-template">
     <WidgetBaseResizable :widget="widget">
-        <div class="d-flex flex-column h-100 w-100" v-slot:default="slotProps">
+        <div class="d-flex flex-column h-100 w-100">
             <span class="w-100 text"
                 >{{ widget.title }} <small class="text-muted">{{ widget.items.length }}</small></span
             >
@@ -9,14 +9,14 @@
                     <span class="w-100 p-1">
                         {{ val }}
                     </span>
-                    <a @click.stop="removeItem(i)" :disabled="$env.lockWidgets" class="btn"
+                    <a @click.stop="removeItem(i)" :disabled="$env.widgetsLocked" class="btn"
                         ><i class="fas fa-times"></i
                     ></a>
                 </div>
             </div>
             <div class="d-flex">
                 <input type="text" :id="_('item-input')" v-model="item" @keyup.enter="addItem" class="form-control" />
-                <a @click.stop="addItem" :disabled="$env.lockWidgets" class="btn"><i class="fas fa-plus"></i></a>
+                <a @click.stop="addItem" :disabled="$env.widgetsLocked" class="btn"><i class="fas fa-plus"></i></a>
             </div>
         </div>
     </WidgetBaseResizable>
@@ -44,7 +44,7 @@
         },
         methods: {
             addItem() {
-                if (this.item && !this.$env.lockWidgets) {
+                if (this.item && !this.$env.widgetsLocked) {
                     var items = this.widget.items ? deepCopy(this.widget.items) : [];
                     items.push(this.item);
                     this.item = undefined;
@@ -52,7 +52,7 @@
                 }
             },
             removeItem(i) {
-                if (this.widget.items && !this.$env.lockWidgets) {
+                if (this.widget.items && !this.$env.widgetsLocked) {
                     var items = deepCopy(this.widget.items);
                     items.splice(i, 1);
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { items }));

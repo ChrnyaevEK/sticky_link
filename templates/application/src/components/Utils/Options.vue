@@ -279,7 +279,7 @@
                 $(`.${this.warningClass}`).remove();
             },
             push() {
-                if (!this.$env.lockChanges) {
+                if (!this.$env.changesLocked) {
                     this.$store.dispatch("updateOrAddInstance", this.instance).then(
                         () => {
                             this.unsetWarning();

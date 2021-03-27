@@ -1,27 +1,25 @@
 <template id="simple-text-template">
-    <component :is="base" v-bind="{ ...$props, ...$attrs }" class="p-0">
-        <template slot="content">
-            <div class="d-flex flex-column h-100">
-                <span
-                    class="flex-grow-1 text-truncate text-wrap text-break ql-editor editor"
-                    v-html="widget.text_content"
-                ></span>
-            </div>
-        </template>
-    </component>
+    <WidgetBaseResizable :widget="widget">
+        <div class="d-flex flex-column h-100">
+            <span
+                class="flex-grow-1 text-truncate text-wrap text-break ql-editor editor"
+                v-html="widget.text_content"
+            ></span>
+        </div>
+    </WidgetBaseResizable>
 </template>
 
 <script>
+    import WidgetBaseResizable from "../Widgets/WidgetBaseResizable";
     export default {
         type: "simple_text",
         name: "SimpleText",
         template: "#simple-text-template",
+        components: {
+            WidgetBaseResizable,
+        },
         props: {
             widget: {
-                type: Object,
-                required: true,
-            },
-            base: {
                 type: Object,
                 required: true,
             },

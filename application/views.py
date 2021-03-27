@@ -1,11 +1,11 @@
 from application import models
 from application import serializers
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.decorators import api_view
 from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework.response import Response
 from django.http import HttpResponse
-from django.core.exceptions import PermissionDenied
 from channels.layers import get_channel_layer
 from application.consumers import Event as ConsumerEvent, WallConsumer
 from asgiref.sync import async_to_sync
@@ -18,48 +18,62 @@ def _get_protected_queryset(model, user):
         q = Q(allow_anonymous_view=True)
         if not user.is_anonymous:
             q.add(Q(owner=user), Q.OR)
-    else:
+    elif model == models.Container:
         q = Q(wall__allow_anonymous_view=True)
         if not user.is_anonymous:
             q.add(Q(wall__owner=user), Q.OR)
+    else:
+        q = Q(container__wall__allow_anonymous_view=True)
+        if not user.is_anonymous:
+            q.add(Q(container__wall__owner=user), Q.OR)
     return model.objects.filter(q)
 
 
 class App:
     @staticmethod
+    @api_view(http_method_names=['GET'])
     def enter(request):
         # Entry point for users - resolve on enter redirections, return client app
         template = 'application/dist/index.html'
         return HttpResponse(render(request, template))
 
     @staticmethod
+    @api_view(http_method_names=['GET'])
     def state(request, wall_id=None):
         try:
             wall = _get_protected_queryset(models.Wall, request.user).get(pk=wall_id)
         except models.Wall.DoesNotExist:
             wall = None
             containers = None
+            container = None
             widgets = None
         else:
-            wall = serializers.WallSerializer(wall).data
-            containers = _get_protected_queryset(models.Container, request.user).filter(wall=wall)
-            containers = [serializers.ContainerSerializer(c).validated_data for c in containers]
+            containers = []
             widgets = []
-            for model, serializer in (
-                    (models.SimpleText, serializers.SimpleTextSerializer),
-                    (models.URL, serializers.URLSerializer),
-                    (models.SimpleList, serializers.SimpleListSerializer),
-                    (models.Counter, serializers.CounterSerializer),
-                    (models.SimpleSwitch, serializers.SimpleSwitchSerializer),
-            ):
-                for widget in model.objects.filter(wall=wall):
-                    widgets.append(serializer(widget).data)
-        return Response({
-            'user': serializers.UserSerializer(request.user).validated_data,
+            for container in _get_protected_queryset(models.Container, request.user).filter(wall=wall):
+                for model, serializer in (
+                        (models.SimpleText, serializers.SimpleTextSerializer),
+                        (models.URL, serializers.URLSerializer),
+                        (models.SimpleList, serializers.SimpleListSerializer),
+                        (models.Counter, serializers.CounterSerializer),
+                        (models.SimpleSwitch, serializers.SimpleSwitchSerializer),
+                ):
+                    for widget in model.objects.filter(container=container):
+                        widgets.append(serializer(widget).data)
+                containers.append(serializers.ContainerSerializer(container).data)
+            if not containers:
+                container = models.Container(wall=wall, index=0)
+                container.save()
+                containers = [serializers.ContainerSerializer(container).data]
+            container = containers[0]
+            wall = serializers.WallSerializer(wall).data
+        return JsonResponse({
+            'user': serializers.UserSerializer(request.user).data,
             'wall': wall,
             'containers': containers,
+            'container': container,
             'widgets': widgets,
-            'walls': WallViewSet.get_list(request)
+            'walls': WallViewSet.get_list(request) or None
         })
 
 

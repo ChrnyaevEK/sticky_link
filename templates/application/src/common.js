@@ -2,7 +2,6 @@ import $ from "jquery";
 import Vue from "vue";
 import Vuex from "vuex";
 import store from "./store";
-import router from "./router";
 
 const transform = require("lodash.transform");
 const isEqual = require("lodash.isequal");
@@ -100,30 +99,30 @@ export var io = new Vue({
 
 export var env = new Vue({
     data: {
-        lockChanges: false,
-        lockUpdateManager: false,
-        lockWidgets: false, // Should disable widgets actions
+        changesLocked: false,
+        updateManagerLocked: false,
+        widgetsLocked: false, // Should disable widgets actions
         openOptionsFor: null,
         viewMode: false,
     },
     methods: {
         lockWidgets() {
-            this.lockWidgets = true;
+            this.widgetsLocked = true;
         },
         unlockWidgets() {
-            this.lockWidgets = false;
+            this.widgetsLocked = false;
         },
         lockChanges() {
-            this.lockChanges = true;
+            this.changesLocked = true;
         },
         unlockChanges() {
-            this.lockChanges = false;
+            this.changesLocked = false;
         },
         lockUpdateManager() {
-            this.lockUpdateManager = true;
+            this.updateManagerLocked = true;
         },
         unlockUpdateManager() {
-            this.lockUpdateManager = false;
+            this.updateManagerLocked = false;
         },
         openOptions(instance) {
             this.openOptionsFor = instance;
@@ -159,7 +158,7 @@ export var updateManager = new Vue({
     methods: {
         async proposeUpdate(update, { type, id, uid }) {
             // Require Type, Id, Uid
-            if (this.$env.lockUpdateManager) return;
+            if (this.$env.updateManagerLocked) return;
 
             this.handler[uid] = Object.assign({}, this.handler[uid], update); // Merge updates
             if (!this.waiter[uid]) {
@@ -183,7 +182,7 @@ export var updateManager = new Vue({
         async populateRemoteUpdate(event) {
             if (this.handler[event.instance.uid] !== undefined) {
                 // Http is pending right now
-                this.remote[event.instance.uid] = update.instance.version;
+                this.remote[event.instance.uid] = event.instance.version;
             } else {
                 // Else fire off update for instance, somebody just changed it
                 await this.resolveNewVersion(event.instance);
@@ -191,7 +190,7 @@ export var updateManager = new Vue({
         },
         async populateRemoteDestroy(event) {
             io.change(true);
-            localInstance = await store.dispatch("getInstanceByUid", event.instance.uid);
+            var localInstance = await store.dispatch("getInstanceByUid", event.instance.uid);
             if (localInstance) {
                 store.commit("deleteInstance", localInstance);
                 if (localInstance.type == "wall") {

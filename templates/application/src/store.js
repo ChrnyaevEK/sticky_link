@@ -1,6 +1,6 @@
 import Vuex from "vuex";
 import Vue from "vue";
-import { env, api, updateManager, difference, deepCopy } from "./common";
+import { env, api, updateManager, difference } from "./common";
 
 Vue.use(Vuex);
 
@@ -23,6 +23,7 @@ export default new Vuex.Store({
         wall: null,
         walls: null,
         containers: null,
+        container: null,
         widgets: null,
         app: {
             title: process.env.VUE_APP_TITLE,
@@ -31,9 +32,11 @@ export default new Vuex.Store({
     mutations: {
         setState(state, response) {
             state.user = response.user;
-            state.wall = wall;
-            state.walls = walls;
-            state.widgets = widgets;
+            state.wall = response.wall;
+            state.walls = response.walls;
+            state.containers = response.containers;
+            state.container = response.container;
+            state.widgets = response.widgets;
             if (state.user.is_anonymous) {
                 state.user.username = "anonymous";
             }
@@ -58,6 +61,9 @@ export default new Vuex.Store({
                 state[source].push(instance);
             }
         },
+        setContainer(state, container){
+            state.container = container
+        }
     },
     actions: {
         async fetchState(context, wallId) {
@@ -69,21 +75,21 @@ export default new Vuex.Store({
         },
         async fetchInstance(context, instance) {
             instance = await api.retrieve(instance.type, instance.id);
-            await env.dispatch("lockUpdateManager");
+            env.lockUpdateManager();
             context.commit("updateOrAddInstance", instance);
             Vue.nextTick(() => {
-                env.dispatch("unlockUpdateManager");
+                env.unlockUpdateManager();
             });
             return instance;
         },
-        async createInstance(context, type) {
-            await env.dispatch("lockChanges");
-            var instance = await api.create(type);
-            context.commit("addInstance", instance);
+        async createInstance(context, instance) {
+            env.lockChanges();
+            instance = await api.create(instance.type, instance);
+            context.commit("updateOrAddInstance", instance);
             Vue.nextTick(() => {
-                env.dispatch("unlockChanges");
+                env.unlockChanges();
             });
-            return i;
+            return instance;
         },
         async deleteInstance(context, instance) {
             context.commit("deleteInstance", instance);
@@ -105,7 +111,7 @@ export default new Vuex.Store({
                 y: widget.y + 5,
                 id: undefined,
             });
-            context.commit("addInstance", widget);
+            context.commit("updateOrAddInstance", widget);
             return widget;
         },
         async recalculateWidgets(context, container) {
@@ -123,7 +129,6 @@ export default new Vuex.Store({
             }
             await Promise.all(updateArray);
         },
-
         getInstanceByUid(context, uid) {
             return [...context.state.walls, ...context.state.widgets].filter((i) => i.uid == uid)[0];
         },

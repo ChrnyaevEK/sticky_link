@@ -1,7 +1,7 @@
 <template>
     <vue-draggable-resizable
-        :draggable="!$env.lockChanges"
-        :resizable="!$env.lockChanges"
+        :draggable="!$env.changesLocked"
+        :resizable="!$env.changesLocked"
         @resizestop="onResizeStop"
         @dragstop="onDrag"
         @click.native.stop
@@ -34,13 +34,13 @@
     >
         <div class="widget-quick-access" v-show="quickAccessVisible">
             <button
-                :disabled="$env.lockChanges"
+                :disabled="$env.changesLocked"
                 class="btn btn-light border"
                 @click="$store.dispatch('copyWidget', widget)"
             >
                 <i class="fas fa-copy"></i>
             </button>
-            <button :disabled="$env.lockChanges" class="btn btn-danger" @click="deleteWidget">
+            <button :disabled="$env.changesLocked" class="btn btn-danger" @click="deleteWidget">
                 <i class="fas fa-trash"></i>
             </button>
         </div>
@@ -71,12 +71,12 @@
         },
         methods: {
             onResizeStop(x, y, w, h) {
-                if (!this.$env.lockChanges) {
+                if (!this.$env.changesLocked) {
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { w, h }));
                 }
             },
             onDrag(x, y) {
-                if (!this.$env.lockChanges) {
+                if (!this.$env.changesLocked) {
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { x, y }));
                 }
             },
