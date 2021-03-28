@@ -1,4 +1,3 @@
-@import "custom";
 @import "~bootstrap/scss/bootstrap";
 @import "vue-select/src/scss/vue-select.scss";
 @import "~quill/dist/quill.core.css";
@@ -9,6 +8,29 @@
 .dropdown-item:active {
     background-color: $gray-400;
     color: unset;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge add Firefox */
+.scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none; /* Firefox */
+}
+
+.scrollable-element {
+    scrollbar-color: $gray-400 $white;
+}
+
+::-webkit-scrollbar {
+    height: 10px;
+    background: $white;
+}
+
+::-webkit-scrollbar-thumb {
+    background: $gray-400;
 }
 
 .cursor-move {
@@ -26,16 +48,24 @@
     border-width: 1px;
     border-color: #dadada;
 }
-.widget-no-border {
-    border-width: 0px;
+.no-border {
+    border: none;
 }
 
 .wall-only > .handle {
     text-align: center;
-    background-color: $success;
-    color: $gray-500;
-    border-radius: 2px;
-    width: 20px;
-    height: 10px;
-    border-color: $gray-500;
+    background-color: transparent;
+    color: #adb5bd;
+    width: 100%;
+    border: none;
+}
+.wall-only > .handle-bm {
+    background-color: $gray-400;
+    height: 6px;
+    bottom: -6px;
+    left: 0%;
+    margin-left: 0;
+}
+.hidden {
+    display: none !important;
 }

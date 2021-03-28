@@ -1,9 +1,6 @@
 <template>
     <vue-draggable-resizable
         v-if="$env.openOptionsFor !== null"
-        @mousedown.native.stop
-        @mouseup.native.stop
-        @mousemove.native.stop
         dragHandle=".options-drag"
         @click.native.stop
         @touchstart.native.stop.prevent
@@ -11,7 +8,7 @@
         :z="100"
         :resizable="false"
         :parent="false"
-        class="bg-white border overflow-auto shadow rounded options-position options-size p-3"
+        class="bg-white border overflow-auto shadow rounded options-position options-size p-3 scrollbar-hidden"
     >
         <div
             class="form-group d-flex justify-content-between align-items-center options-drag border-bottom cursor-move"
@@ -19,7 +16,53 @@
             <strong>Options</strong>
             <a class="btn" @click="$env.closeOptions()"><i class="fas fa-times"></i></a>
         </div>
-        <template v-if="instance.type != 'wall'">
+        <template v-if="instance.type == types.Wall">
+            <div class="form-group">
+                <label :for="_('title')">Title </label>
+                <input :id="_('title')" class="form-control" v-model="instance.title" maxlength="200" @input="push" />
+            </div>
+            <div class="form-check">
+                <input
+                    type="checkbox"
+                    :id="_('allow_anonymous_view')"
+                    class="form-check-input"
+                    v-model="instance.allow_anonymous_view"
+                    @change="push"
+                />
+                <label class="form-check-label" :for="_('allow_anonymous_view')">Allow anonymous view mode</label>
+            </div>
+            <div class="form-check">
+                <input
+                    type="checkbox"
+                    :id="_('lock_widgets')"
+                    class="form-check-input"
+                    v-model="instance.lock_widgets"
+                    @change="push"
+                />
+                <label class="form-check-label" :for="_('lock_widgets')">Lock widget actions</label>
+            </div>
+        </template>
+        <template v-else-if="instance.type == types.Container">
+            <div class="form-group">
+                <label :for="_('title')">Title </label>
+                <input :id="_('title')" class="form-control" v-model="instance.title" maxlength="200" @input="push" />
+            </div>
+            <div class="form-group">
+                <label :for="_('description')">Description </label>
+                <input
+                    :id="_('description')"
+                    class="form-control"
+                    v-model="instance.description"
+                    maxlength="500"
+                    @input="push"
+                />
+            </div>
+            <div class="form-group">
+                <label :for="_('h')">Height </label>
+                <input :id="_('h')" type="number" class="form-control" v-model.number="instance.h" @input="push" min="50" />
+            </div>
+        </template>
+        <template v-else>
             <div class="form-group">
                 <label :for="_('x')">X coordinate</label>
                 <input
@@ -136,13 +179,7 @@
             </div>
             <div class="form-group">
                 <label :for="_('help')">Help text</label>
-                <input
-                    :id="_('help')"
-                    class="form-control"
-                    v-model="instance.help"
-                    @input="push"
-                    maxlength="200"
-                />
+                <input :id="_('help')" class="form-control" v-model="instance.help" @input="push" maxlength="200" />
             </div>
             <div class="form-check">
                 <input
@@ -155,40 +192,14 @@
                 <label class="form-check-label" :for="_('border')">Border</label>
             </div>
         </template>
-        <template v-if="instance.type == 'wall'">
-            <div class="form-group">
-                <label :for="_('title')">Title </label>
-                <input :id="_('title')" class="form-control" v-model="instance.title" @input="push" />
-            </div>
-            <div class="form-check">
-                <input
-                    type="checkbox"
-                    :id="_('allow_anonymous_view')"
-                    class="form-check-input"
-                    v-model="instance.allow_anonymous_view"
-                    @change="push"
-                />
-                <label class="form-check-label" :for="_('allow_anonymous_view')">Allow anonymous view mode</label>
-            </div>
-            <div class="form-check">
-                <input
-                    type="checkbox"
-                    :id="_('lock_widgets')"
-                    class="form-check-input"
-                    v-model="instance.lock_widgets"
-                    @change="push"
-                />
-                <label class="form-check-label" :for="_('lock_widgets')">Lock widget actions</label>
-            </div>
-        </template>
         <hr />
         <!--Options by widget type========================================================================================================-->
         <!--Simple text-->
-        <template v-if="instance.type == SimpleText.type">
+        <template v-if="instance.type == types.SimpleText">
             <TextEditor v-model="instance.text_content" @input="push"></TextEditor>
         </template>
         <!--Counter-->
-        <template v-if="instance.type == Counter.type">
+        <template v-if="instance.type == types.Counter">
             <div class="form-group">
                 <label :for="_('value')">Value </label>
                 <input :id="_('value')" class="form-control" v-model.number="instance.value" @input="push" />
@@ -199,7 +210,7 @@
             </div>
         </template>
         <!--URL-->
-        <template v-if="instance.type == URL.type">
+        <template v-if="instance.type == types.URL">
             <div class="form-group">
                 <label :for="_('href')">URL address </label>
                 <input :id="_('href')" class="form-control" v-model="instance.href" @input="push" />
@@ -210,21 +221,23 @@
             </div>
         </template>
         <!--Simple List-->
-        <template v-if="instance.type == SimpleList.type">
+        <template v-if="instance.type == types.SimpleList">
             <div class="form-group">
                 <label :for="_('title')">Title </label>
                 <input :id="_('title')" class="form-control" v-model="instance.title" @input="push" />
             </div>
         </template>
         <!--Simple Switch-->
-        <template v-if="instance.type == SimpleSwitch.type">
+        <template v-if="instance.type == types.SimpleSwitch">
             <div class="form-group">
                 <label :for="_('title')">Title </label>
                 <input :id="_('title')" class="form-control" v-model="instance.title" @input="push" />
             </div>
         </template>
-
         <!--Options by widget type========================================================================================================-->
+        <div class="form-group">
+            <a class="btn btn-sm btn-danger w-100" @click.stop="onDeleteInstance">Delete</a>
+        </div>
         <div class="form-group d-flex justify-content-center">
             <small class="text-secondary">All changes are automatically saved</small>
         </div>
@@ -237,21 +250,14 @@
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
     import $ from "jquery";
     import TextEditor from "./TextEditor";
-    import SimpleText from "../Widgets/SimpleText";
-    import URL from "../Widgets/URL";
-    import Counter from "../Widgets/Counter";
-    import SimpleList from "../Widgets/SimpleList";
-    import SimpleSwitch from "../Widgets/SimpleSwitch";
+    import { types } from "../../common";
 
     export default {
         name: "Options",
         data: function() {
             return {
-                SimpleText,
-                URL,
-                Counter,
-                SimpleList,
-                SimpleSwitch,
+                types,
+                warningClass: "options-warning",
             };
         },
         computed: {
@@ -272,22 +278,26 @@
                         );
                 }
             },
+            onDeleteInstance() {
+                if (confirm("Are you sure?")) {
+                    this.$env.closeOptions()
+                    this.$store.dispatch("deleteInstance", this.instance);
+                }
+            },
             unsetWarning() {
                 $(`.${this.warningClass}`)
                     .parent()
                     .removeClass("text-danger");
                 $(`.${this.warningClass}`).remove();
             },
-            push() {
+            async push() {
                 if (!this.$env.changesLocked) {
-                    this.$store.dispatch("updateOrAddInstance", this.instance).then(
-                        () => {
-                            this.unsetWarning();
-                        },
-                        (response) => {
-                            this.setWarningFromResponse(response);
-                        }
-                    );
+                    try {
+                        await this.$store.dispatch("updateOrAddInstance", this.instance)
+                    } catch (err){
+                        return this.setWarningFromResponse(err);
+                    }
+                    this.unsetWarning();
                 }
             },
         },

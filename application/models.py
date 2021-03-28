@@ -42,9 +42,14 @@ class Wall(Common):
 
 class Container(Common):
     type = 'container'
+    protected_fields = [
+        'id', 'uid', 'type', 'date_of_creation', 'last_update',
+        'wall', 'index', 'h', 'w', 'description', 'title',
+    ]
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
     index = models.IntegerField(verbose_name='Index of container in wall', validators=[MinValueValidator(0)])
     h = models.IntegerField(verbose_name='Container height', default=100, validators=[MinValueValidator(50)])
+    w = models.IntegerField(verbose_name='Container width', default=2000)  # Should not change (is static)
     title = models.CharField(verbose_name='Container title', max_length=200, null=True, blank=True)
     description = models.CharField(verbose_name='Container description', max_length=500, blank=True, null=True)
 

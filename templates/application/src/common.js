@@ -103,7 +103,7 @@ export var env = new Vue({
         updateManagerLocked: false,
         widgetsLocked: false, // Should disable widgets actions
         openOptionsFor: null,
-        viewMode: false,
+        edit: false,
     },
     methods: {
         lockWidgets() {
@@ -130,11 +130,11 @@ export var env = new Vue({
         closeOptions() {
             this.openOptionsFor = null;
         },
-        openViewMode() {
-            this.viewMode = true;
+        openEditor() {
+            this.edit = true;
         },
-        closeViewMode() {
-            this.viewMode = false;
+        closeEditor() {
+            this.edit = false;
         },
         setTabTitle(context) {
             $("#tab-title").text(`${context.state.user.username} @ ${process.env.VUE_APP_TITLE}`);
@@ -159,12 +159,11 @@ export var updateManager = new Vue({
         async proposeUpdate(update, { type, id, uid }) {
             // Require Type, Id, Uid
             if (this.$env.updateManagerLocked) return;
-
             this.handler[uid] = Object.assign({}, this.handler[uid], update); // Merge updates
             if (!this.waiter[uid]) {
                 // Already waiting to push update?
                 this.waiter[uid] = (async () => {
-                    setTimeout(async () => {
+                        await sleep(this.coolDown)
                         delete this.waiter[uid];
                         var newInstance = await api.update_partial(type, id, this.handler[uid]);
                         delete this.handler[uid];
@@ -174,7 +173,6 @@ export var updateManager = new Vue({
                             delete this.remote[newInstance.uid]; // Unset remote version
                         }
                         return newInstance;
-                    }, this.coolDown);
                 })();
             }
             return this.waiter[uid];
@@ -309,9 +307,11 @@ export var ws = new Vue({
         wallId: null,
         socket: null,
         connectionTimeout: 1000,
+        expectClose: false,
     },
     methods: {
         connect(wallId) {
+            this.expectClose = false;
             this.wallId = wallId;
             this.socket = new WebSocket(
                 `${process.env.NODE_ENV == "production" ? "wss" : "ws"}://${process.env.VUE_APP_HOST}/wss/${wallId}`
@@ -332,10 +332,16 @@ export var ws = new Vue({
             }
         },
         onClose() {
-            console.error("Wall socket closed unexpectedly");
-            setTimeout(() => {
-                this.connect(this.wallId);
-            }, this.connectionTimeout);
+            if (!this.expectClose) {
+                console.error("Wall socket closed unexpectedly");
+                setTimeout(() => {
+                    this.connect(this.wallId);
+                }, this.connectionTimeout);
+            }
+        },
+        close() {
+            this.expectClose = true;
+            this.socket.close();
         },
     },
 });
@@ -352,7 +358,18 @@ export function generateId(property) {
     return `${this._uid}-${property}`;
 }
 
+export const types = {
+    Wall: "wall",
+    Container: "container",
+    SimpleText: "simple_text",
+    URL: "url",
+    Counter: "counter",
+    SimpleList: "simple_list",
+    SimpleSwitch: "simple_switch",
+};
+
 export default {
+    types,
     difference,
     generateId,
     updateManager,

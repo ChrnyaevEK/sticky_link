@@ -1,31 +1,41 @@
 <template>
     <div class="w-100 h-100 py-5 overflow-auto" v-if="$store.state.wall">
-        <vue-draggable-resizable
-            @click.native="$env.closeOptions"
-            @touchstart.native="$env.closeOptions"
-            @contextmenu.native.stop.prevent="$env.openOptions(Object.assign({}, $store.state.wall))"
-            @resizing="onResizing"
-            v-for="container of containers"
-            @activated="selectContainer(container)"
-            :key="container.id"
-            :resizable="true"
-            :draggable="false"
-            :parent="false"
-            :handles="['bm']"
-            :h="container.h"
-            :minHeight="100"
-            class="border wall wall-only my-3"
-        >
-            <component
-                v-for="widget of filterWidgets(container)"
-                :is="toComponent(widget)"
-                :parent="true"
-                :key="widget.type + widget.id"
-                :widget="widget"
+        <div class="d-flex flex-column relative m-1" v-for="container of containers" :key="container.id">
+            <div
+                :id="_(container.id)"
+                class="overflow-auto border container-wrap scrollbar-hidden scrollable-element relative bottom-element"
             >
-            </component>
-        </vue-draggable-resizable>
-        <Options></Options>
+                <vue-draggable-resizable
+                    @click.native.stop.prevent="onCloseOptions"
+                    @touchstart.native.stop.prevent="onCloseOptions"
+                    @resizing="onResizing"
+                    @activated="onActivated(container)"
+                    :resizable="$env.edit"
+                    :draggable="false"
+                    :parent="false"
+                    :handles="['bm']"
+                    :h="container.h"
+                    :w="container.w"
+                    :minHeight="100"
+                    class="relative wall-only no-border"
+                >
+                    <component
+                        v-for="widget of filterWidgets(container)"
+                        :is="toComponent(widget)"
+                        :parent="true"
+                        :key="widget.type + widget.id"
+                        :widget="widget"
+                    >
+                    </component>
+                </vue-draggable-resizable>
+            </div>
+            <div class="quick-access container-quick-access hidden p-1" v-if="$env.edit">
+                <a class="btn btn-sm btn-light border" @click.stop="$env.openOptions(Object.assign({}, container))">
+                    <i class="fas fa-ellipsis-v"></i>
+                </a>
+            </div>
+        </div>
+        <Options v-if="$env.edit"></Options>
     </div>
     <div v-else class="w-100 h-100 d-flex justify-content-center align-items-center text-secondary">
         <span v-if="$store.state.user.is_authenticated">No wall is selected...</span>
@@ -74,8 +84,8 @@
         },
         methods: {
             onResizing(x, y, w, h) {
-                if (!this.$env.changesLocked && this.$store.state.container) {
-                    this.$el.querySelector(".handle-bm").scrollIntoView({ behavior: "auto", block: "end" });
+                if (!this.$env.changesLocked && this.$env.edit && this.$store.state.container) {
+                    this.$el.querySelector(".handle-bm").scrollIntoView({ behavior: "smooth", block: "center" });
                     var update = Object.assign({}, this.$store.state.container, { h });
                     this.$store.dispatch("recalculateWidgets", update);
                     this.$store.dispatch("updateOrAddInstance", update);
@@ -99,8 +109,29 @@
                     return [];
                 }
             },
-            selectContainer(container) {
-                this.$store.commit("setContainer", container);
+            onCloseOptions() {
+                if (this.$env.edit) {
+                    this.$env.closeOptions();
+                }
+            },
+            onActivated(container) {
+                if (this.$env.edit) {
+                    window.dispatchEvent(new Event("resize"));
+                    var containerId = "#" + this._(container.id);
+                    $(".container-wrap")
+                        .addClass("scrollbar-hidden")
+                        .removeClass("shadow-sm");
+                    $(containerId).addClass("shadow-sm");
+                    $(".quick-access")
+                        .not(`${containerId} .quick-access`)
+                        .addClass("hidden");
+                    $(containerId)
+                        .removeClass("scrollbar-hidden")
+                        .parent()
+                        .find(".container-quick-access")
+                        .removeClass("hidden");
+                    this.$store.commit("setContainer", container);
+                }
             },
         },
         watch: {
@@ -112,8 +143,20 @@
 </script>
 
 <style scoped>
-    .wall {
+    .relative {
         position: relative;
-        width: 100% !important;
+    }
+    .container-quick-access {
+        position: absolute;
+        display: flex;
+        right: 0px;
+    }
+    .container-quick-access > * {
+        margin: 0 0 0 2px;
+        height: 2rem;
+        width: 2rem;
+    }
+    .bottom-element {
+        padding-bottom: 6px;
     }
 </style>

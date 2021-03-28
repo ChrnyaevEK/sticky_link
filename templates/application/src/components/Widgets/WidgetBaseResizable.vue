@@ -1,26 +1,18 @@
 <template>
     <vue-draggable-resizable
-        :draggable="!$env.changesLocked"
-        :resizable="!$env.changesLocked"
+        :draggable="!$env.changesLocked && $env.edit"
+        :resizable="!$env.changesLocked && $env.edit"
         @resizestop="onResizeStop"
         @dragstop="onDrag"
-        @click.native.stop
-        @mousedown.native.stop
-        @mouseup.native.stop
-        @mousemove.native.stop
-        @contextmenu.native.stop.prevent
+        @activated="onActivated"
         @touchstart.native.stop.prevent
         class="widget"
         :class="[
             widget.border ? 'widget-border' : 'widget-no-border',
-            $env.openOptionsFor &&
-            $env.openOptionsFor.id == widget.id &&
-            $env.openOptionsFor.type == widget.type
+            $env.openOptionsFor && $env.openOptionsFor.id == widget.id && $env.openOptionsFor.type == widget.type
                 ? 'shadow'
                 : '',
         ]"
-        :enableNativeDrag="true"
-        :grid="[10, 10]"
         :title="widget.help"
         :style="style"
         :parent="true"
@@ -32,19 +24,22 @@
         :minHeight="50"
         :minWidth="50"
     >
-        <div class="widget-quick-access" v-show="quickAccessVisible">
-            <button
+        <div class="quick-access widget-quick-access hidden" v-if="$env.edit">
+            <a :disabled="$env.changesLocked" class="btn btn-sm btn-danger" @click="deleteWidget">
+                <i class="fas fa-trash"></i>
+            </a>
+            <a
                 :disabled="$env.changesLocked"
-                class="btn btn-light border"
+                class="btn btn-sm btn-light border"
                 @click="$store.dispatch('copyWidget', widget)"
             >
                 <i class="fas fa-copy"></i>
-            </button>
-            <button :disabled="$env.changesLocked" class="btn btn-danger" @click="deleteWidget">
-                <i class="fas fa-trash"></i>
-            </button>
+            </a>
+            <a class="btn btn-sm btn-light border" @click.stop="onOpenOptions">
+                <i class="fas fa-ellipsis-v"></i>
+            </a>
         </div>
-        <div class="w-100 h-100" @contextmenu.stop.prevent="$env.openOptions(Object.assign({}, widget))">
+        <div class="w-100 h-100">
             <slot></slot>
         </div>
     </vue-draggable-resizable>
@@ -63,26 +58,34 @@
                 required: true,
             },
         },
-        data() {
-            return {
-                quickAccessClass: "widget-quick-access",
-                quickAccessVisible: false,
-            };
-        },
         methods: {
             onResizeStop(x, y, w, h) {
-                if (!this.$env.changesLocked) {
+                if (!this.$env.changesLocked && this.$env.edit) {
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { w, h }));
                 }
             },
             onDrag(x, y) {
-                if (!this.$env.changesLocked) {
+                if (!this.$env.changesLocked && this.$env.edit) {
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { x, y }));
                 }
             },
             deleteWidget() {
-                if (confirm("Are you sure?")) {
+                if (confirm("Are you sure?" && this.$env.edit)) {
                     this.$store.dispatch("deleteInstance", this.widget);
+                }
+            },
+            onActivated() {
+                if (this.$env.edit) {
+                    window.dispatchEvent(new Event("resize"));
+                    $(".widget-quick-access").addClass("hidden");
+                    $(this.$el)
+                        .find(".widget-quick-access")
+                        .removeClass("hidden");
+                }
+            },
+            onOpenOptions() {
+                if (this.$env.edit) {
+                    this.$env.openOptions(Object.assign({}, this.widget));
                 }
             },
         },
@@ -98,18 +101,6 @@
                     font-weight:${this.widget.font_weight};
                 `;
             },
-        },
-        updated() {
-            window.dispatchEvent(new Event("resize"));
-        },
-        mounted() {
-            $(this.$el)
-                .mouseenter(() => {
-                    this.quickAccessVisible = true;
-                })
-                .mouseleave(() => {
-                    this.quickAccessVisible = false;
-                });
         },
     };
 </script>
@@ -129,7 +120,7 @@
         padding: 2px 2px 0 2px;
         z-index: 2;
     }
-    .widget-quick-access a {
+    .widget-quick-access > * {
         margin: 0 0 0 2px;
         display: flex;
         justify-content: center;

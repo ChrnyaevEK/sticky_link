@@ -45,6 +45,9 @@ new Vue({
             handler: function(to, from) {
                 // Reconnect to server on route change (on wall change)
                 if (to.params.wallId !== undefined) {
+                    if (ws.socket !== null) {
+                        ws.close();
+                    }
                     if (to.params.wallId !== from.params.wallId) {
                         ws.connect(to.params.wallId);
                     }

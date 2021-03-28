@@ -93,7 +93,7 @@ export default new Vuex.Store({
         },
         async deleteInstance(context, instance) {
             context.commit("deleteInstance", instance);
-            await api.delete(instance.type, instance.id, instance.uid);
+            return await api.delete(instance.type, instance.id, instance.uid);
         },
         async updateOrAddInstance(context, instance) {
             var localInstance = await context.dispatch("getInstanceByUid", instance.uid);
@@ -101,14 +101,14 @@ export default new Vuex.Store({
             if (localInstance) {
                 update = difference(localInstance, instance);
             }
-            context.commit("updateOrAddInstance", instance);
-            await updateManager.proposeUpdate(update, instance);
+            if (Object.keys(update).length){
+                context.commit("updateOrAddInstance", instance);
+                return await updateManager.proposeUpdate(update, instance);
+            }
         },
         async copyWidget(context, widget) {
             widget = await api.create(widget.type, {
                 ...widget,
-                x: widget.x + 5,
-                y: widget.y + 5,
                 id: undefined,
             });
             context.commit("updateOrAddInstance", widget);

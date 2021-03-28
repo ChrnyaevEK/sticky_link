@@ -3,6 +3,7 @@ import VueRouter from "vue-router";
 import App from "./components/App";
 import Wall from "./components/Wall";
 import store from "./store";
+import { env } from "./common";
 
 Vue.use(VueRouter);
 
@@ -15,8 +16,17 @@ const router = new VueRouter({
             children: [
                 {
                     name: "wall",
-                    path: ":wallId?",
+                    path: "wall/:wallId?",
+                    alias: ":wallId?",
                     component: Wall,
+                    beforeEnter(to, from, next) {
+                        if (to.query.edit) {
+                            env.openEditor()
+                        } else {
+                            env.closeEditor()
+                        }
+                        next()
+                    },
                 },
             ],
         },

@@ -8,13 +8,15 @@
                         <router-link class="nav-link" :to="{ name: 'home' }">Home </router-link>
                     </li>
                     <li class="nav-item">
-                        <a
-                            v-show="$store.state.wall"
-                            class="btn btn-defaul"
-                            @click.stop.prevent="$env.viewMode ? $env.closeViewMode() : $env.openViewMode()"
-                            role="button"
-                            >{{ $env.viewMode ? "Edit" : "View" }}</a
-                        >
+                        <router-link
+                            class="nav-link"
+                            :to="{
+                                name: 'wall',
+                                query: { view: $env.edit ? true : undefined },
+                                params: { wallId: $route.params.wallId },
+                            }"
+                            >{{ $env.edit ? "View" : "Edit" }}
+                        </router-link>
                     </li>
                     <li class="nav-item">
                         <router-link
@@ -46,7 +48,7 @@
         <div class="h-100 container d-flex flex-column justify-content-between align-items-center overflow-hidden">
             <AlertUtil></AlertUtil>
             <router-view></router-view>
-            <SelectCreate :allowDeleteWall="Boolean($store.state.wall)" @wallCreated="onCreateWall"></SelectCreate>
+            <SelectCreate @wallCreated="onCreateWall" v-if="$env.edit"></SelectCreate>
         </div>
     </div>
 </template>
@@ -71,12 +73,6 @@
                     params: {
                         wallId: wall.id,
                     },
-                });
-            },
-            createWidget(klass) {
-                this.$store.dispatch("createWidget", {
-                    type: klass.type,
-                    wall: this.$route.params.wallId,
                 });
             },
         },

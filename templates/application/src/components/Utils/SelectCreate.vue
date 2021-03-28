@@ -34,13 +34,12 @@
                 <i class="fas fa-plus"></i>
             </a>
             <a
-                v-if="deleteWall"
-                class="mr-1 btn btn-sm btn-danger border"
-                @click.stop="deleteWall"
-                title="Delete current wall"
+                v-if="$store.state.wall"
+                class="mr-1 btn btn-sm btn-default"
+                @click.stop="$env.openOptions($store.state.wall)"
                 :disabled="$env.changesLocked"
             >
-                <i class="fas fa-trash"></i>
+                <i class="fas fa-ellipsis-v"></i>
             </a>
         </div>
         <span class="overflow-auto d-flex" v-if="$store.state.wall">
@@ -98,12 +97,6 @@
 <script>
     export default {
         name: "SelectCreate",
-        props: {
-            allowDeleteWall: {
-                type: Boolean,
-                default: true,
-            },
-        },
         methods: {
             async createInstance(type) {
                 switch (type) {
