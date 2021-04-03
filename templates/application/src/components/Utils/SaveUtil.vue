@@ -4,7 +4,7 @@
     </span>
 </template>
 <script>
-    import { io } from "../../common";
+    import io  from "../../modules/io";
     export default {
         data() {
             return {

@@ -61,11 +61,16 @@
 }
 .wall-only > .handle-bm {
     background-color: $gray-400;
-    height: 6px;
-    bottom: -6px;
+    height: 1px;
+    top: calc(100% - 1px);
     left: 0%;
     margin-left: 0;
+    z-index: 101;
 }
 .hidden {
     display: none !important;
+}
+
+.workspace {
+    background-color: $gray-200;
 }

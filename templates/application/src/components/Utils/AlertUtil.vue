@@ -6,14 +6,14 @@
         :class="'alert-' + io.alertUtil.type"
         @mouseout="io.alertUtil.visible = false"
         v-html="io.alertUtil.html"
-        >
+    >
         <a class="close btn" aria-label="Close" @click="io.alertUtil.visible = false">
             <span aria-hidden="true">&times;</span>
         </a></span
     >
 </template>
 <script>
-    import { io } from "../../common";
+    import io from "../../modules/io";
     export default {
         data() {
             return {

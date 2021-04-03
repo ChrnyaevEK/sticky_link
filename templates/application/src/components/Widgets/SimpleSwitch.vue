@@ -1,6 +1,6 @@
 <template id="simple-switch-template">
     <WidgetBaseResizable :widget="widget">
-        <div class="custom-control custom-switch w-100 h-100">
+        <div class="h-100 custom-control custom-switch d-flex justify-content-center align-items-center" :title="widget.title">
             <input
                 type="checkbox"
                 @change="changeValue"
@@ -9,7 +9,7 @@
                 :disabled="$env.widgetsLocked"
                 class="custom-control-input"
             />
-            <label class="custom-control-label w-100 h-100" :for="_('value')">{{ widget.title }}</label>
+            <label class="custom-control-label text-muted small" :for="_('value')">{{ widget.title }}</label>
         </div>
     </WidgetBaseResizable>
 </template>
@@ -31,12 +31,10 @@
         },
         methods: {
             changeValue() {
-                if (!this.$env.widgetsLocked) {
-                    this.$store.dispatch(
-                        "updateOrAddInstance",
-                        Object.assign({}, this.widget, { value: !this.widget.value })
-                    );
-                }
+                this.$store.dispatch(
+                    "updateOrAddInstance",
+                    Object.assign({}, this.widget, { value: !this.widget.value })
+                );
             },
         },
     };

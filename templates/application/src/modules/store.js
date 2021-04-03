@@ -1,6 +1,9 @@
 import Vuex from "vuex";
 import Vue from "vue";
-import { env, api, updateManager, difference } from "./common";
+import { difference } from "../common";
+import env from "./env";
+import api from "./api";
+import um from "./um";
 
 Vue.use(Vuex);
 
@@ -52,18 +55,16 @@ export default new Vuex.Store({
         },
         updateOrAddInstance(state, instance) {
             var source = determineSource(instance);
-            var localInstance = state[source].filter((i) => {
-                return i.uid == instance.uid;
-            })[0];
-            if (localInstance) {
-                Object.assign(localInstance, instance);
-            } else {
-                state[source].push(instance);
+            for (let localInstance of state[source]) {
+                if (localInstance.uid == instance.uid) {
+                    return Object.assign(localInstance, instance);
+                }
             }
+            state[source].push(instance);
         },
-        setContainer(state, container){
-            state.container = container
-        }
+        setContainer(state, container) {
+            state.container = container;
+        },
     },
     actions: {
         async fetchState(context, wallId) {
@@ -75,25 +76,21 @@ export default new Vuex.Store({
         },
         async fetchInstance(context, instance) {
             instance = await api.retrieve(instance.type, instance.id);
-            env.lockUpdateManager();
             context.commit("updateOrAddInstance", instance);
-            Vue.nextTick(() => {
-                env.unlockUpdateManager();
-            });
             return instance;
         },
         async createInstance(context, instance) {
-            env.lockChanges();
+            await env.lockChanges();
             instance = await api.create(instance.type, instance);
             context.commit("updateOrAddInstance", instance);
-            Vue.nextTick(() => {
-                env.unlockChanges();
-            });
+            await env.unlockChanges();
             return instance;
         },
         async deleteInstance(context, instance) {
+            await env.lockChanges();
+            await api.delete(instance.type, instance.id, instance.uid);
             context.commit("deleteInstance", instance);
-            return await api.delete(instance.type, instance.id, instance.uid);
+            await env.unlockChanges();
         },
         async updateOrAddInstance(context, instance) {
             var localInstance = await context.dispatch("getInstanceByUid", instance.uid);
@@ -101,9 +98,9 @@ export default new Vuex.Store({
             if (localInstance) {
                 update = difference(localInstance, instance);
             }
-            if (Object.keys(update).length){
+            if (Object.keys(update).length) {
                 context.commit("updateOrAddInstance", instance);
-                return await updateManager.proposeUpdate(update, instance);
+                return await um.proposeUpdate(update, instance);
             }
         },
         async copyWidget(context, widget) {

@@ -1,5 +1,5 @@
 <template>
-    <div class="m-2 p-1 w-100 shadow d-flex justify-content-between border">
+    <div class="m-1 p-1 bg-white w-100 shadow d-flex justify-content-between border">
         <div class="btn-group dropup bg-white">
             <a
                 class="btn btn-sm dropdown-toggle"
@@ -18,7 +18,7 @@
                     :key="wall.id"
                     :class="{ active: wall.id == $route.params.wallId, 'text-secondary': !wall.title }"
                     :to="{
-                        name: 'wall',
+                        name: 'wallEdit',
                         params: { wallId: wall.id },
                     }"
                     >{{ wall.title || "[no title]" }}</router-link
@@ -36,7 +36,7 @@
             <a
                 v-if="$store.state.wall"
                 class="mr-1 btn btn-sm btn-default"
-                @click.stop="$env.openOptions($store.state.wall)"
+                @click.stop="$env.openOptions(Object.assign({}, $store.state.wall))"
                 :disabled="$env.changesLocked"
             >
                 <i class="fas fa-ellipsis-v"></i>

@@ -1,9 +1,9 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import App from "./components/App";
-import Wall from "./components/Wall";
+import App from "../components/App";
+import Wall from "../components/Wall";
 import store from "./store";
-import { env } from "./common";
+import env from "./env";
 
 Vue.use(VueRouter);
 
@@ -15,17 +15,23 @@ const router = new VueRouter({
             component: App,
             children: [
                 {
-                    name: "wall",
-                    path: "wall/:wallId?",
+                    name: "wallEdit",
+                    path: "wall/edit/:wallId?",
                     alias: ":wallId?",
                     component: Wall,
                     beforeEnter(to, from, next) {
-                        if (to.query.edit) {
-                            env.openEditor()
-                        } else {
-                            env.closeEditor()
-                        }
-                        next()
+                        env.edit = true;
+                        next();
+                    },
+                },
+                {
+                    name: "wallView",
+                    path: "wall/view/:wallId?",
+                    alias: ":wallId?",
+                    component: Wall,
+                    beforeEnter(to, from, next) {
+                        env.edit = false;
+                        next();
                     },
                 },
             ],

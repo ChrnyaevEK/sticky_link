@@ -5,10 +5,10 @@
         @resizestop="onResizeStop"
         @dragstop="onDrag"
         @activated="onActivated"
-        @touchstart.native.stop.prevent
+        @touchstart.native.stop
         class="widget"
         :class="[
-            widget.border ? 'widget-border' : 'widget-no-border',
+            widget.border ? 'widget-border' : 'no-border',
             $env.openOptionsFor && $env.openOptionsFor.id == widget.id && $env.openOptionsFor.type == widget.type
                 ? 'shadow'
                 : '',

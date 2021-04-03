@@ -11,8 +11,7 @@
                         <router-link
                             class="nav-link"
                             :to="{
-                                name: 'wall',
-                                query: { view: $env.edit ? true : undefined },
+                                name: $env.edit ? 'wallView' : 'wallEdit',
                                 params: { wallId: $route.params.wallId },
                             }"
                             >{{ $env.edit ? "View" : "Edit" }}
@@ -45,10 +44,12 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
         </nav>
-        <div class="h-100 container d-flex flex-column justify-content-between align-items-center overflow-hidden">
+        <div class="h-100 workspace d-flex flex-column justify-content-between align-items-center overflow-hidden">
             <AlertUtil></AlertUtil>
             <router-view></router-view>
-            <SelectCreate @wallCreated="onCreateWall" v-if="$env.edit"></SelectCreate>
+            <div class="w-100 px-5 select-create">
+                <SelectCreate @wallCreated="onCreateWall" v-if="$env.edit"></SelectCreate>
+            </div>
         </div>
     </div>
 </template>
@@ -57,13 +58,19 @@
     import SaveUtil from "./Utils/SaveUtil";
     import AlertUtil from "./Utils/AlertUtil";
     import SelectCreate from "./Utils/SelectCreate";
-    import router from "../router";
+    import router from "../modules/router";
+    import $ from "jquery";
 
     export default {
         components: {
             SaveUtil,
             AlertUtil,
             SelectCreate,
+        },
+        created() {
+            $(document).keyup((e) => {
+                if (e.keyCode === 27) this.$env.closeOptions(); // esc
+            });
         },
         methods: {
             onCreateWall(wall) {
@@ -78,3 +85,10 @@
         },
     };
 </script>
+
+<style scoped>
+    .select-create {
+        position: absolute;
+        bottom: 0;
+    }
+</style>

@@ -95,12 +95,15 @@ class CustomModelViewSet(ModelViewSet):
     channel_layer = get_channel_layer()
     version_hash_field = 'version'
 
-    def push_instance_update(self, response):
+    def push_instance_update(self, response, instance):
         data = response.data
         try:
-            wall_id = data['wall']
-        except KeyError:
-            wall_id = data['id']
+            wall_id = instance.wall.id
+        except AttributeError:
+            try:
+                wall_id = instance.container.wall.id
+            except AttributeError:
+                wall_id = instance.id
         async_to_sync(self.channel_layer.group_send)(
             WallConsumer.generate_group_name(wall_id),
             {
@@ -141,17 +144,19 @@ class CustomModelViewSet(ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
-        self.push_instance_update(response)
+        instance = self.get_queryset().get(pk=kwargs['pk'])
+        self.push_instance_update(response, instance)
         return response
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-        self.push_instance_update(response)
+        instance = self.get_queryset().get(pk=kwargs['pk'])
+        self.push_instance_update(response, instance)
         return response
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_queryset().get(pk=kwargs['pk'])
         response = super().destroy(request, *args, **kwargs)
+        instance = self.get_queryset().get(pk=kwargs['pk'])
         self.push_instance_destroy(instance)
         return response
 

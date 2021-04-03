@@ -1,16 +1,19 @@
 import Vue from "vue";
-import router from "./router";
+import router from "./modules/router";
+import store from "./modules/store";
+import env from "./modules/env";
+import io from "./modules/io";
+import ws from "./modules/ws";
 import "bootstrap";
 import "./css/main.scss";
 import "@fortawesome/fontawesome-free/js/all.js";
 import "@fortawesome/fontawesome-free/css/all.css";
-import { env, io, ws, generateId, handleUnexpected } from "./common";
-import store from "./store";
+import { generateId } from "./common";
 import $ from "jquery";
 import Rollbar from "rollbar";
 import JqueryRollbarPlugin from "rollbar-jquery";
 
-Vue.config.productionTip = true;
+Vue.config.productionTip = false;
 Vue.prototype.$env = env;
 Vue.prototype.$io = io;
 Vue.prototype._ = generateId;
@@ -31,7 +34,7 @@ rollbar.configure({ reportLevel: "error" });
 rollbar.configure({
     onSendCallback: function(isUncaught) {
         if (isUncaught) {
-            handleUnexpected();
+            env.handleUnexpected();
         }
     },
 });
@@ -49,7 +52,7 @@ new Vue({
                         ws.close();
                     }
                     if (to.params.wallId !== from.params.wallId) {
-                        ws.connect(to.params.wallId);
+                        ws.open(to.params.wallId);
                     }
                 }
             },

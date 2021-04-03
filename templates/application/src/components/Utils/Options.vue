@@ -278,10 +278,10 @@
                         );
                 }
             },
-            onDeleteInstance() {
+            async onDeleteInstance() {
                 if (confirm("Are you sure?")) {
+                    await this.$store.dispatch("deleteInstance", this.instance);
                     this.$env.closeOptions()
-                    this.$store.dispatch("deleteInstance", this.instance);
                 }
             },
             unsetWarning() {
