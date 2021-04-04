@@ -23,6 +23,7 @@
         :z="widget.z"
         :minHeight="50"
         :minWidth="50"
+        :grid="[$store.state.app.grid, $store.state.app.grid]"
         ref="base"
     >
         <div class="quick-access widget-quick-access hidden" v-if="$env.edit">
@@ -64,17 +65,17 @@
         },
         methods: {
             onResizeStop(x, y, w, h) {
-                if (!this.$env.changesLocked && this.$env.edit) {
+                if (!this.$env.changesLocked) {
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { w, h }));
                 }
             },
             onDrag(x, y) {
-                if (!this.$env.changesLocked && this.$env.edit) {
+                if (!this.$env.changesLocked) {
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { x, y }));
                 }
             },
             deleteWidget() {
-                if (confirm("Are you sure?" && this.$env.edit)) {
+                if (confirm("Are you sure?")) {
                     this.$store.dispatch("deleteInstance", this.widget);
                 }
             },

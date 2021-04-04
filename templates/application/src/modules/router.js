@@ -17,9 +17,14 @@ const router = new VueRouter({
                 {
                     name: "wallEdit",
                     path: "wall/edit/:wallId?",
-                    alias: '',
+                    alias: "",
                     component: Wall,
                     beforeEnter(to, from, next) {
+                        if (env.wall) {
+                            if (!store.state.meta.edit_permission) {
+                                return next({ to: "wallView", params: to.params });
+                            }
+                        }
                         env.edit = true;
                         next();
                     },
@@ -29,6 +34,11 @@ const router = new VueRouter({
                     path: "wall/view/:wallId?",
                     component: Wall,
                     beforeEnter(to, from, next) {
+                        if (env.wall) {
+                            if (!store.state.meta.view_permission) {
+                                return next({ to: "wallEdit" });
+                            }
+                        }
                         env.edit = false;
                         next();
                     },
@@ -44,7 +54,11 @@ const router = new VueRouter({
 
 router.beforeEach(async (to, from, next) => {
     await store.dispatch("fetchState", to.params.wallId);
-    next();
+    env.wallId = to.params.wallId;
+    if (store.state.containers) {
+        env.containerId = store.state.containers[0];
+    }
+    Vue.nextTick(next);
 });
 
 export default router;

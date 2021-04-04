@@ -1,15 +1,18 @@
 <template id="simple-switch-template">
     <WidgetBaseResizable :widget="widget">
-        <div class="h-100 custom-control custom-switch d-flex justify-content-center align-items-center" :title="widget.title">
+        <div
+            class="h-100 custom-control custom-switch d-flex justify-content-center align-items-center"
+            :title="widget.title"
+        >
             <input
                 type="checkbox"
                 @change="changeValue"
                 :checked="widget.value"
                 :id="_('value')"
-                :disabled="$env.widgetsLocked"
+                :disabled="$env.wall && $env.wall.lock_widgets"
                 class="custom-control-input"
             />
-            <label class="custom-control-label text-muted small" :for="_('value')">{{ widget.title }}</label>
+            <label class="custom-control-label" :for="_('value')">{{ widget.title }}</label>
         </div>
     </WidgetBaseResizable>
 </template>

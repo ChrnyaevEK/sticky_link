@@ -59,7 +59,15 @@
             </div>
             <div class="form-group">
                 <label :for="_('h')">Height </label>
-                <input :id="_('h')" type="number" class="form-control" v-model.number="instance.h" @input="push" min="50" />
+                <input
+                    :id="_('h')"
+                    type="number"
+                    class="form-control"
+                    v-model.number="instance.h"
+                    @input="push"
+                    min="50"
+                    :step="$store.state.app.grid"
+                />
             </div>
         </template>
         <template v-else>
@@ -71,11 +79,10 @@
                     @input="push"
                     class="form-control"
                     type="number"
-                    step="10"
+                    :step="$store.state.app.grid"
                     min="0"
                 />
             </div>
-
             <div class="form-group">
                 <label :for="_('y')">Y coordinate</label>
                 <input
@@ -84,11 +91,10 @@
                     @input="push"
                     class="form-control"
                     type="number"
-                    step="10"
+                    :step="$store.state.app.grid"
                     min="0"
                 />
             </div>
-
             <div class="form-group">
                 <label :for="_('z')">Z coordinate</label>
                 <input
@@ -102,7 +108,6 @@
                     max="10"
                 />
             </div>
-
             <div class="form-group">
                 <label :for="_('w')">Width</label>
                 <input
@@ -111,11 +116,10 @@
                     @input="push"
                     class="form-control"
                     type="number"
-                    step="1"
+                    :step="$store.state.app.grid"
                     min="50"
                 />
             </div>
-
             <div class="form-group">
                 <label :for="_('h')">Height</label>
                 <input
@@ -141,7 +145,6 @@
                     max="40"
                 />
             </div>
-
             <div class="form-group">
                 <label :for="_('font_weight')">Font weight</label>
                 <input
@@ -155,7 +158,6 @@
                     max="900"
                 />
             </div>
-
             <div class="form-group">
                 <label :for="_('background_color')">Background color</label>
                 <input
@@ -166,7 +168,6 @@
                     class="form-control"
                 />
             </div>
-
             <div class="form-group">
                 <label :for="_('text_color')">Text color</label>
                 <input
@@ -281,7 +282,7 @@
             async onDeleteInstance() {
                 if (confirm("Are you sure?")) {
                     await this.$store.dispatch("deleteInstance", this.instance);
-                    this.$env.closeOptions()
+                    this.$env.closeOptions();
                 }
             },
             unsetWarning() {
@@ -293,8 +294,8 @@
             async push() {
                 if (!this.$env.changesLocked) {
                     try {
-                        await this.$store.dispatch("updateOrAddInstance", this.instance)
-                    } catch (err){
+                        await this.$store.dispatch("updateOrAddInstance", this.instance);
+                    } catch (err) {
                         return this.setWarningFromResponse(err);
                     }
                     this.unsetWarning();

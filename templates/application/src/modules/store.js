@@ -28,17 +28,18 @@ export default new Vuex.Store({
         containers: null,
         container: null,
         widgets: null,
+        meta: null,
         app: {
             title: process.env.VUE_APP_TITLE,
+            grid: 3,
         },
     },
     mutations: {
         setState(state, response) {
             state.user = response.user;
-            state.wall = response.wall;
+            state.meta = response.meta;
             state.walls = response.walls;
             state.containers = response.containers;
-            state.container = response.container;
             state.widgets = response.widgets;
             if (state.user.is_anonymous) {
                 state.user.username = "anonymous";
@@ -61,9 +62,6 @@ export default new Vuex.Store({
                 }
             }
             state[source].push(instance);
-        },
-        setContainer(state, container) {
-            state.container = container;
         },
     },
     actions: {
@@ -127,7 +125,14 @@ export default new Vuex.Store({
             await Promise.all(updateArray);
         },
         getInstanceByUid(context, uid) {
-            return [...context.state.walls, ...context.state.widgets].filter((i) => i.uid == uid)[0];
+            let result = [];
+            if (context.state.walls) {
+                result.push(...context.state.walls);
+            }
+            if (context.state.widgets) {
+                result.push(...context.state.widgets);
+            }
+            return result.filter((i) => i.uid == uid)[0];
         },
     },
 });

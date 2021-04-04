@@ -1,6 +1,6 @@
 <template>
     <div class="w-100 h-100 d-flex flex-column">
-        <nav class="navbar navbar-expand-md navbar-light bg-light border-bottom">
+        <nav class="navbar navbar-expand-md navbar-light border-bottom">
             <a class="navbar-brand" :href="homeUrl">{{ $store.state.app.title }}</a>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
@@ -12,21 +12,19 @@
                             class="nav-link"
                             :to="{
                                 name: $env.edit ? 'wallView' : 'wallEdit',
-                                params: { wallId: $route.params.wallId },
+                                params: $route.param,
                             }"
                             >{{ $env.edit ? "View" : "Edit" }}
                         </router-link>
                     </li>
                     <li class="nav-item">
-                        <a
-                            class="nav-link"
-                            :href="$store.state.user.is_authenticated ? logoutUrl : loginUrl"
-                            >{{ $store.state.user.is_authenticated ? "Logout" : "Login" }}</a
-                        >
+                        <a class="nav-link" :href="$store.state.user.is_authenticated ? logoutUrl : loginUrl">{{
+                            $store.state.user.is_authenticated ? "Logout" : "Login"
+                        }}</a>
                     </li>
                 </ul>
             </div>
-            <div v-show="!$store.state.wall" class="mx-5 text-secondary">
+            <div v-show="!$env.wall" class="mx-5 text-secondary">
                 <span v-if="$store.state.user.is_authenticated">
                     Select or create a <span class="text-success font-weight-bold">wall</span> to continue
                 </span>
@@ -44,11 +42,11 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
         </nav>
-        <div class="h-100 workspace d-flex flex-column justify-content-between align-items-center overflow-hidden">
+        <div class="h-100 bg-light d-flex flex-column justify-content-between align-items-center overflow-hidden">
             <AlertUtil></AlertUtil>
             <router-view></router-view>
-            <div class="w-100 px-5 select-create">
-                <SelectCreate @wallCreated="onCreateWall" v-if="$env.edit"></SelectCreate>
+            <div class="w-100 px-5 select-create-pos">
+                <SelectCreate @wallCreated="onCreateWall" v-if="$env.edit && $store.state.walls"></SelectCreate>
             </div>
         </div>
     </div>
@@ -62,12 +60,12 @@
     import $ from "jquery";
 
     export default {
-        data(){
+        data() {
             return {
                 homeUrl: process.env.VUE_APP_HOME,
-                loginUrl: process.env.VUE_APP_HOME + '/accounts/login/',
-                logoutUrl: process.env.VUE_APP_HOME + '/accounts/logout/',
-            }
+                loginUrl: process.env.VUE_APP_HOME + "/accounts/login/",
+                logoutUrl: process.env.VUE_APP_HOME + "/accounts/logout/",
+            };
         },
         components: {
             SaveUtil,
@@ -83,7 +81,7 @@
             onCreateWall(wall) {
                 this.$io.alert("New wall has been created!", "success");
                 router.push({
-                    name: "wall",
+                    name: "wallEdit",
                     params: {
                         wallId: wall.id,
                     },
@@ -94,7 +92,7 @@
 </script>
 
 <style scoped>
-    .select-create {
+    .select-create-pos {
         position: absolute;
         bottom: 0;
     }

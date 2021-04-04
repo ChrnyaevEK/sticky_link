@@ -1,6 +1,6 @@
 <template>
-    <div class="m-1 p-1 bg-white w-100 shadow d-flex justify-content-between border">
-        <div class="btn-group dropup bg-white">
+    <div class="m-1 p-1 w-100 shadow d-flex justify-content-between border bg-white">
+        <div class="btn-group dropup">
             <a
                 class="btn btn-sm dropdown-toggle"
                 id="wall-list"
@@ -16,7 +16,7 @@
                     class="dropdown-item btn btn-sm"
                     v-for="wall of $store.state.walls"
                     :key="wall.id"
-                    :class="{ active: wall.id == $route.params.wallId, 'text-secondary': !wall.title }"
+                    :class="{ active: wall.id == $env.wallId, 'text-secondary': !wall.title }"
                     :to="{
                         name: 'wallEdit',
                         params: { wallId: wall.id },
@@ -26,7 +26,7 @@
             </div>
             <a
                 v-if="createWall"
-                class="mr-1 btn btn-sm btn-success border"
+                class="mr-1 btn btn-sm btn-success text-white border"
                 @click="createWall"
                 title="Add new wall"
                 :disabled="$env.changesLocked"
@@ -34,15 +34,15 @@
                 <i class="fas fa-plus"></i>
             </a>
             <a
-                v-if="$store.state.wall"
+                v-if="$env.wall"
                 class="mr-1 btn btn-sm btn-default"
-                @click.stop="$env.openOptions($store.state.wall)"
+                @click.stop="$env.openOptions($env.wall)"
                 :disabled="$env.changesLocked"
             >
                 <i class="fas fa-ellipsis-v"></i>
             </a>
         </div>
-        <span class="overflow-auto d-flex" v-if="$store.state.wall">
+        <span class="overflow-auto d-flex" v-if="$env.wall">
             <button
                 @click.stop="createInstance('container')"
                 class="mr-1 btn btn-sm bg-light border text-nowrap"
@@ -101,20 +101,18 @@
             async createInstance(type) {
                 switch (type) {
                     case "container":
-                        if (this.$store.state.wall && this.$store.state.containers) {
+                        if (this.$env.wall) {
                             var index = 0;
                             for (var container of this.$store.state.containers) {
                                 if (container.index > index) {
                                     index = container.index + 1;
                                 }
                             }
-                            var wallId = this.$store.state.wall.id;
-                            await this.$store.dispatch("createInstance", { type, wall: wallId, index });
+                            await this.$store.dispatch("createInstance", { type, wall: this.$env.wall.id, index });
                         }
                         break;
                     default:
-                        var containerId = this.$store.state.container.id;
-                        await this.$store.dispatch("createInstance", { type, container: containerId });
+                        await this.$store.dispatch("createInstance", { type, container: this.$env.containerId });
                         break;
                 }
             },
@@ -123,8 +121,8 @@
                 this.$emit("wallCreated", wall);
             },
             async deleteWall() {
-                if (this.$store.state.wall && confirm("Are you sure? Wall will be permanently removed!")) {
-                    await this.$store.dispatch("deleteInstance", this.$store.state.wall);
+                if (this.$env.wall && confirm("Are you sure? Wall will be permanently removed!")) {
+                    await this.$store.dispatch("deleteInstance", this.$env.wall);
                     this.$emit("wallDeleted");
                 }
             },

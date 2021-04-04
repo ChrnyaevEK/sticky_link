@@ -1,5 +1,5 @@
 <template>
-    <div class="w-100 h-100 py-1 overflow-auto pb-5" v-if="$store.state.wall">
+    <div class="w-100 h-100 py-1 overflow-auto pb-5" v-if="$env.wall">
         <div
             class="d-flex flex-column relative m-1 bg-white"
             v-for="container of $store.state.containers"
@@ -14,7 +14,6 @@
                     @touchstart.native.stop="$env.closeOptions"
                     @resizing="onResizing"
                     @activated="onActivated(container)"
-                    @deactivated="onDeactivated"
                     :resizable="$env.edit && !$env.changesLocked"
                     :draggable="false"
                     :parent="false"
@@ -23,6 +22,7 @@
                     :w="container.w"
                     :minHeight="100"
                     class="relative overflow-hidden wall-only no-border"
+                    :grid="[$store.state.app.grid, $store.state.app.grid]"
                 >
                     <template v-for="widget of $store.state.widgets">
                         <component
@@ -45,11 +45,7 @@
     </div>
     <div v-else class="w-100 h-100 d-flex justify-content-center align-items-center text-secondary">
         <span v-if="$store.state.user.is_authenticated">No wall is selected...</span>
-        <span v-else
-            >No wall is available...
-            <router-link class="text-success font-weight-bold" :to="{ name: 'login' }">Login</router-link> to
-            continue</span
-        >
+        <span v-else>No wall is available... Login to continue</span>
     </div>
 </template>
 
@@ -68,21 +64,10 @@
             VueDraggableResizable,
             Options,
         },
-        async beforeRouteLeave(to, from, next) {
-            await this.$env.unlockWidgets();
-            next();
-        },
-        computed: {
-            wall() {
-                let wall = this.$store.state.wall;
-                if (wall && wall.lock_widgets) this.$env.lockWidgets();
-                return wall;
-            },
-        },
         methods: {
             onResizing(x, y, w, h) {
-                this.$el.querySelector(".handle-bm").scrollIntoView({ behavior: "smooth", block: "center" });
-                let instance = this.$env.makeMutable(this.$store.state.container, { h });
+                this.$el.querySelector(".handle-bm").scrollIntoView({ behavior: "smooth", block: "end" });
+                let instance = this.$env.makeMutable(this.$env.container, { h });
                 this.$store.dispatch("recalculateWidgets", instance);
                 this.$store.dispatch("updateOrAddInstance", instance);
             },
@@ -92,6 +77,7 @@
                 )[0];
             },
             onActivated(container) {
+                this.$env.containerId = container.id;
                 if (this.$env.edit) {
                     // Add scroll bar, hide previous active element
                     window.dispatchEvent(new Event("resize"));
@@ -104,19 +90,7 @@
                         .parent()
                         .find(".container-quick-access")
                         .removeClass("hidden");
-                    this.$store.commit("setContainer", container);
                 }
-            },
-            onDeactivated() {
-                window.dispatchEvent(new Event("resize"));
-                $(this.$el)
-                    .find(".container-wrap")
-                    .addClass("scrollbar-hidden");
-            },
-        },
-        watch: {
-            "wall.lock_widgets"() {
-                this.wall.lock_widgets ? this.$env.lockWidgets() : this.$env.unlockWidgets();
             },
         },
     };

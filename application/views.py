@@ -45,8 +45,8 @@ class App:
         except models.Wall.DoesNotExist:
             wall = None
             containers = None
-            container = None
             widgets = None
+            meta = None
         else:
             containers = []
             widgets = []
@@ -65,15 +65,22 @@ class App:
                 container = models.Container(wall=wall, index=0)
                 container.save()
                 containers = [serializers.ContainerSerializer(container).data]
-            container = containers[0]
+            meta = {
+                'edit_permission': wall.owner == request.user,
+                'view_permission': wall.allow_anonymous_view or wall.owner == request.user
+            }
             wall = serializers.WallSerializer(wall).data
+        walls = WallViewSet.get_list(request)
+        if not walls and wall:
+            walls = [wall]
+        elif not walls:
+            walls = None
         return JsonResponse({
             'user': serializers.UserSerializer(request.user).data,
-            'wall': wall,
+            'meta': meta,
             'containers': containers,
-            'container': container,
             'widgets': widgets,
-            'walls': WallViewSet.get_list(request) or None
+            'walls': walls
         })
 
 

@@ -1,8 +1,15 @@
+$enable-rounded: false;
+$danger: #f25f5c;
+
 @import "~bootstrap/scss/bootstrap";
 @import "vue-select/src/scss/vue-select.scss";
 @import "~quill/dist/quill.core.css";
 @import "~quill/dist/quill.snow.css";
 @import "~vue-draggable-resizable/dist/VueDraggableResizable.css";
+
+.select-create {
+    background-color: $gray-100;
+}
 
 .dropdown-item.active,
 .dropdown-item:active {
@@ -68,8 +75,4 @@
 }
 .hidden {
     display: none !important;
-}
-
-.workspace {
-    background-color: $gray-200;
 }
