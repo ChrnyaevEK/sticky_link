@@ -1,28 +1,30 @@
 <template>
     <div class="m-1 p-1 w-100 shadow d-flex justify-content-between border bg-white">
         <div class="btn-group dropup">
-            <a
-                class="btn btn-sm dropdown-toggle"
-                id="wall-list"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-                title="Select any wall to open for edition"
-            >
-                Walls
-            </a>
-            <div class="mr-1 dropdown-menu" aria-labelledby="wall-list" v-if="$store.state.walls">
-                <router-link
-                    class="dropdown-item btn btn-sm"
-                    v-for="wall of $store.state.walls"
-                    :key="wall.id"
-                    :class="{ active: wall.id == $env.wallId, 'text-secondary': !wall.title }"
-                    :to="{
-                        name: 'wallEdit',
-                        params: { wallId: wall.id },
-                    }"
-                    >{{ wall.title || "[no title]" }}</router-link
+            <div v-if="$store.state.walls">
+                <a
+                    class="btn btn-sm dropdown-toggle"
+                    id="wall-list"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    title="Select any wall to open for edition"
                 >
+                    Walls
+                </a>
+                <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
+                    <router-link
+                        class="dropdown-item btn btn-sm"
+                        v-for="wall of $store.state.walls"
+                        :key="wall.id"
+                        :class="{ active: wall.id == $env.wallId, 'text-secondary': !wall.title }"
+                        :to="{
+                            name: 'wallEdit',
+                            params: { wallId: wall.id },
+                        }"
+                        >{{ wall.title || "[no title]" }}</router-link
+                    >
+                </div>
             </div>
             <a
                 v-if="createWall"

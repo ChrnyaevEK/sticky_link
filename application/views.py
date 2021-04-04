@@ -44,8 +44,8 @@ class App:
             wall = _get_protected_queryset(models.Wall, request.user).get(pk=wall_id)
         except models.Wall.DoesNotExist:
             wall = None
-            containers = None
-            widgets = None
+            containers = []
+            widgets = []
             meta = None
         else:
             containers = []
@@ -74,7 +74,7 @@ class App:
         if not walls and wall:
             walls = [wall]
         elif not walls:
-            walls = None
+            walls = []
         return JsonResponse({
             'user': serializers.UserSerializer(request.user).data,
             'meta': meta,

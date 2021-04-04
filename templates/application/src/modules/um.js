@@ -55,9 +55,6 @@ export default new Vue({
             let localInstance = await store.dispatch("getInstanceByUid", event.instance.uid);
             if (localInstance) {
                 store.commit("deleteInstance", localInstance);
-                if (localInstance.type == "wall") {
-                    env.resolveWallDeleted(localInstance);
-                }
             }
             io.change(false);
         },
