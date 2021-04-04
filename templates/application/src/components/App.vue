@@ -63,8 +63,8 @@
         data() {
             return {
                 homeUrl: process.env.VUE_APP_HOME,
-                loginUrl: process.env.VUE_APP_HOME + "/accounts/login/",
-                logoutUrl: process.env.VUE_APP_HOME + "/accounts/logout/",
+                loginUrl: "/accounts/login/",
+                logoutUrl: "/accounts/logout/",
             };
         },
         components: {
