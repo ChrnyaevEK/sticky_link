@@ -27,6 +27,6 @@ pnpm-debug.log*
 *.sln
 *.sw?
 /venv/
-/static/application/
+/static/app/
 /templates/application/dist/
 /templates/application/package-lock.json

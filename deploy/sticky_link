@@ -16,12 +16,9 @@ server {
         # alias /path/to/your/mysite/media;
     # }
 
-    location /static {  # Django static files
-        alias /var/www/sticky_link/static;
-    }
-
-    location /app/static {  # Static files for app
-        alias /var/www/sticky_link/templates/application/dist/static;
+    location ~ ^/static/(.*)$ {
+        root /var/www/sticky_link;
+        try_files /static/$1 /templates/application/dist/static/$1 =404;
     }
 
     location / {
