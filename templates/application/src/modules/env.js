@@ -42,7 +42,7 @@ export default new Vue({
         handleUnexpected() {
             io.alert("Something went wrong...", "danger");
         },
-        handleBadRequest(response){
+        handleBadRequest(response) {
             if (response.responseJSON && response.responseJSON.detail) {
                 io.alert(response.responseJSON.detail, "danger");
             } else if (response.status >= 500) {

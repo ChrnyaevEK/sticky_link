@@ -23,6 +23,7 @@
         :z="widget.z"
         :minHeight="50"
         :minWidth="50"
+        ref="base"
     >
         <div class="quick-access widget-quick-access hidden" v-if="$env.edit">
             <a :disabled="$env.changesLocked" class="btn btn-sm btn-danger" @click="deleteWidget">
@@ -58,6 +59,9 @@
                 required: true,
             },
         },
+        beforeUpdate() {
+            this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
+        },
         methods: {
             onResizeStop(x, y, w, h) {
                 if (!this.$env.changesLocked && this.$env.edit) {
@@ -85,7 +89,7 @@
             },
             onOpenOptions() {
                 if (this.$env.edit) {
-                    this.$env.openOptions(Object.assign({}, this.widget));
+                    this.$env.openOptions(this.widget);
                 }
             },
         },

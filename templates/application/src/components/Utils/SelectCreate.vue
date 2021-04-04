@@ -36,7 +36,7 @@
             <a
                 v-if="$store.state.wall"
                 class="mr-1 btn btn-sm btn-default"
-                @click.stop="$env.openOptions(Object.assign({}, $store.state.wall))"
+                @click.stop="$env.openOptions($store.state.wall)"
                 :disabled="$env.changesLocked"
             >
                 <i class="fas fa-ellipsis-v"></i>

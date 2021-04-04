@@ -70,7 +70,7 @@ class Widget(Common):
     container = models.ForeignKey(Container, on_delete=models.CASCADE)
 
     w = models.IntegerField(verbose_name='Widget width', default=200, validators=[MinValueValidator(50)])
-    h = models.IntegerField(verbose_name='Widget height', default=100, validators=[MinValueValidator(50)])
+    h = models.IntegerField(verbose_name='Widget height', default=130, validators=[MinValueValidator(50)])
     z = models.IntegerField(verbose_name='Widget z index(stack position)', default=0,
                             validators=[MaxValueValidator(100), MinValueValidator(0)])
     x = models.IntegerField(verbose_name='Offset left from parent', default=0, validators=[MinValueValidator(0)])

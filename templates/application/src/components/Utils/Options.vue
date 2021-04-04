@@ -262,7 +262,7 @@
         },
         computed: {
             instance() {
-                return this.$env.openOptionsFor;
+                return this.$env.makeMutable(this.$env.openOptionsFor);
             },
         },
         methods: {

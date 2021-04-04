@@ -11,13 +11,13 @@ const router = new VueRouter({
     mode: "history",
     routes: [
         {
-            path: "/app",
+            path: "/",
             component: App,
             children: [
                 {
                     name: "wallEdit",
                     path: "wall/edit/:wallId?",
-                    alias: ":wallId?",
+                    alias: '',
                     component: Wall,
                     beforeEnter(to, from, next) {
                         env.edit = true;
@@ -27,7 +27,6 @@ const router = new VueRouter({
                 {
                     name: "wallView",
                     path: "wall/view/:wallId?",
-                    alias: ":wallId?",
                     component: Wall,
                     beforeEnter(to, from, next) {
                         env.edit = false;
@@ -38,28 +37,7 @@ const router = new VueRouter({
         },
         {
             path: "*",
-            redirect: "/app",
-        },
-        {
-            path: "/",
-            name: "home",
-            beforeEnter() {
-                window.location.replace(location.origin);
-            },
-        },
-        {
-            path: "/accounts/login/",
-            name: "login",
-            beforeEnter(to) {
-                window.location.replace(location.origin + to.path);
-            },
-        },
-        {
-            path: "/accounts/logout/",
-            name: "logout",
-            beforeEnter(to) {
-                window.location.replace(location.origin + to.path);
-            },
+            redirect: "/",
         },
     ],
 });

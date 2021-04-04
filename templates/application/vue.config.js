@@ -4,7 +4,7 @@ const FaviconsWebpackPlugin = require("favicons-webpack-plugin");
 module.exports = {
     filenameHashing: false,
     assetsDir: "static",
-    publicPath: "/app/",
+    publicPath: "/",
     runtimeCompiler: true,
     configureWebpack: {
         plugins: [new FaviconsWebpackPlugin({  // After you change it, copy generated <head> to website index...

@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = env.SECRET_KEY
 DEBUG = env.DEBUG
-ALLOWED_HOSTS = ['sticky-link.com', 'www.sticky-link.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['app.sticky-link.com', '127.0.0.1', 'localhost']
 CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
 
@@ -156,13 +156,13 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ],
 }
-if env.DEBUG:
-    def get_user():
-        from django.contrib.auth.models import User
-        return User.objects.get(username="dev_user1")  # Choose any dev user
-
-
-    REST_FRAMEWORK['UNAUTHENTICATED_USER'] = get_user
+# if env.DEBUG:
+#     def get_user():
+#         from django.contrib.auth.models import User
+#         return User.objects.get(username="dev_user1")  # Choose any dev user
+#
+#
+#     REST_FRAMEWORK['UNAUTHENTICATED_USER'] = get_user
 
 # Site settings
 SITE_ID = 1

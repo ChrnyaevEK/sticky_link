@@ -1,11 +1,11 @@
 <template>
     <div class="w-100 h-100 d-flex flex-column">
         <nav class="navbar navbar-expand-md navbar-light bg-light border-bottom">
-            <router-link class="navbar-brand" :to="{ name: 'home' }">{{ $store.state.app.title }}</router-link>
+            <a class="navbar-brand" :href="homeUrl">{{ $store.state.app.title }}</a>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item active">
-                        <router-link class="nav-link" :to="{ name: 'home' }">Home </router-link>
+                        <a class="nav-link" :href="homeUrl">Home</a>
                     </li>
                     <li class="nav-item">
                         <router-link
@@ -18,10 +18,10 @@
                         </router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link
+                        <a
                             class="nav-link"
-                            :to="{ name: $store.state.user.is_authenticated ? 'logout' : 'login' }"
-                            >{{ $store.state.user.is_authenticated ? "Logout" : "Login" }}</router-link
+                            :href="$store.state.user.is_authenticated ? logoutUrl : loginUrl"
+                            >{{ $store.state.user.is_authenticated ? "Logout" : "Login" }}</a
                         >
                     </li>
                 </ul>
@@ -62,6 +62,13 @@
     import $ from "jquery";
 
     export default {
+        data(){
+            return {
+                homeUrl: process.env.VUE_APP_HOME,
+                loginUrl: process.env.VUE_APP_HOME + '/accounts/login/',
+                logoutUrl: process.env.VUE_APP_HOME + '/accounts/logout/',
+            }
+        },
         components: {
             SaveUtil,
             AlertUtil,

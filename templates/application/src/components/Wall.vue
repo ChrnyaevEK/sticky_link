@@ -1,6 +1,10 @@
 <template>
     <div class="w-100 h-100 py-1 overflow-auto pb-5" v-if="$store.state.wall">
-        <div class="d-flex flex-column relative m-1 bg-white" v-for="container of containers" :key="container.id">
+        <div
+            class="d-flex flex-column relative m-1 bg-white"
+            v-for="container of $store.state.containers"
+            :key="container.id"
+        >
             <div
                 :id="_(container.id)"
                 class="overflow-auto border container-wrap scrollbar-hidden scrollable-element relative"
@@ -20,18 +24,19 @@
                     :minHeight="100"
                     class="relative overflow-hidden wall-only no-border"
                 >
-                    <component
-                        v-for="widget of filterWidgets(container)"
-                        :is="toComponent(widget)"
-                        :parent="true"
-                        :key="widget.type + widget.id"
-                        :widget="widget"
-                    >
-                    </component>
+                    <template v-for="widget of $store.state.widgets">
+                        <component
+                            v-if="widget.container == container.id"
+                            :is="toComponent(widget)"
+                            :key="widget.type + widget.id"
+                            :widget="widget"
+                        >
+                        </component>
+                    </template>
                 </vue-draggable-resizable>
             </div>
             <div class="quick-access container-quick-access hidden p-1" v-if="$env.edit">
-                <a class="btn btn-sm btn-light border" @click.stop="$env.openOptions(Object.assign({}, container))">
+                <a class="btn btn-sm btn-light border" @click.stop="$env.openOptions(container)">
                     <i class="fas fa-ellipsis-v"></i>
                 </a>
             </div>
@@ -73,9 +78,6 @@
                 if (wall && wall.lock_widgets) this.$env.lockWidgets();
                 return wall;
             },
-            containers() {
-                return this.$store.state.containers ? this.$store.state.containers : [this.$store.state.container];
-            },
         },
         methods: {
             onResizing(x, y, w, h) {
@@ -89,23 +91,11 @@
                     (klass) => widget.type == klass.type
                 )[0];
             },
-            filterWidgets(container) {
-                if (!this.$store.state.widgets) {
-                    return [];
-                }
-                let widgets = [];
-                for (let widget of this.$store.state.widgets) {
-                    if (widget.container == container.id) {
-                        widgets.push(widget);
-                    }
-                }
-                return widgets;
-            },
             onActivated(container) {
                 if (this.$env.edit) {
                     // Add scroll bar, hide previous active element
                     window.dispatchEvent(new Event("resize"));
-                    var containerId = "#" + this._(container.id);
+                    let containerId = "#" + this._(container.id);
                     $(".quick-access")
                         .not(`${containerId} .quick-access`)
                         .addClass("hidden");

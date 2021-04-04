@@ -29,7 +29,7 @@ export default new Vue({
                 this.waiter[uid] = (async () => {
                     await sleep(this.coolDown);
                     delete this.waiter[uid];
-                    var newInstance = await api.update_partial(type, id, this.handler[uid]);
+                    let newInstance = await api.update_partial(type, id, this.handler[uid]);
                     delete this.handler[uid];
                     if (this.remote[uid] !== undefined) {
                         // Ws finished before http - resolve miss match
@@ -52,7 +52,7 @@ export default new Vue({
         },
         async populateRemoteDestroy(event) {
             io.change(true);
-            var localInstance = await store.dispatch("getInstanceByUid", event.instance.uid);
+            let localInstance = await store.dispatch("getInstanceByUid", event.instance.uid);
             if (localInstance) {
                 store.commit("deleteInstance", localInstance);
                 if (localInstance.type == "wall") {
@@ -63,7 +63,7 @@ export default new Vue({
         },
         async resolveNewVersion(instance) {
             io.change(true);
-            var localInstance = await store.dispatch("getInstanceByUid", instance.uid);
+            let localInstance = await store.dispatch("getInstanceByUid", instance.uid);
             await store.dispatch("fetchInstance", localInstance ? localInstance : instance);
             io.change(false);
         },
