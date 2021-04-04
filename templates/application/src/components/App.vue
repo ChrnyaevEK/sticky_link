@@ -46,7 +46,7 @@
             <AlertUtil></AlertUtil>
             <router-view></router-view>
             <div class="w-100 px-5 select-create-pos">
-                <SelectCreate @wallCreated="onCreateWall" v-if="$env.edit && $store.state.walls"></SelectCreate>
+                <SelectCreate @wallCreated="onCreateWall" v-if="$env.edit && $store.state.user.is_authenticated"></SelectCreate>
             </div>
         </div>
     </div>
