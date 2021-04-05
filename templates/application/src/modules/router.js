@@ -24,7 +24,7 @@ const router = new VueRouter({
                         if (env.wall && !store.state.meta.edit_permission) {
                             return next({ to: "wallView", params: to.params });
                         }
-                        if (to.params.wallId !== undefined){
+                        if (to.params.wallId !== undefined) {
                             ws.open(to.params.wallId);
                         }
                         env.edit = true;
@@ -39,7 +39,9 @@ const router = new VueRouter({
                         if (env.wall && !store.state.meta.view_permission) {
                             return next({ to: "wallEdit" });
                         }
-                        ws.open(to.params.wallId);
+                        if (to.params.wallId !== undefined) {
+                            ws.open(to.params.wallId);
+                        }
                         env.edit = false;
                         next();
                     },
