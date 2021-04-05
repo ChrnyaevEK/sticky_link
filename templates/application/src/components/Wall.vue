@@ -28,14 +28,8 @@
                     class="overflow-auto border container-wrap scrollbar-hidden scrollable-element relative bg-white"
                 >
                     <vue-draggable-resizable
-                        @click.native.stop="
-                            unsetWidgetSelection();
-                            $env.closeOptions();
-                        "
-                        @touchstart.native.stop="
-                            unsetWidgetSelection();
-                            $env.closeOptions();
-                        "
+                        @click.native.stop="$env.closeOptions()"
+                        @touchstart.native.stop="$env.closeOptions()"
                         @resizing="onResizing"
                         @activated="onActivated(container)"
                         :resizable="$env.edit && !$env.changesLocked"

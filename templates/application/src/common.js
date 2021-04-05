@@ -27,6 +27,15 @@ export function generateId(property) {
     return `${this._uid}-${property}`;
 }
 
+export function copyToClipboard(text) {
+    let input = document.body.appendChild(document.createElement("input"));
+    input.value = text;
+    input.focus();
+    input.select();
+    document.execCommand('copy');
+    input.parentNode.removeChild(input);
+  }
+
 export const types = {
     Wall: "wall",
     Container: "container",

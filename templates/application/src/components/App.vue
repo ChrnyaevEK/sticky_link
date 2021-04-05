@@ -25,12 +25,12 @@
                     </li>
                 </ul>
             </div>
+            <SaveUtil></SaveUtil>
             <div class="mx-5 text-secondary d-sm-none">
                 <span v-if="!$env.wall && $store.state.user.is_authenticated">
                     Select or create a <span class="text-success font-weight-bold">wall</span> to continue
                 </span>
             </div>
-            <SaveUtil></SaveUtil>
             <button
                 class="navbar-toggler"
                 type="button"

@@ -115,6 +115,7 @@
                         break;
                     default:
                         await this.$store.dispatch("createInstance", { type, container: this.$env.containerId });
+                        this.$store.dispatch("recalculateWidgets", this.$env.container);
                         break;
                 }
             },

@@ -4,6 +4,7 @@ import { difference } from "../common";
 import env from "./env";
 import api from "./api";
 import um from "./um";
+import io from "./io";
 
 Vue.use(Vuex);
 
@@ -78,12 +79,15 @@ export default new Vuex.Store({
             await env.unlockChanges();
         },
         async updateOrAddInstance(context, instance) {
+            io.save(true);
             let local = (await context.dispatch("getInstanceByUid", instance.uid)) || {};
             let update = difference(local, instance);
             if (Object.keys(update).length) {
                 context.commit("updateOrAddInstance", instance);
-                return await um.proposeUpdate(update, instance);
+                instance = await um.proposeUpdate(update, instance);
             }
+            io.save(false);
+            return instance;
         },
         async copyWidget(context, widget) {
             widget = await api.create(widget.type, {
