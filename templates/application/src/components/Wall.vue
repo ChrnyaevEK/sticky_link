@@ -110,18 +110,20 @@
             },
             onActivated(container) {
                 this.$env.containerId = container.id;
+                window.dispatchEvent(new Event("resize"));
+
+                let containerId = "#" + this._(container.id);
+                container = $(containerId);
+
+                // Should be available in view (for mobile view)
+                $(".container-wrap").addClass("scrollbar-hidden");
+                container.removeClass("scrollbar-hidden");
+
                 if (this.$env.edit) {
                     // Add scroll bar, hide previous active element
-                    window.dispatchEvent(new Event("resize"));
-                    let containerId = "#" + this._(container.id);
-                    container = $(containerId);
-
-                    $(".container-wrap").addClass("scrollbar-hidden");
                     $(".quick-access")
                         .not(`${containerId} .quick-access`)
                         .addClass("hidden");
-
-                    container.removeClass("scrollbar-hidden");
                     container
                         .parent()
                         .find(".container-quick-access")

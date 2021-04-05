@@ -1,5 +1,6 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path, include
+from django.contrib import admin
 
 auth_urlpatterns = [
     path(
@@ -63,6 +64,7 @@ auth_urlpatterns = [
 ]
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('accounts/', include('django_registration.backends.activation.urls')),
     path('accounts/', include(auth_urlpatterns)),
     path('', include('application.urls')),

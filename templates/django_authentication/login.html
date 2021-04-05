@@ -60,7 +60,9 @@
                 <input type="hidden" name="next" value="{% url 'enter' %}">
             </div>
             <div class="form-group text-center">
-                <a href="{% url 'password_reset' %}" class="small">Reset password</a>
+                <div class="d-flex justify-content-around"></div>
+                <a href="{% url 'password_reset' %}" class="small px-1">Reset password</a>
+                <a href="{% url 'django_registration_register' %}" class="small px-1">Register</a>
             </div>
         </form>
     </div>

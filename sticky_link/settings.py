@@ -165,4 +165,4 @@ if env.DEBUG:
     REST_FRAMEWORK['UNAUTHENTICATED_USER'] = get_user
 
 # Site settings
-SITE_ID = 1
+SITE_ID = 2
