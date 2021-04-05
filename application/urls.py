@@ -3,6 +3,7 @@ from django.urls import path, include, re_path
 from application import views
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import admin
 
 router = routers.DefaultRouter()
 router.register('wall', views.WallViewSet, basename='wall')
@@ -19,6 +20,7 @@ urlpatterns = [
     path('api/state/', views.App.state, name="state"),
     path('api/state/<int:wall_id>/', views.App.state, name="state"),
     path('api/', include(router.urls), name="api"),
+    path('admin/', admin.site.urls),
     *static(settings.STATIC_URL, document_root='templates/application/dist/static'),
     re_path('.*', views.App.enter),
 ]

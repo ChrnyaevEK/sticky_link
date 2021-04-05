@@ -1,4 +1,3 @@
-from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path, include
 
@@ -13,7 +12,7 @@ auth_urlpatterns = [
     path(
         'logout/',
         auth_views.LogoutView.as_view(
-            template_name="website/website.html"
+            template_name="django_authentication/login.html"
         ),
         name='logout'
     ),
@@ -66,6 +65,5 @@ auth_urlpatterns = [
 urlpatterns = [
     path('accounts/', include('django_registration.backends.activation.urls')),
     path('accounts/', include(auth_urlpatterns)),
-    path('admin/', admin.site.urls),
     path('', include('application.urls')),
 ]
