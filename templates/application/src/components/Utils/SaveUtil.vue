@@ -1,6 +1,6 @@
 <template id="save-util-template">
     <span class="mx-1 small font-weight-bold" :class="io.saveUtil.type ? 'text-' + io.saveUtil.type : 'text-secondary'">
-       {{io.changeUtil.state}}  {{ io.saveUtil.state }}
+        {{ io.saveUtil.state }} {{io.changeUtil.state}}
     </span>
 </template>
 <script>

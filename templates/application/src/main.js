@@ -3,7 +3,6 @@ import router from "./modules/router";
 import store from "./modules/store";
 import env from "./modules/env";
 import io from "./modules/io";
-import ws from "./modules/ws";
 import "bootstrap";
 import "./css/main.scss";
 import "@fortawesome/fontawesome-free/js/all.js";
@@ -43,20 +42,4 @@ new Vue({
     router,
     store,
     template: "<router-view/>",
-    watch: {
-        $route: {
-            handler: function(to, from) {
-                // Reconnect to server on route change (on wall change)
-                if (to.params.wallId !== undefined) {
-                    if (ws.socket !== null) {
-                        ws.close();
-                    }
-                    if (to.params.wallId !== from.params.wallId) {
-                        ws.open(to.params.wallId);
-                    }
-                }
-            },
-            deep: true,
-        },
-    },
 }).$mount("#app");

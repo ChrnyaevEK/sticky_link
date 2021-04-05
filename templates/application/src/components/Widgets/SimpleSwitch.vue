@@ -9,7 +9,7 @@
                 @change="changeValue"
                 :checked="widget.value"
                 :id="_('value')"
-                :disabled="$env.wall && $env.wall.lock_widgets"
+                :disabled="$env.widgetsLocked || $env.changesLocked"
                 class="custom-control-input"
             />
             <label class="custom-control-label" :for="_('value')">{{ widget.title }}</label>

@@ -8,7 +8,7 @@
         :z="100"
         :resizable="false"
         :parent="false"
-        class="bg-white border overflow-auto shadow rounded options-position options-size p-3 scrollbar-hidden"
+        class="bg-white border overflow-auto shadow rounded options-position options-size p-2 scrollbar-hidden"
     >
         <div
             class="form-group d-flex justify-content-between align-items-center options-drag border-bottom cursor-move"
@@ -19,25 +19,45 @@
         <template v-if="instance.type == types.Wall">
             <div class="form-group">
                 <label :for="_('title')">Title </label>
-                <input :id="_('title')" class="form-control" v-model="instance.title" maxlength="200" @input="push" />
+                <input
+                    :id="_('title')"
+                    :disabled="$env.changesLocked"
+                    @input="push"
+                    v-model="instance.title"
+                    class="form-control"
+                    maxlength="200"
+                />
+            </div>
+            <div class="form-group">
+                <label :for="_('description')">Description</label>
+                <input
+                    :id="_('description')"
+                    :disabled="$env.changesLocked"
+                    @input="push"
+                    v-model="instance.description"
+                    class="form-control"
+                    maxlength="500"
+                />
             </div>
             <div class="form-check">
                 <input
-                    type="checkbox"
                     :id="_('allow_anonymous_view')"
-                    class="form-check-input"
+                    :disabled="$env.changesLocked"
                     v-model="instance.allow_anonymous_view"
                     @change="push"
+                    class="form-check-input"
+                    type="checkbox"
                 />
                 <label class="form-check-label" :for="_('allow_anonymous_view')">Allow anonymous view mode</label>
             </div>
             <div class="form-check">
                 <input
-                    type="checkbox"
                     :id="_('lock_widgets')"
-                    class="form-check-input"
+                    :disabled="$env.changesLocked"
                     v-model="instance.lock_widgets"
                     @change="push"
+                    class="form-check-input"
+                    type="checkbox"
                 />
                 <label class="form-check-label" :for="_('lock_widgets')">Lock widget actions</label>
             </div>
@@ -45,28 +65,37 @@
         <template v-else-if="instance.type == types.Container">
             <div class="form-group">
                 <label :for="_('title')">Title </label>
-                <input :id="_('title')" class="form-control" v-model="instance.title" maxlength="200" @input="push" />
+                <input
+                    :id="_('title')"
+                    :disabled="$env.changesLocked"
+                    v-model="instance.title"
+                    @input="push"
+                    class="form-control"
+                    maxlength="200"
+                />
             </div>
             <div class="form-group">
                 <label :for="_('description')">Description </label>
                 <input
                     :id="_('description')"
-                    class="form-control"
-                    v-model="instance.description"
-                    maxlength="500"
+                    :disabled="$env.changesLocked"
                     @input="push"
+                    v-model="instance.description"
+                    class="form-control"
+                    maxlength="500"
                 />
             </div>
             <div class="form-group">
                 <label :for="_('h')">Height </label>
                 <input
                     :id="_('h')"
-                    type="number"
-                    class="form-control"
+                    :disabled="$env.changesLocked"
+                    :step="$store.state.app.grid"
                     v-model.number="instance.h"
                     @input="push"
                     min="50"
-                    :step="$store.state.app.grid"
+                    class="form-control"
+                    type="number"
                 />
             </div>
         </template>
@@ -75,11 +104,12 @@
                 <label :for="_('x')">X coordinate</label>
                 <input
                     :id="_('x')"
+                    :disabled="$env.changesLocked"
+                    :step="$store.state.app.grid"
                     v-model.number="instance.x"
                     @input="push"
                     class="form-control"
                     type="number"
-                    :step="$store.state.app.grid"
                     min="0"
                 />
             </div>
@@ -87,11 +117,12 @@
                 <label :for="_('y')">Y coordinate</label>
                 <input
                     :id="_('y')"
+                    :disabled="$env.changesLocked"
+                    :step="$store.state.app.grid"
                     v-model.number="instance.y"
                     @input="push"
                     class="form-control"
                     type="number"
-                    :step="$store.state.app.grid"
                     min="0"
                 />
             </div>
@@ -99,6 +130,7 @@
                 <label :for="_('z')">Z coordinate</label>
                 <input
                     :id="_('z')"
+                    :disabled="$env.changesLocked"
                     v-model.number="instance.z"
                     @input="push"
                     class="form-control"
@@ -112,11 +144,12 @@
                 <label :for="_('w')">Width</label>
                 <input
                     :id="_('w')"
+                    :disabled="$env.changesLocked"
+                    :step="$store.state.app.grid"
                     v-model.number="instance.w"
                     @input="push"
                     class="form-control"
                     type="number"
-                    :step="$store.state.app.grid"
                     min="50"
                 />
             </div>
@@ -124,6 +157,7 @@
                 <label :for="_('h')">Height</label>
                 <input
                     :id="_('h')"
+                    :disabled="$env.changesLocked"
                     v-model.number="instance.h"
                     @input="push"
                     class="form-control"
@@ -136,6 +170,7 @@
                 <label :for="_('font_size')">Font size</label>
                 <input
                     :id="_('font_size')"
+                    :disabled="$env.changesLocked"
                     v-model.number="instance.font_size"
                     @input="push"
                     class="form-control"
@@ -149,6 +184,7 @@
                 <label :for="_('font_weight')">Font weight</label>
                 <input
                     :id="_('font_weight')"
+                    :disabled="$env.changesLocked"
                     v-model.number="instance.font_weight"
                     @input="push"
                     class="form-control"
@@ -161,34 +197,44 @@
             <div class="form-group">
                 <label :for="_('background_color')">Background color</label>
                 <input
-                    type="color"
                     :id="_('background_color')"
+                    :disabled="$env.changesLocked"
                     v-model="instance.background_color"
                     @input="push"
                     class="form-control"
+                    type="color"
                 />
             </div>
             <div class="form-group">
                 <label :for="_('text_color')">Text color</label>
                 <input
-                    type="color"
                     :id="_('text_color')"
+                    :disabled="$env.changesLocked"
                     v-model="instance.text_color"
                     @input="push"
                     class="form-control"
+                    type="color"
                 />
             </div>
             <div class="form-group">
                 <label :for="_('help')">Help text</label>
-                <input :id="_('help')" class="form-control" v-model="instance.help" @input="push" maxlength="200" />
+                <input
+                    :id="_('help')"
+                    :disabled="$env.changesLocked"
+                    v-model="instance.help"
+                    @input="push"
+                    class="form-control"
+                    maxlength="200"
+                />
             </div>
             <div class="form-check">
                 <input
-                    type="checkbox"
                     :id="_('border')"
-                    class="form-check-input"
+                    :disabled="$env.changesLocked"
                     v-model="instance.border"
                     @change="push"
+                    class="form-check-input"
+                    type="checkbox"
                 />
                 <label class="form-check-label" :for="_('border')">Border</label>
             </div>
@@ -203,41 +249,79 @@
         <template v-if="instance.type == types.Counter">
             <div class="form-group">
                 <label :for="_('value')">Value </label>
-                <input :id="_('value')" class="form-control" v-model.number="instance.value" @input="push" />
+                <input
+                    :id="_('value')"
+                    :disabled="$env.changesLocked"
+                    v-model.number="instance.value"
+                    @input="push"
+                    class="form-control"
+                />
             </div>
             <div class="form-group">
                 <label :for="_('title')">Title </label>
-                <input :id="_('title')" class="form-control" v-model="instance.title" @input="push" />
+                <input
+                    :id="_('title')"
+                    :disabled="$env.changesLocked"
+                    v-model="instance.title"
+                    @input="push"
+                    class="form-control"
+                />
             </div>
         </template>
         <!--URL-->
         <template v-if="instance.type == types.URL">
             <div class="form-group">
                 <label :for="_('href')">URL address </label>
-                <input :id="_('href')" class="form-control" v-model="instance.href" @input="push" />
+                <input
+                    :id="_('href')"
+                    :disabled="$env.changesLocked"
+                    v-model="instance.href"
+                    @input="push"
+                    class="form-control"
+                />
             </div>
             <div class="form-group">
                 <label :for="_('text')">URL text </label>
-                <input :id="_('text')" class="form-control" v-model="instance.text" @input="push" />
+                <input
+                    :id="_('text')"
+                    :disabled="$env.changesLocked"
+                    v-model="instance.text"
+                    @input="push"
+                    class="form-control"
+                />
             </div>
         </template>
         <!--Simple List-->
         <template v-if="instance.type == types.SimpleList">
             <div class="form-group">
                 <label :for="_('title')">Title </label>
-                <input :id="_('title')" class="form-control" v-model="instance.title" @input="push" />
+                <input
+                    :id="_('title')"
+                    :disabled="$env.changesLocked"
+                    v-model="instance.title"
+                    @input="push"
+                    class="form-control"
+                />
             </div>
         </template>
         <!--Simple Switch-->
         <template v-if="instance.type == types.SimpleSwitch">
             <div class="form-group">
                 <label :for="_('title')">Title </label>
-                <input :id="_('title')" class="form-control" v-model="instance.title" @input="push" />
+                <input
+                    :id="_('title')"
+                    :disabled="$env.changesLocked"
+                    v-model="instance.title"
+                    @input="push"
+                    class="form-control"
+                />
             </div>
         </template>
         <!--Options by widget type========================================================================================================-->
         <div class="form-group">
-            <a class="btn btn-sm btn-danger w-100" @click.stop="onDeleteInstance">Delete</a>
+            <button :disabled="$env.changesLocked" class="btn btn-sm btn-danger w-100" @click.stop="onDeleteInstance">
+                Delete
+            </button>
         </div>
         <div class="form-group d-flex justify-content-center">
             <small class="text-secondary">All changes are automatically saved</small>
@@ -292,14 +376,12 @@
                 $(`.${this.warningClass}`).remove();
             },
             async push() {
-                if (!this.$env.changesLocked) {
-                    try {
-                        await this.$store.dispatch("updateOrAddInstance", this.instance);
-                    } catch (err) {
-                        return this.setWarningFromResponse(err);
-                    }
-                    this.unsetWarning();
+                try {
+                    await this.$store.dispatch("updateOrAddInstance", this.instance);
+                } catch (err) {
+                    return this.setWarningFromResponse(err);
                 }
+                this.unsetWarning();
             },
         },
         components: {

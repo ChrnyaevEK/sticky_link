@@ -6,6 +6,7 @@
         @dragstop="onDrag"
         @activated="onActivated"
         @touchstart.native.stop
+        @click.native.stop
         class="widget"
         :class="[
             widget.border ? 'widget-border' : 'no-border',
@@ -27,19 +28,19 @@
         ref="base"
     >
         <div class="quick-access widget-quick-access hidden" v-if="$env.edit">
-            <a :disabled="$env.changesLocked" class="btn btn-sm btn-danger" @click="deleteWidget">
+            <button :disabled="$env.changesLocked" class="btn btn-sm btn-danger" @click="deleteWidget">
                 <i class="fas fa-trash"></i>
-            </a>
-            <a
+            </button>
+            <button
                 :disabled="$env.changesLocked"
                 class="btn btn-sm btn-light border"
                 @click="$store.dispatch('copyWidget', widget)"
             >
                 <i class="fas fa-copy"></i>
-            </a>
-            <a class="btn btn-sm btn-light border" @click.stop="onOpenOptions">
+            </button>
+            <button class="btn btn-sm btn-light border" @click.stop="onOpenOptions">
                 <i class="fas fa-ellipsis-v"></i>
-            </a>
+            </button>
         </div>
         <div class="w-100 h-100">
             <slot></slot>
@@ -65,11 +66,13 @@
         },
         methods: {
             onResizeStop(x, y, w, h) {
+                this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
                 if (!this.$env.changesLocked) {
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { w, h }));
                 }
             },
             onDrag(x, y) {
+                this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
                 if (!this.$env.changesLocked) {
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { x, y }));
                 }
@@ -80,6 +83,7 @@
                 }
             },
             onActivated() {
+                this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
                 if (this.$env.edit) {
                     window.dispatchEvent(new Event("resize"));
                     $(".widget-quick-access").addClass("hidden");

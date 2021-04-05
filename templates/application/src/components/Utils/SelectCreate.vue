@@ -1,5 +1,5 @@
 <template>
-    <div class="m-1 p-1 w-100 shadow d-flex justify-content-between border bg-white">
+    <div class="p-1 w-100 shadow d-flex justify-content-between border bg-white">
         <div class="btn-group dropup">
             <div v-if="$store.state.walls">
                 <a
@@ -26,7 +26,7 @@
                     >
                 </div>
             </div>
-            <a
+            <button
                 v-if="createWall"
                 class="mr-1 btn btn-sm btn-success text-white border"
                 @click="createWall"
@@ -34,17 +34,17 @@
                 :disabled="$env.changesLocked"
             >
                 <i class="fas fa-plus"></i>
-            </a>
-            <a
+            </button>
+            <button
                 v-if="$env.wall"
                 class="mr-1 btn btn-sm btn-default"
                 @click.stop="$env.openOptions($env.wall)"
                 :disabled="$env.changesLocked"
             >
                 <i class="fas fa-ellipsis-v"></i>
-            </a>
+            </button>
         </div>
-        <span class="overflow-auto d-flex" v-if="$env.wall">
+        <span class="overflow-auto scrollbar-hidden d-flex" v-if="$env.wall">
             <button
                 @click.stop="createInstance('container')"
                 class="mr-1 btn btn-sm bg-light border text-nowrap"

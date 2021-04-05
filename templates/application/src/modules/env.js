@@ -20,6 +20,9 @@ export default new Vue({
         container() {
             return store.state.containers ? store.state.containers.filter((c) => c.id == this.containerId)[0] : null;
         },
+        widgetsLocked(){
+            return this.edit && this.wall && this.wall.lock_widgets
+        }
     },
     methods: {
         async lockChanges() {
@@ -30,6 +33,18 @@ export default new Vue({
         },
         async unlockChanges() {
             this.changesLocked = false;
+            await new Promise((resolve) => {
+                Vue.nextTick(resolve);
+            });
+        },
+        async lockWidgets() {
+            this.widgetsLocked = true;
+            await new Promise((resolve) => {
+                Vue.nextTick(resolve);
+            });
+        },
+        async unlockWidgets() {
+            this.widgetsLocked = false;
             await new Promise((resolve) => {
                 Vue.nextTick(resolve);
             });
@@ -59,9 +74,9 @@ export default new Vue({
                 io.alert("Server error occurred", "danger");
             }
         },
-        makeMutable(...instances) {
+        makeMutable() {
             // To allow straight mutations
-            return Object.assign({}, ...instances);
+            return Object.assign({}, ...arguments);
         },
     },
 });

@@ -21,14 +21,12 @@ function determineSource(instance) {
 export default new Vuex.Store({
     strict: true,
     state: {
-        valid: false,
         user: null,
-        wall: null,
         walls: null,
         containers: null,
-        container: null,
         widgets: null,
         meta: null,
+
         app: {
             title: process.env.VUE_APP_TITLE,
             grid: 3,
@@ -36,29 +34,21 @@ export default new Vuex.Store({
     },
     mutations: {
         setState(state, response) {
-            state.user = response.user;
-            state.meta = response.meta;
-            state.walls = response.walls;
-            state.containers = response.containers;
-            state.widgets = response.widgets;
-            if (state.user.is_anonymous) {
-                state.user.username = "anonymous";
-            }
+            Object.assign(state, response);
         },
         deleteInstance(state, instance) {
-            var source = determineSource(instance);
-            for (var i = 0; i < state[source].length; i++) {
+            let source = determineSource(instance);
+            for (let i = 0; i < state[source].length; i++) {
                 if (state[source][i].uid == instance.uid) {
-                    state[source].splice(i, 1);
-                    break;
+                    return state[source].splice(i, 1);
                 }
             }
         },
         updateOrAddInstance(state, instance) {
-            var source = determineSource(instance);
-            for (let localInstance of state[source]) {
-                if (localInstance.uid == instance.uid) {
-                    return Object.assign(localInstance, instance);
+            let source = determineSource(instance);
+            for (let local of state[source]) {
+                if (local.uid == instance.uid) {
+                    return Object.assign(local, instance);
                 }
             }
             state[source].push(instance);
@@ -66,11 +56,8 @@ export default new Vuex.Store({
     },
     actions: {
         async fetchState(context, wallId) {
-            if (wallId !== undefined) {
-                context.commit("setState", await api.retrieve("state", wallId));
-            } else {
-                context.commit("setState", await api.get("state"));
-            }
+            let state = wallId != undefined ? await api.retrieve("state", wallId) : await api.get("state");
+            context.commit("setState", state);
         },
         async fetchInstance(context, instance) {
             instance = await api.retrieve(instance.type, instance.id);
@@ -91,11 +78,8 @@ export default new Vuex.Store({
             await env.unlockChanges();
         },
         async updateOrAddInstance(context, instance) {
-            var localInstance = await context.dispatch("getInstanceByUid", instance.uid);
-            var update = instance;
-            if (localInstance) {
-                update = difference(localInstance, instance);
-            }
+            let local = (await context.dispatch("getInstanceByUid", instance.uid)) || {};
+            let update = difference(local, instance);
             if (Object.keys(update).length) {
                 context.commit("updateOrAddInstance", instance);
                 return await um.proposeUpdate(update, instance);
@@ -110,29 +94,25 @@ export default new Vuex.Store({
             return widget;
         },
         async recalculateWidgets(context, container) {
-            var updateArray = [];
-            for (var widget of context.state.widgets) {
-                widget = Object.assign({}, widget);
+            let update = [];
+            for (let widget of context.state.widgets) {
+                widget = env.makeMutable(widget);
                 if (widget.y + widget.h >= container.h) {
-                    var y = container.h - widget.h;
+                    let y = container.h - widget.h;
                     widget.y = y < 0 ? 0 : y;
                 }
                 if (widget.h >= container.h) {
                     widget.h = container.h;
                 }
-                updateArray.push(context.dispatch("updateOrAddInstance", widget));
+                update.push(context.dispatch("updateOrAddInstance", widget));
             }
-            await Promise.all(updateArray);
+            await Promise.all(update);
         },
         getInstanceByUid(context, uid) {
-            let result = [];
-            if (context.state.walls) {
-                result.push(...context.state.walls);
-            }
-            if (context.state.widgets) {
-                result.push(...context.state.widgets);
-            }
-            return result.filter((i) => i.uid == uid)[0];
+            return [
+                ...(context.state.walls ? context.state.walls : []),
+                ...(context.state.widgets ? context.state.widgets : []),
+            ].filter((instance) => instance.uid == uid)[0];
         },
     },
 });

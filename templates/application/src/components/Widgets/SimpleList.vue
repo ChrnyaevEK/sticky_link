@@ -9,14 +9,20 @@
                     <span class="w-100 p-1">
                         {{ val }}
                     </span>
-                    <a @click.stop="removeItem(i)" :disabled="$env.widgetsLocked" class="btn"
-                        ><i class="fas fa-times"></i
-                    ></a>
+                    <button
+                        @click.stop="removeItem(i)"
+                        :disabled="$env.widgetsLocked || $env.changesLocked"
+                        class="btn"
+                    >
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
             <div class="d-flex">
                 <input type="text" :id="_('item-input')" v-model="item" @keyup.enter="addItem" class="form-control" />
-                <a @click.stop="addItem" :disabled="$env.widgetsLocked" class="btn"><i class="fas fa-plus"></i></a>
+                <button @click.stop="addItem" :disabled="$env.widgetsLocked || $env.changesLocked" class="btn">
+                    <i class="fas fa-plus"></i>
+                </button>
             </div>
         </div>
     </WidgetBaseResizable>

@@ -75,8 +75,12 @@ class App:
             walls = [wall]
         elif not walls:
             walls = []
+
+        user = serializers.UserSerializer(request.user).data
+        if request.user.is_anonymous:
+            user['username'] = 'anonymous'
         return JsonResponse({
-            'user': serializers.UserSerializer(request.user).data,
+            'user': user,
             'meta': meta,
             'containers': containers,
             'widgets': widgets,

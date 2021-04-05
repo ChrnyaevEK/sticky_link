@@ -9,10 +9,11 @@
                     </li>
                     <li class="nav-item">
                         <router-link
+                            v-show="$store.state.user.is_authenticated"
                             class="nav-link"
                             :to="{
                                 name: $env.edit ? 'wallView' : 'wallEdit',
-                                params: $route.param,
+                                params: $route.params,
                             }"
                             >{{ $env.edit ? "View" : "Edit" }}
                         </router-link>
@@ -24,8 +25,8 @@
                     </li>
                 </ul>
             </div>
-            <div v-show="!$env.wall" class="mx-5 text-secondary">
-                <span v-if="$store.state.user.is_authenticated">
+            <div class="mx-5 text-secondary d-sm-none">
+                <span v-if="!$env.wall && $store.state.user.is_authenticated">
                     Select or create a <span class="text-success font-weight-bold">wall</span> to continue
                 </span>
             </div>
@@ -42,21 +43,14 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
         </nav>
-        <div class="h-100 bg-light d-flex flex-column justify-content-between align-items-center overflow-hidden">
-            <AlertUtil></AlertUtil>
-            <router-view></router-view>
-            <div class="w-100 px-5 select-create-pos">
-                <SelectCreate @wallCreated="onCreateWall" v-if="$env.edit && $store.state.user.is_authenticated"></SelectCreate>
-            </div>
-        </div>
+        <AlertUtil></AlertUtil>
+        <router-view></router-view>
     </div>
 </template>
 
 <script>
     import SaveUtil from "./Utils/SaveUtil";
     import AlertUtil from "./Utils/AlertUtil";
-    import SelectCreate from "./Utils/SelectCreate";
-    import router from "../modules/router";
     import $ from "jquery";
 
     export default {
@@ -70,30 +64,11 @@
         components: {
             SaveUtil,
             AlertUtil,
-            SelectCreate,
         },
         created() {
             $(document).keyup((e) => {
                 if (e.keyCode === 27) this.$env.closeOptions(); // esc
             });
         },
-        methods: {
-            onCreateWall(wall) {
-                this.$io.alert("New wall has been created!", "success");
-                router.push({
-                    name: "wallEdit",
-                    params: {
-                        wallId: wall.id,
-                    },
-                });
-            },
-        },
     };
 </script>
-
-<style scoped>
-    .select-create-pos {
-        position: absolute;
-        bottom: 0;
-    }
-</style>

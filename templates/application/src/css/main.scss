@@ -7,6 +7,10 @@ $danger: #f25f5c;
 @import "~quill/dist/quill.snow.css";
 @import "~vue-draggable-resizable/dist/VueDraggableResizable.css";
 
+html {
+    font-size: 14px;
+}
+
 .select-create {
     background-color: $gray-100;
 }
@@ -67,8 +71,8 @@ $danger: #f25f5c;
 }
 .wall-only > .handle-bm {
     background-color: $gray-400;
-    height: 1px;
-    top: calc(100% - 1px);
+    height: 2px;
+    top: calc(100% - 2px);
     left: 0%;
     margin-left: 0;
     z-index: 101;

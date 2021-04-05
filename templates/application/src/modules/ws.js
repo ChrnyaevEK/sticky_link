@@ -7,11 +7,13 @@ export default new Vue({
         wallId: null,
         socket: null,
         reopenTime: 1000,
-        expectClose: false,
     },
     methods: {
         open(wallId) {
-            this.expectClose = false;
+            if (this.socket !== null) {
+                this.socket.onclose = () => {};
+                this.socket.close();
+            }
             this.wallId = wallId;
             this.socket = new WebSocket(
                 `${process.env.NODE_ENV == "production" ? "wss" : "ws"}://${process.env.VUE_APP_HOST}/wss/${wallId}`
@@ -24,7 +26,7 @@ export default new Vue({
             };
         },
         onMessage(event) {
-            event = JSON.parse(event.data)
+            event = JSON.parse(event.data);
             switch (event.type) {
                 case "on_instance_update":
                     um.populateRemoteUpdate(event);
@@ -35,17 +37,9 @@ export default new Vue({
             }
         },
         async onClose() {
-            if (!this.expectClose) {
-                if (process.env.NODE_ENV == "development") {
-                    console.error("Wall socket closed unexpectedly");
-                }
-                await sleep(this.reopenTime);
-                this.open(this.wallId);
-            }
-        },
-        close() {
-            this.expectClose = true;
-            this.socket.close();
+            console.error("Wall socket closed unexpectedly");
+            await sleep(this.reopenTime);
+            this.open(this.wallId);
         },
     },
 });

@@ -4,6 +4,7 @@ import App from "../components/App";
 import Wall from "../components/Wall";
 import store from "./store";
 import env from "./env";
+import ws from "./ws";
 
 Vue.use(VueRouter);
 
@@ -20,11 +21,10 @@ const router = new VueRouter({
                     alias: "",
                     component: Wall,
                     beforeEnter(to, from, next) {
-                        if (env.wall) {
-                            if (!store.state.meta.edit_permission) {
-                                return next({ to: "wallView", params: to.params });
-                            }
+                        if (env.wall && !store.state.meta.edit_permission) {
+                            return next({ to: "wallView", params: to.params });
                         }
+                        ws.open(to.params.wallId);
                         env.edit = true;
                         next();
                     },
@@ -34,11 +34,10 @@ const router = new VueRouter({
                     path: "wall/view/:wallId?",
                     component: Wall,
                     beforeEnter(to, from, next) {
-                        if (env.wall) {
-                            if (!store.state.meta.view_permission) {
-                                return next({ to: "wallEdit" });
-                            }
+                        if (env.wall && !store.state.meta.view_permission) {
+                            return next({ to: "wallEdit" });
                         }
+                        ws.open(to.params.wallId);
                         env.edit = false;
                         next();
                     },
@@ -55,8 +54,9 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
     await store.dispatch("fetchState", to.params.wallId);
     env.wallId = to.params.wallId;
+    env.setTabTitle();
     if (store.state.containers) {
-        env.containerId = store.state.containers[0];
+        env.containerId = store.state.containers[0].id;
     }
     Vue.nextTick(next);
 });

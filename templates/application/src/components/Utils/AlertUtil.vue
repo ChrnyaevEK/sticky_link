@@ -1,6 +1,6 @@
 <template>
     <span
-        class="w-75 alert alert-dismissible fade show position-absolute"
+        class="w-100 alert alert-dismissible fade show position-absolute"
         style="z-index: 1;"
         v-show="io.alertUtil.visible"
         :class="'alert-' + io.alertUtil.type"

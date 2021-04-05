@@ -20,26 +20,25 @@ export default new Vue({
         },
     },
     methods: {
-        async proposeUpdate(update, { type, id, uid }) {
-            // Require Type, Id, Uid
+        async proposeUpdate(update, instance) {
             if (env.changesLocked) return;
-            this.handler[uid] = Object.assign({}, this.handler[uid], update); // Merge updates
-            if (!this.waiter[uid]) {
+            this.handler[instance.uid] = Object.assign({}, this.handler[instance.uid], update); // Merge updates
+            if (!this.waiter[instance.uid]) {
                 // Already waiting to push update?
-                this.waiter[uid] = (async () => {
+                this.waiter[instance.uid] = (async () => {
                     await sleep(this.coolDown);
-                    delete this.waiter[uid];
-                    let newInstance = await api.update_partial(type, id, this.handler[uid]);
-                    delete this.handler[uid];
-                    if (this.remote[uid] !== undefined) {
+                    delete this.waiter[instance.uid];
+                    let remote = await api.update_partial(instance.type, instance.id, this.handler[instance.uid]);
+                    delete this.handler[instance.uid];
+                    if (this.remote[instance.uid] !== undefined) {
                         // Ws finished before http - resolve miss match
-                        if (this.remote[uid] !== newInstance.version) await this.resolveNewVersion(newInstance);
-                        delete this.remote[newInstance.uid]; // Unset remote version
+                        if (this.remote[instance.uid] !== remote.version) await this.resolveNewVersion(remote);
+                        delete this.remote[remote.uid]; // Unset remote version
                     }
-                    return newInstance;
+                    return remote;
                 })();
             }
-            return this.waiter[uid];
+            return this.waiter[instance.uid];
         },
         async populateRemoteUpdate(event) {
             if (this.handler[event.instance.uid] !== undefined) {
@@ -52,16 +51,15 @@ export default new Vue({
         },
         async populateRemoteDestroy(event) {
             io.change(true);
-            let localInstance = await store.dispatch("getInstanceByUid", event.instance.uid);
-            if (localInstance) {
-                store.commit("deleteInstance", localInstance);
+            let local = await store.dispatch("getInstanceByUid", event.instance.uid);
+            if (local != undefined) {
+                store.commit("deleteInstance", local);
             }
             io.change(false);
         },
         async resolveNewVersion(instance) {
             io.change(true);
-            let localInstance = await store.dispatch("getInstanceByUid", instance.uid);
-            await store.dispatch("fetchInstance", localInstance ? localInstance : instance);
+            await store.dispatch("fetchInstance", instance);
             io.change(false);
         },
     },
