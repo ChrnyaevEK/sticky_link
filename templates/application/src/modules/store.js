@@ -100,15 +100,17 @@ export default new Vuex.Store({
         async recalculateWidgets(context, container) {
             let update = [];
             for (let widget of context.state.widgets) {
-                widget = env.makeMutable(widget);
-                if (widget.y + widget.h >= container.h) {
-                    let y = container.h - widget.h;
-                    widget.y = y < 0 ? 0 : y;
+                if (widget.container == container.id) {
+                    widget = env.makeMutable(widget);
+                    if (widget.y + widget.h >= container.h) {
+                        let y = container.h - widget.h;
+                        widget.y = y < 0 ? 0 : y;
+                    }
+                    if (widget.h >= container.h) {
+                        widget.h = container.h;
+                    }
+                    update.push(context.dispatch("updateOrAddInstance", widget));
                 }
-                if (widget.h >= container.h) {
-                    widget.h = container.h;
-                }
-                update.push(context.dispatch("updateOrAddInstance", widget));
             }
             await Promise.all(update);
         },
