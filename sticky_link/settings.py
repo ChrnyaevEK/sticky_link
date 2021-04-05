@@ -159,7 +159,7 @@ REST_FRAMEWORK = {
 if env.DEBUG:
     def get_user():
         from django.contrib.auth.models import User
-        return User.objects.get(username="sticky_admin")  # Choose any dev user
+        return User.objects.get(username="dev_user1")  # Choose any dev user
 
 
     REST_FRAMEWORK['UNAUTHENTICATED_USER'] = get_user

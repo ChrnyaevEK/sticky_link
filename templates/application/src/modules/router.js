@@ -24,7 +24,9 @@ const router = new VueRouter({
                         if (env.wall && !store.state.meta.edit_permission) {
                             return next({ to: "wallView", params: to.params });
                         }
-                        ws.open(to.params.wallId);
+                        if (to.params.wallId !== undefined){
+                            ws.open(to.params.wallId);
+                        }
                         env.edit = true;
                         next();
                     },
@@ -56,7 +58,8 @@ router.beforeEach(async (to, from, next) => {
     env.wallId = to.params.wallId;
     env.setTabTitle();
     if (store.state.containers) {
-        env.containerId = store.state.containers[0].id;
+        let container = store.state.containers[0];
+        env.containerId = container ? container.id : null;
     }
     Vue.nextTick(next);
 });
