@@ -1,11 +1,7 @@
 <template id="url-template">
     <WidgetBaseResizable :widget="widget">
         <div class="w-100 h-100 d-flex justify-content-center align-items-center">
-            <button
-                class="btn btn-default p-2 border"
-                @click="openHref"
-                :disabled="$env.widgetsLocked || $env.changesLocked"
-            >
+            <a class="p-2 border" @click.stop.prevent="openHref" :disabled="$env.widgetsLocked || $env.changesLocked">
                 <a
                     :href="widget.href"
                     @click.stop.prevent="openHref"
@@ -15,7 +11,7 @@
                     ><u>{{ widget.text || widget.href }}</u></a
                 >
                 <i class="fas fa-external-link-square-alt text-muted mx-1"></i>
-            </button>
+            </a>
         </div>
     </WidgetBaseResizable>
 </template>
