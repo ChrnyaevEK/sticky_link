@@ -8,7 +8,6 @@
             v-if="$env.wall"
             @click="
                 unsetWidgetSelection();
-                unsetContainerSelection();
                 $env.closeOptions();
             "
         >
@@ -25,7 +24,7 @@
                 </div>
                 <div
                     :id="_(container.id)"
-                    class="overflow-auto border container-wrap scrollbar-hidden scrollable-element relative bg-white"
+                    class="overflow-auto border container-wrap scrollable-element relative bg-white"
                 >
                     <vue-draggable-resizable
                         @click.native.stop="$env.closeOptions()"
@@ -115,12 +114,7 @@
                 let containerId = "#" + this._(container.id);
                 container = $(containerId);
 
-                // Should be available in view (for mobile view)
-                $(".container-wrap").addClass("scrollbar-hidden");
-                container.removeClass("scrollbar-hidden");
-
                 if (this.$env.edit) {
-                    // Add scroll bar, hide previous active element
                     $(".quick-access")
                         .not(`${containerId} .quick-access`)
                         .addClass("hidden");
@@ -132,9 +126,6 @@
             },
             unsetWidgetSelection() {
                 $(".quick-access").addClass("hidden");
-            },
-            unsetContainerSelection() {
-                $(".container-wrap").addClass("scrollbar-hidden");
             },
             onCreateWall(wall) {
                 this.$io.alert("New wall has been created!", "success");

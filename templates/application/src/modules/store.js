@@ -19,6 +19,21 @@ function determineSource(instance) {
     }
 }
 
+function fitWidget(widget, container) {
+    if (widget.x + widget.w >= container.w) {
+        let x = container.w - widget.w;
+        widget.x = x < 0 ? 0 : x;
+    }
+    if (widget.y + widget.h >= container.h) {
+        let y = container.h - widget.h;
+        widget.y = y < 0 ? 0 : y;
+    }
+    if (widget.h >= container.h) {
+        widget.h = container.h;
+    }
+    return widget;
+}
+
 export default new Vuex.Store({
     strict: true,
     state: {
@@ -73,10 +88,11 @@ export default new Vuex.Store({
             return instance;
         },
         async deleteInstance(context, instance) {
-            await env.lockChanges();
-            await api.delete(instance.type, instance.id, instance.uid);
-            context.commit("deleteInstance", instance);
-            await env.unlockChanges();
+            await env.lockChanges(); // Lock changes to prevent update for deleted instance
+            await um.cancelPending(instance); // cancel or wait for pending update
+            await api.delete(instance.type, instance.id, instance.uid); // Perform delete
+            context.commit("deleteInstance", instance); // Delete local copy
+            await env.unlockChanges(); // Unlock changes
         },
         async updateOrAddInstance(context, instance) {
             io.save(true);
@@ -90,25 +106,28 @@ export default new Vuex.Store({
             return instance;
         },
         async copyWidget(context, widget) {
-            widget = await api.create(widget.type, {
+            widget = {
                 ...widget,
+                x: widget.x + context.state.app.grid,
+                y: widget.y + context.state.app.grid,
                 id: undefined,
-            });
+            };
+            for (let container of context.state.containers) {
+                if (widget.container == container.id) {
+                    widget = fitWidget(widget, container);
+                    break;
+                }
+            }
+            widget = await api.create(widget.type, widget);
             context.commit("updateOrAddInstance", widget);
             return widget;
         },
+
         async recalculateWidgets(context, container) {
             let update = [];
             for (let widget of context.state.widgets) {
                 if (widget.container == container.id) {
-                    widget = env.makeMutable(widget);
-                    if (widget.y + widget.h >= container.h) {
-                        let y = container.h - widget.h;
-                        widget.y = y < 0 ? 0 : y;
-                    }
-                    if (widget.h >= container.h) {
-                        widget.h = container.h;
-                    }
+                    widget = fitWidget(env.makeMutable(widget), container);
                     update.push(context.dispatch("updateOrAddInstance", widget));
                 }
             }

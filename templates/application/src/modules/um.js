@@ -20,6 +20,10 @@ export default new Vue({
         },
     },
     methods: {
+        async cancelPending(instance) {
+            delete this.handler[instance.uid]; // Prevent new ajax
+            await this.waiter[instance.uid]; // Wait for pending ajax
+        },
         async proposeUpdate(update, instance) {
             if (env.changesLocked) return;
             this.handler[instance.uid] = Object.assign({}, this.handler[instance.uid], update); // Merge updates
@@ -28,14 +32,16 @@ export default new Vue({
                 this.waiter[instance.uid] = (async () => {
                     await sleep(this.coolDown);
                     delete this.waiter[instance.uid];
-                    let remote = await api.update_partial(instance.type, instance.id, this.handler[instance.uid]);
-                    delete this.handler[instance.uid];
-                    if (this.remote[instance.uid] !== undefined) {
-                        // Ws finished before http - resolve miss match
-                        if (this.remote[instance.uid] !== remote.version) await this.resolveNewVersion(remote);
-                        delete this.remote[remote.uid]; // Unset remote version
+                    if (this.handler[instance.uid]) {
+                        let remote = await api.update_partial(instance.type, instance.id, this.handler[instance.uid]);
+                        if (this.remote[instance.uid] !== undefined) {
+                            // Ws finished before http - resolve miss match
+                            if (this.remote[instance.uid] !== remote.version) await this.resolveNewVersion(remote);
+                            delete this.remote[remote.uid]; // Unset remote version
+                        }
+                        delete this.handler[instance.uid];
+                        return remote;
                     }
-                    return remote;
                 })();
             }
             return this.waiter[instance.uid];
