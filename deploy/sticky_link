@@ -5,6 +5,11 @@ upstream django_channels {
  server localhost:9001;
 }
 
+server {
+    server_name sticky-link.com;
+    return 301 $scheme://www.sticky-link.com$request_uri;
+}
+
 # configuration of the server
 server {
     server_name app.sticky-link.com;
