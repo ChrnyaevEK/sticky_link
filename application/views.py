@@ -2,10 +2,9 @@ from application import models
 from application import serializers
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.decorators import api_view
-from django.http import JsonResponse
-from django.shortcuts import render
+from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
+from django.shortcuts import render, redirect, reverse
 from rest_framework.response import Response
-from django.http import HttpResponse
 from channels.layers import get_channel_layer
 from application.consumers import Event as ConsumerEvent, WallConsumer
 from asgiref.sync import async_to_sync
@@ -36,6 +35,17 @@ class App:
         # Entry point for users - resolve on enter redirections, return client app
         template = 'application/dist/index.html'
         return HttpResponse(render(request, template))
+
+    @staticmethod
+    def port(request, uid):
+        """ Resolve redirection to required resource """
+        try:
+            port = models.Port.objects.get(pk=uid)
+        except models.Port.DoesNotExist:
+            return HttpResponseNotFound('Port does not exist')
+        if port.wall is None:
+            return HttpResponseNotFound('Port refer invalid resource')
+        return redirect(f'/wall/view/{port.wall.id}/')
 
     @staticmethod
     @api_view(http_method_names=['GET'])

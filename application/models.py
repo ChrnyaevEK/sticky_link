@@ -7,12 +7,12 @@ from django.db import models
 from django.core.validators import BaseValidator, MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import User
 import re
+from hashid_field import HashidAutoField, HashidField
 import hashlib
 
 
 class Common(models.Model):
     type = None
-    id = models.AutoField(primary_key=True)
     date_of_creation = models.DateTimeField(verbose_name='Date of creation', auto_now_add=True)
     last_update = models.DateTimeField(verbose_name='Date of last update (wall or any widget)', auto_now=True)
 
@@ -82,7 +82,9 @@ class Widget(Common):
     background_color = models.CharField(max_length=9, validators=[ColorValidator], default='#ffffff')
     text_color = models.CharField(max_length=9, validators=[ColorValidator], default='#000000')
     border = models.BooleanField(default=True)
+
     help = models.CharField(max_length=200, null=True, blank=True)
+    title = models.CharField(max_length=200, blank=True, null=True)
 
     class Meta:
         abstract = True
@@ -101,18 +103,20 @@ class URL(Widget):
 
 class SimpleList(Widget):
     type = 'simple_list'
-    title = models.CharField(max_length=100, null=True, blank=True)
-    description = models.CharField(max_length=200, null=True, blank=True)
     items = models.JSONField(default=list)
 
 
 class Counter(Widget):
     type = 'counter'
-    title = models.CharField(max_length=200, blank=True, null=True)
     value = models.BigIntegerField(default=0)
 
 
 class SimpleSwitch(Widget):
     type = 'simple_switch'
-    title = models.CharField(max_length=200, blank=True, null=True)
     value = models.BooleanField(default=False)
+
+
+class Port(Common):
+    """ Describe static link ready to be distributed - link format should not change """
+    id = HashidAutoField(primary_key=True)
+    wall = models.ForeignKey(Wall, on_delete=models.SET_NULL, null=True)
