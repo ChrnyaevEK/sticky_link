@@ -44,6 +44,7 @@ export const types = {
     Counter: "counter",
     SimpleList: "simple_list",
     SimpleSwitch: "simple_switch",
+    Port: 'port',
 };
 
 export default {

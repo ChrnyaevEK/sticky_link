@@ -99,6 +99,7 @@ class URL(Widget):
     type = 'url'
     href = models.URLField(null=True, blank=True)
     text = models.CharField(max_length=2048, null=True, blank=True)
+    open_in_new_window = models.BooleanField(default=True)
 
 
 class SimpleList(Widget):
@@ -109,6 +110,8 @@ class SimpleList(Widget):
 class Counter(Widget):
     type = 'counter'
     value = models.BigIntegerField(default=0)
+    vertical = models.BooleanField(default=True)
+    step = models.IntegerField(default=1)
 
 
 class SimpleSwitch(Widget):
@@ -118,5 +121,7 @@ class SimpleSwitch(Widget):
 
 class Port(Common):
     """ Describe static link ready to be distributed - link format should not change """
+    type = 'port'
+    title = models.CharField(max_length=200, blank=True, null=True)
     id = HashidAutoField(primary_key=True)
     wall = models.ForeignKey(Wall, on_delete=models.SET_NULL, null=True)

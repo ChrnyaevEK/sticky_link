@@ -8,7 +8,7 @@
                     data-toggle="dropdown"
                     aria-haspopup="true"
                     aria-expanded="false"
-                    title="Select any wall to open for edition"
+                    title="Select wall to edit"
                 >
                     Walls
                 </a>
@@ -27,7 +27,6 @@
                 </div>
             </div>
             <button
-                v-if="createWall"
                 class="mr-1 btn btn-sm btn-success text-white border"
                 @click="createWall"
                 title="Add new wall"
@@ -42,6 +41,35 @@
                 :disabled="$env.changesLocked"
             >
                 <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <div v-if="$store.state.ports">
+                <a
+                    class="btn btn-sm dropdown-toggle"
+                    id="wall-list"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    title="Select port to edit"
+                >
+                    Ports
+                </a>
+                <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
+                    <a
+                        class="dropdown-item btn btn-sm"
+                        v-for="port of $store.state.ports"
+                        :key="port.id"
+                        @click="portSelected(port)"
+                        >{{ port.title || port.id }}</a
+                    >
+                </div>
+            </div>
+            <button
+                class="mr-1 btn btn-sm btn-success text-white border"
+                @click="createPort"
+                title="Add new port"
+                :disabled="$env.changesLocked"
+            >
+                <i class="fas fa-plus"></i>
             </button>
         </div>
         <span class="overflow-auto scrollbar-hidden d-flex" v-if="$env.wall">
@@ -104,8 +132,8 @@
                 switch (type) {
                     case "container":
                         if (this.$env.wall) {
-                            var index = 0;
-                            for (var container of this.$store.state.containers) {
+                            let index = 0;
+                            for (let container of this.$store.state.containers) {
                                 if (container.index > index) {
                                     index = container.index + 1;
                                 }
@@ -123,12 +151,13 @@
                 var wall = await this.$store.dispatch("createInstance", { type: "wall" });
                 this.$emit("wallCreated", wall);
             },
-            async deleteWall() {
-                if (this.$env.wall && confirm("Are you sure? Wall will be permanently removed!")) {
-                    await this.$store.dispatch("deleteInstance", this.$env.wall);
-                    this.$emit("wallDeleted");
-                }
+            async createPort(){
+                var port = await this.$store.dispatch("createInstance", { type: "port", wall: this.$env.wall.id });
+                this.$emit("portSelected", port);  
             },
+            portSelected(port){
+                this.$emit("portSelected", port);  
+            }
         },
     };
 </script>

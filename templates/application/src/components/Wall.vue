@@ -73,7 +73,7 @@
             <span v-if="$store.state.user.is_authenticated">No wall is selected...</span>
             <span v-else>No wall is available... Login to continue</span>
         </div>
-        <SelectCreate @wallCreated="onCreateWall" v-if="$env.edit && $store.state.user.is_authenticated"></SelectCreate>
+        <SelectCreate @wallCreated="onCreateWall" @portSelected="onPortSelected" v-if="$env.edit && $store.state.user.is_authenticated"></SelectCreate>
     </div>
 </template>
 
@@ -97,7 +97,6 @@
         },
         methods: {
             onResizing(x, y, w, h) {
-                this.$el.querySelector(".handle-bm").scrollIntoView({ behavior: "smooth", block: "end" });
                 let instance = this.$env.makeMutable(this.$env.container, { h });
                 this.$store.dispatch("recalculateWidgets", instance);
                 this.$store.dispatch("updateOrAddInstance", instance);
@@ -136,6 +135,10 @@
                     },
                 });
             },
+            onPortSelected(port){
+                port = this.$env.makeMutable(port)
+                this.$env.openOptions(port)
+            }
         },
     };
 </script>

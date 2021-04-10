@@ -53,6 +53,7 @@ class ObjectSerializer(serializers.BaseSerializer):
 class CustomModelSerializer(serializers.ModelSerializer):
     type = serializers.ReadOnlyField()
     uid = serializers.ReadOnlyField()
+    id = serializers.ReadOnlyField()
 
     def to_representation(self, instance):
         """Add version hash"""
@@ -133,3 +134,9 @@ class WallSerializer(CustomModelSerializer):
     class Meta:
         fields = '__all__'
         model = models.Wall
+
+
+class PortSerializer(CustomModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = models.Port

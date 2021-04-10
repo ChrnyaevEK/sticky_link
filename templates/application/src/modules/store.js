@@ -14,6 +14,8 @@ function determineSource(instance) {
             return "walls";
         case "container":
             return "containers";
+        case 'port':
+            return 'ports'
         default:
             return "widgets";
     }
@@ -40,6 +42,7 @@ export default new Vuex.Store({
         user: null,
         walls: null,
         containers: null,
+        ports: null,
         widgets: null,
         meta: null,
 

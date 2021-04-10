@@ -1,16 +1,14 @@
 <template id="url-template">
     <WidgetBaseResizable :widget="widget">
-        <div class="w-100 h-100 d-flex justify-content-center align-items-center">
-            <a class="p-2 border" @click.stop.prevent="openHref" :disabled="$env.widgetsLocked || $env.changesLocked">
-                <a
-                    :href="widget.href"
-                    @click.stop.prevent="openHref"
-                    class="text-break"
-                    :style="`color: ${widget.text_color};`"
-                    :disabled="$env.widgetsLocked || $env.changesLocked"
-                    ><u>{{ widget.text || widget.href }}</u></a
-                >
-                <i class="fas fa-external-link-square-alt text-muted mx-1"></i>
+        <div class="w-100 h-100 p-2 d-flex flex-column">
+            <span class="text-truncate">{{ widget.title }}</span>
+            <a
+                @click.stop.prevent="openHref"
+                class="w-100 h-100 text-break border cursor-pointer d-flex justify-content-center align-items-center"
+                :style="`color: ${widget.text_color};`"
+                :disabled="$env.widgetsLocked || $env.changesLocked"
+                ><u>{{ widget.text || widget.href }}</u>
+                <i class="mx-2 fas fa-external-link-square-alt text-muted"></i>
             </a>
         </div>
     </WidgetBaseResizable>
@@ -33,7 +31,9 @@
         },
         methods: {
             openHref() {
-                if (this.widget.href && !this.$env.widgetsLocked) window.open(this.widget.href, "_blank");
+                if (this.widget.href && !this.$env.widgetsLocked) {
+                    window.open(this.widget.href, this.widget.open_in_new_window ? "_blank" : undefined);
+                }
             },
         },
     };

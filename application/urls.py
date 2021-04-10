@@ -12,11 +12,12 @@ router.register('url', views.URLViewSet, 'url')
 router.register('simple_list', views.SimpleListViewSet, basename='simple_list')
 router.register('counter', views.CounterViewSet, basename='counter')
 router.register('simple_switch', views.SimpleSwitchViewSet, basename='simple_switch')
+router.register('port', views.PortViewSet, basename='port')
 router.register('user', views.UserViewSet, basename='user')
 
 urlpatterns = [
     path('', views.App.enter, name="enter"),
-    path('port/<str:uid>/', views.App.port, name="port"),
+    path('ext/<str:uid>/', views.App.port, name="external"),
     path('api/state/', views.App.state, name="state"),
     path('api/state/<int:wall_id>/', views.App.state, name="state"),
     path('api/', include(router.urls), name="api"),

@@ -3,7 +3,7 @@ from application import serializers
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.decorators import api_view
 from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect
 from rest_framework.response import Response
 from channels.layers import get_channel_layer
 from application.consumers import Event as ConsumerEvent, WallConsumer
@@ -17,7 +17,7 @@ def _get_protected_queryset(model, user):
         q = Q(allow_anonymous_view=True)
         if not user.is_anonymous:
             q.add(Q(owner=user), Q.OR)
-    elif model == models.Container:
+    elif model == models.Container or model == models.Port:
         q = Q(wall__allow_anonymous_view=True)
         if not user.is_anonymous:
             q.add(Q(wall__owner=user), Q.OR)
@@ -56,6 +56,7 @@ class App:
             wall = None
             containers = []
             widgets = []
+            ports = []
             meta = None
         else:
             containers = []
@@ -79,6 +80,8 @@ class App:
                 'edit_permission': wall.owner == request.user,
                 'view_permission': wall.allow_anonymous_view or wall.owner == request.user
             }
+            ports = _get_protected_queryset(models.Port, request.user).filter(wall=wall)
+            ports = serializers.PortSerializer(ports, many=True).data
             wall = serializers.WallSerializer(wall).data
         walls = WallViewSet.get_list(request)
         if not walls and wall:
@@ -93,6 +96,7 @@ class App:
             'user': user,
             'meta': meta,
             'containers': containers,
+            'ports': ports,
             'widgets': widgets,
             'walls': walls
         })
@@ -120,7 +124,7 @@ class CustomModelViewSet(ModelViewSet):
         data = response.data
         if data['type'] == models.Wall.type:
             wall_id = data['id']
-        elif data['type'] == models.Container.type:
+        elif data['type'] == models.Container.type or data['type'] == models.Port.type:
             wall_id = data['wall']
         else:
             instance = self.get_queryset().get(pk=data['id'])
@@ -241,3 +245,10 @@ class SimpleSwitchViewSet(CustomModelViewSet):
 
     def get_queryset(self):
         return _get_protected_queryset(models.SimpleSwitch, self.request.user)
+
+
+class PortViewSet(CustomModelViewSet):
+    serializer_class = serializers.PortSerializer
+
+    def get_queryset(self):
+        return _get_protected_queryset(models.Port, self.request.user)

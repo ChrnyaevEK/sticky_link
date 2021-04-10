@@ -14,7 +14,7 @@
                 ? 'shadow'
                 : '',
         ]"
-        :title="widget.help"
+        :title="title"
         :style="style"
         :parent="true"
         :w="widget.w"
@@ -42,9 +42,7 @@
                 <i class="fas fa-ellipsis-v"></i>
             </button>
         </div>
-        <div class="w-100 h-100">
-            <slot></slot>
-        </div>
+        <slot></slot>
     </vue-draggable-resizable>
 </template>
 
@@ -109,6 +107,12 @@
                     font-size:${this.widget.font_size}px;
                     font-weight:${this.widget.font_weight};
                 `;
+            },
+            title() {
+                if (this.widget.title || this.widget.help) {
+                    return `Title: ${this.widget.title || ""};\n${this.widget.help || ""}`;
+                }
+                return "";
             },
         },
     };
