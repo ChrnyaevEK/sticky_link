@@ -192,6 +192,27 @@
                     <small class="text-muted col-12">Give your port a descriptive title</small>
                 </div>
             </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-12  d-flex flex-column justify-content-center">
+                        <strong>Static link</strong>
+                        <span class="text-secondary"
+                            >Port is a static link to this wall. You should use ports for any external navigation, as
+                            other links may change</span
+                        >
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <a :href="`/ext/${instance.id}/`" target="_blank">{{ origin }}/port/{{ instance.id }}/</a>
+                        <a
+                            @click.stop.prevent="copyToClipboard(`${origin}/port/${instance.id}/`)"
+                            class="cursor-pointer"
+                            ><i class="fas fa-copy mx-3 text-muted"></i
+                        ></a>
+                    </div>
+                </div>
+            </div>
         </template>
 
         <template v-else>
@@ -527,6 +548,35 @@
                     </div>
                 </div>
             </template>
+            <!--Simple List-->
+            <template v-if="instance.type == types.SimpleList">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-12  d-flex flex-column">
+                            <strong>Other</strong>
+                        </div>
+                    </div>
+
+                    <div class="row pb-1">
+                        <div class="col-5 d-flex flex-column justify-content-center">
+                            <i><label class="form-check-label" :for="_('inner_border')">Items border</label></i>
+                        </div>
+                        <div class="col-7">
+                            <div class="form-check">
+                                <input
+                                    :id="_('inner_border')"
+                                    :disabled="$env.changesLocked"
+                                    v-model="instance.inner_border"
+                                    @change="push"
+                                    class="form-check-input"
+                                    type="checkbox"
+                                />
+                            </div>
+                        </div>
+                        <small class="text-muted col-12">Set border for items</small>
+                    </div>
+                </div>
+            </template>
             <!--URL-->
             <template v-if="instance.type == types.URL">
                 <div class="form-group">
@@ -603,7 +653,7 @@
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
     import $ from "jquery";
     import TextEditor from "./TextEditor";
-    import { types } from "../../common";
+    import { types, copyToClipboard } from "../../common";
 
     export default {
         name: "Options",
@@ -616,6 +666,9 @@
         computed: {
             instance() {
                 return this.$env.makeMutable(this.$env.openOptionsFor);
+            },
+            origin() {
+                return window.location.origin;
             },
         },
         methods: {
@@ -650,6 +703,10 @@
                     return this.setWarningFromResponse(err);
                 }
                 this.unsetWarning();
+            },
+            copyToClipboard(text) {
+                copyToClipboard(text);
+                this.$io.alert("Copied to clipboard!", "success");
             },
         },
         components: {

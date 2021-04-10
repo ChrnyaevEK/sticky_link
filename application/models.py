@@ -105,6 +105,7 @@ class URL(Widget):
 class SimpleList(Widget):
     type = 'simple_list'
     items = models.JSONField(default=list)
+    inner_border = models.BooleanField(default=True, help_text='Set border for items in list')
 
 
 class Counter(Widget):
@@ -122,6 +123,7 @@ class SimpleSwitch(Widget):
 class Port(Common):
     """ Describe static link ready to be distributed - link format should not change """
     type = 'port'
-    title = models.CharField(max_length=200, blank=True, null=True)
+    title = models.CharField(max_length=200, blank=True, default='Untitled')
     id = HashidAutoField(primary_key=True)
     wall = models.ForeignKey(Wall, on_delete=models.SET_NULL, null=True)
+    visited = models.IntegerField(default=0, help_text='Visit counter')

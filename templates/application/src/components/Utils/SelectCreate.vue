@@ -22,7 +22,7 @@
                             name: 'wallEdit',
                             params: { wallId: wall.id },
                         }"
-                        >{{ wall.title || "[no title]" }}</router-link
+                        >{{ wall.title }}</router-link
                     >
                 </div>
             </div>
@@ -59,8 +59,9 @@
                         v-for="port of $store.state.ports"
                         :key="port.id"
                         @click="portSelected(port)"
-                        >{{ port.title || port.id }}</a
-                    >
+                        :title="`Visit counter: ${port.visited}`"
+                        >{{ port.title }} <small>{{ port.visited }}</small>
+                    </a>
                 </div>
             </div>
             <button
@@ -151,13 +152,13 @@
                 var wall = await this.$store.dispatch("createInstance", { type: "wall" });
                 this.$emit("wallCreated", wall);
             },
-            async createPort(){
+            async createPort() {
                 var port = await this.$store.dispatch("createInstance", { type: "port", wall: this.$env.wall.id });
-                this.$emit("portSelected", port);  
+                this.$emit("portSelected", port);
             },
-            portSelected(port){
-                this.$emit("portSelected", port);  
-            }
+            portSelected(port) {
+                this.$emit("portSelected", port);
+            },
         },
     };
 </script>

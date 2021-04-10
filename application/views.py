@@ -43,6 +43,8 @@ class App:
             port = models.Port.objects.get(pk=uid)
         except models.Port.DoesNotExist:
             return HttpResponseNotFound('Port does not exist')
+        port.visited += 1
+        port.save()
         if port.wall is None:
             return HttpResponseNotFound('Port refer invalid resource')
         return redirect(f'/wall/view/{port.wall.id}/')
