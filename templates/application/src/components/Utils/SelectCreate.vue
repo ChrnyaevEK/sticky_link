@@ -63,15 +63,16 @@
                         >{{ port.title }} <small>{{ port.visited }}</small>
                     </a>
                 </div>
-                <button
-                    class="mr-1 btn btn-sm btn-success text-white border"
-                    @click="createPort"
-                    title="Add new port"
-                    :disabled="$env.changesLocked"
-                >
-                    <i class="fas fa-plus"></i>
-                </button>
             </div>
+            <button
+                v-if="$store.state.ports && $env.wall"
+                class="mr-1 btn btn-sm btn-success text-white border"
+                @click="createPort"
+                title="Add new port"
+                :disabled="$env.changesLocked"
+            >
+                <i class="fas fa-plus"></i>
+            </button>
         </div>
         <span class="overflow-auto scrollbar-hidden d-flex" v-if="$env.wall">
             <button
