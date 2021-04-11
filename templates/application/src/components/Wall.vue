@@ -28,7 +28,7 @@
                 >
                     <vue-draggable-resizable
                         @click.native.stop="$env.closeOptions()"
-                        @touchstart.native.stop="$env.closeOptions()"
+                        @touchstart.native="$env.closeOptions()"
                         @resizing="onResizing"
                         @activated="onActivated(container)"
                         :resizable="$env.edit && !$env.changesLocked"
