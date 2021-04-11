@@ -1,11 +1,9 @@
 <template id="simple-text-template">
     <WidgetBaseResizable :widget="widget">
-        <div class="d-flex flex-column h-100">
-            <span
-                class="flex-grow-1 text-truncate text-wrap text-break ql-editor editor"
-                v-html="widget.text_content"
-            ></span>
-        </div>
+        <span
+            class="flex-grow-1 text-truncate text-wrap text-break ql-editor editor"
+            v-html="widget.text_content"
+        ></span>
     </WidgetBaseResizable>
 </template>
 

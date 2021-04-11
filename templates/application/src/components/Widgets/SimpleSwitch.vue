@@ -1,7 +1,7 @@
 <template id="simple-switch-template">
     <WidgetBaseResizable :widget="widget">
         <div
-            class="h-100 custom-control custom-switch d-flex justify-content-center align-items-center"
+            class="custom-control custom-switch"
             :title="widget.title"
         >
             <input

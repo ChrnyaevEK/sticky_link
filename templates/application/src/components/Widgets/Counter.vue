@@ -1,51 +1,49 @@
 <template id="counter-template">
     <WidgetBaseResizable :widget="widget">
-        <div class="w-100 h-100 d-flex flex-column justify-content-center align-items-center">
-            <span class="w-100 text-truncate">{{ widget.title }}</span>
-            <div
-                class="d-flex w-100 h-100 justify-content-between align-items-center"
-                :class="{ 'flex-column': widget.vertical }"
+        <span class="w-100 text-truncate">{{ widget.title }}</span>
+        <div
+            class="d-flex w-100 h-100 justify-content-between align-items-center"
+            :class="{ 'flex-column': widget.vertical }"
+        >
+            <button
+                v-if="widget.vertical"
+                key="fa-chevron-up"
+                class="btn border w-100"
+                @click="changeValue(widget.step)"
+                :disabled="$env.widgetsLocked || $env.changesLocked"
             >
-                <button
-                    v-if="widget.vertical"
-                    key="fa-chevron-up"
-                    class="btn border w-100"
-                    @click="changeValue(widget.step)"
-                    :disabled="$env.widgetsLocked || $env.changesLocked"
-                >
-                    <i class="fa fa-chevron-up"></i>
-                </button>
-                <button
-                    v-else
-                    key="fa-chevron-left"
-                    class="btn border h-100"
-                    @click="changeValue(-widget.step)"
-                    :disabled="$env.widgetsLocked || $env.changesLocked"
-                >
-                    <i class="fa fa-chevron-left"></i>
-                </button>
-                <span class="text-truncate text-wrap text-break cursor-default">
-                    {{ widget.value }}
-                </span>
-                <button
-                    v-if="widget.vertical"
-                    key="fa-chevron-down"
-                    class="btn border w-100"
-                    @click="changeValue(-widget.step)"
-                    :disabled="$env.widgetsLocked || $env.changesLocked"
-                >
-                    <i class="fa fa-chevron-down"></i>
-                </button>
-                <button
-                    v-else
-                    key="fa-chevron-right"
-                    class="btn border h-100"
-                    @click="changeValue(widget.step)"
-                    :disabled="$env.widgetsLocked || $env.changesLocked"
-                >
-                    <i class="fa fa-chevron-right"></i>
-                </button>
-            </div>
+                <i class="fa fa-chevron-up"></i>
+            </button>
+            <button
+                v-else
+                key="fa-chevron-left"
+                class="btn border h-100"
+                @click="changeValue(-widget.step)"
+                :disabled="$env.widgetsLocked || $env.changesLocked"
+            >
+                <i class="fa fa-chevron-left"></i>
+            </button>
+            <span class="text-truncate text-wrap text-break cursor-default">
+                {{ widget.value }}
+            </span>
+            <button
+                v-if="widget.vertical"
+                key="fa-chevron-down"
+                class="btn border w-100"
+                @click="changeValue(-widget.step)"
+                :disabled="$env.widgetsLocked || $env.changesLocked"
+            >
+                <i class="fa fa-chevron-down"></i>
+            </button>
+            <button
+                v-else
+                key="fa-chevron-right"
+                class="btn border h-100"
+                @click="changeValue(widget.step)"
+                :disabled="$env.widgetsLocked || $env.changesLocked"
+            >
+                <i class="fa fa-chevron-right"></i>
+            </button>
         </div>
     </WidgetBaseResizable>
 </template>

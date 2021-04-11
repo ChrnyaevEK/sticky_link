@@ -38,7 +38,7 @@
                         :h="container.h"
                         :w="container.w"
                         :minHeight="100"
-                        class="relative wall-only no-border"
+                        class="relative overflow-hidden wall-only no-border"
                         :grid="[$store.state.app.grid, $store.state.app.grid]"
                     >
                         <template v-for="widget of $store.state.widgets">

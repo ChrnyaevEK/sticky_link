@@ -1,16 +1,14 @@
 <template id="url-template">
     <WidgetBaseResizable :widget="widget">
-        <div class="w-100 h-100 p-2 d-flex flex-column">
-            <span class="text-truncate">{{ widget.title }}</span>
-            <a
-                @click.stop.prevent="openHref"
-                class="w-100 h-100 text-break border cursor-pointer d-flex justify-content-center align-items-center"
-                :style="`color: ${widget.text_color};`"
-                :disabled="$env.widgetsLocked || $env.changesLocked"
-                ><u>{{ widget.text || widget.href }}</u>
-                <i class="mx-2 fas fa-external-link-square-alt text-muted"></i>
-            </a>
-        </div>
+        <span class="text-truncate">{{ widget.title }}</span>
+        <a
+            @click.stop.prevent="openHref"
+            class="w-100 h-100 text-break border cursor-pointer d-flex justify-content-center align-items-center"
+            :style="`color: ${widget.text_color};`"
+            :disabled="$env.widgetsLocked || $env.changesLocked"
+            ><u>{{ widget.text || widget.href }}</u>
+            <i class="mx-2 fas fa-external-link-square-alt text-muted"></i>
+        </a>
     </WidgetBaseResizable>
 </template>
 

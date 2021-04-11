@@ -55,7 +55,9 @@
                 <i class="fas fa-ellipsis-v"></i>
             </button>
         </div>
-        <slot></slot>
+        <div class="h-100 w-100 d-flex flex-column justify-content-center align-items-center overflow-auto">
+            <slot></slot>
+        </div>
     </vue-draggable-resizable>
 </template>
 
@@ -129,7 +131,7 @@
             },
             title() {
                 if (this.widget.title || this.widget.help) {
-                    return `Title: ${this.widget.title || ""};\n${this.widget.help || ""}`;
+                    return `Title: ${this.widget.title};\n${this.widget.help}`;
                 }
                 return "";
             },
