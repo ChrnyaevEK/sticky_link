@@ -5,7 +5,6 @@
         @resizestop="onResizeStop"
         @dragstop="onDrag"
         @activated="onActivated"
-        @touchstart.native.stop
         @click.native.stop
         class="widget"
         :class="[
