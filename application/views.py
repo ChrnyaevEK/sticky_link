@@ -136,7 +136,7 @@ class CustomModelViewSet(ModelViewSet):
             # Validate sync_id. Find any object that belong to user and has id equal to requested sync id
             if sync_id and not self.get_queryset().filter(pk=sync_id, container__wall__owner=request.user).exists():
                 return JsonResponse({
-                    'sync_id': ['Make sure the sync ID belong to user.']
+                    'sync_id': ['Make sure the sync ID belong to user and widgets have the same type.']
                 }, status=400)
         return super().update(request, *args, **kwargs)
 

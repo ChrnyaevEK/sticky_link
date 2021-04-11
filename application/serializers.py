@@ -90,31 +90,36 @@ class UserSerializer(CustomModelSerializer):
         fields = ['username', 'email', 'is_anonymous', 'is_authenticated']
 
 
-class SimpleTextSerializer(CustomModelSerializer):
+class CustomWidgetSerializer(CustomModelSerializer):
+    referenced = serializers.ReadOnlyField()
+    pass
+
+
+class SimpleTextSerializer(CustomWidgetSerializer):
     class Meta:
         fields = '__all__'
         model = models.SimpleText
 
 
-class URLSerializer(CustomModelSerializer):
+class URLSerializer(CustomWidgetSerializer):
     class Meta:
         fields = '__all__'
         model = models.URL
 
 
-class SimpleListSerializer(CustomModelSerializer):
+class SimpleListSerializer(CustomWidgetSerializer):
     class Meta:
         fields = '__all__'
         model = models.SimpleList
 
 
-class CounterSerializer(CustomModelSerializer):
+class CounterSerializer(CustomWidgetSerializer):
     class Meta:
         fields = '__all__'
         model = models.Counter
 
 
-class SimpleSwitchSerializer(CustomModelSerializer):
+class SimpleSwitchSerializer(CustomWidgetSerializer):
     class Meta:
         fields = '__all__'
         model = models.SimpleSwitch

@@ -498,7 +498,7 @@
                 </div>
                 <div class="row pb-1">
                     <div class="col-5 d-flex flex-column justify-content-center">
-                        <i><label :for="_('sync_id')">Target Sync Id</label></i>
+                        <i><label :for="_('sync_id')">Synchronize with ...</label></i>
                     </div>
                     <div class="col-7">
                         <input
@@ -517,11 +517,11 @@
                 </div>
                 <div class="row pb-1">
                     <div class="col-5 d-flex flex-column justify-content-center">
-                        <i><label>Self Sync Id</label></i>
+                        <i><label>Sync Id</label></i>
                     </div>
                     <div class="col-7">
                         <button class="w-100 btn btn-sm border" @click="copyToClipboard(instance.id)">
-                            Copy
+                            {{ instance.id }}
                             <i class="fas fa-copy mx-3 text-muted"></i>
                         </button>
                     </div>

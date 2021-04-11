@@ -28,6 +28,19 @@
         ref="base"
     >
         <div class="quick-access widget-quick-access hidden" v-if="$env.edit">
+            <button
+                v-if="widget.sync_id || widget.referenced"
+                :title="
+                    widget.sync_id
+                        ? `This widget is synchronized with ${widget.sync_id}`
+                        : 'This widget is referenced by at least one widget'
+                "
+                :disabled="$env.changesLocked || !widget.sync_id"
+                class="btn btn-sm btn-light border"
+                @click="copySyncWidget"
+            >
+                <i class="fas fa-link"></i>
+            </button>
             <button :disabled="$env.changesLocked" class="btn btn-sm btn-danger" @click="deleteWidget">
                 <i class="fas fa-trash"></i>
             </button>
@@ -50,6 +63,7 @@
     import VueDraggableResizable from "vue-draggable-resizable";
     import "vue-draggable-resizable/dist/VueDraggableResizable.css";
     import $ from "jquery";
+    import { copyToClipboard } from "../../common";
 
     export default {
         name: "WidgetBaseResizable",
@@ -77,6 +91,7 @@
             },
             deleteWidget() {
                 if (confirm("Are you sure?")) {
+                    this.$env.closeOptions();
                     this.$store.dispatch("deleteInstance", this.widget);
                 }
             },
@@ -94,6 +109,10 @@
                 if (this.$env.edit) {
                     this.$env.openOptions(this.widget);
                 }
+            },
+            copySyncWidget() {
+                copyToClipboard(this.widget.sync_id);
+                this.$io.alert("Copied to clipboard!", "success");
             },
         },
         components: {
