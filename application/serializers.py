@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from application import models
 from django.contrib.auth.models import User
-from application.utils import get_version_hash
+from application.utils import get_version
 from django.core.exceptions import PermissionDenied
 
 
@@ -58,7 +58,7 @@ class CustomModelSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         """Add version hash"""
         representation = super().to_representation(instance)
-        representation['version'] = get_version_hash(representation)
+        representation['version'] = get_version(instance)
         return representation
 
     def update(self, instance, validated_data):

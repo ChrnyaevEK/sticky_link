@@ -5,9 +5,6 @@ from rest_framework.decorators import api_view
 from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
 from django.shortcuts import render, redirect
 from rest_framework.response import Response
-from channels.layers import get_channel_layer
-from application.consumers import Event as ConsumerEvent, WallConsumer
-from asgiref.sync import async_to_sync
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 
@@ -119,48 +116,6 @@ class UserViewSet(ReadOnlyModelViewSet):
 
 
 class CustomModelViewSet(ModelViewSet):
-    channel_layer = get_channel_layer()
-    version_hash_field = 'version'
-
-    def push_instance_update(self, response):
-        data = response.data
-        if data['type'] == models.Wall.type:
-            wall_id = data['id']
-        elif data['type'] == models.Container.type or data['type'] == models.Port.type:
-            wall_id = data['wall']
-        else:
-            instance = self.get_queryset().get(pk=data['id'])
-            wall_id = instance.container.wall.id
-        async_to_sync(self.channel_layer.group_send)(
-            WallConsumer.generate_group_name(wall_id),
-            {
-                'type': ConsumerEvent.instance_update,
-                'instance': {
-                    'type': data['type'],
-                    'id': data['id'],
-                    'uid': data['uid'],
-                    'version': data['version'],
-                },
-            })
-
-    def push_instance_destroy(self, instance):
-        try:
-            wall_id = instance.wall.id
-        except AttributeError:
-            try:
-                wall_id = instance.container.wall.id
-            except AttributeError:
-                wall_id = instance.id
-        async_to_sync(self.channel_layer.group_send)(
-            WallConsumer.generate_group_name(wall_id),
-            {
-                'type': ConsumerEvent.instance_destroy,
-                'instance': {
-                    'type': instance.type,
-                    'id': instance.id,
-                    'uid': instance.uid(),
-                }
-            })
 
     def get_permissions(self):
         """
@@ -172,21 +127,18 @@ class CustomModelViewSet(ModelViewSet):
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
-    def update(self, request, *args, **kwargs):
-        response = super().update(request, *args, **kwargs)
-        self.push_instance_update(response)
-        return response
-
-    def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        self.push_instance_update(response)
-        return response
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_queryset().get(pk=kwargs['pk'])
-        response = super().destroy(request, *args, **kwargs)
-        self.push_instance_destroy(instance)
-        return response
+    def update(self, request, pk=None, *args, **kwargs):
+        try:
+            sync_id = request.data['sync_id']
+        except KeyError:
+            pass
+        else:
+            # Validate sync_id. Find any object that belong to user and has id equal to requested sync id
+            if sync_id and not self.get_queryset().filter(pk=sync_id, container__wall__owner=request.user).exists():
+                return JsonResponse({
+                    'sync_id': ['Make sure the sync ID belong to user.']
+                }, status=400)
+        return super().update(request, *args, **kwargs)
 
 
 class WallViewSet(CustomModelViewSet):

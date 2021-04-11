@@ -136,7 +136,6 @@
                 });
             },
             onPortSelected(port){
-                port = this.$env.makeMutable(port)
                 this.$env.openOptions(port)
             }
         },

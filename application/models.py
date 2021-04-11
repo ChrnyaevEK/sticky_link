@@ -3,21 +3,33 @@
     Walls are located in a different table and Wall id is a primary key for Widgets.
     Relay on ID's given by default
 """
+import re
+import hashlib
+
 from django.db import models
 from django.core.validators import BaseValidator, MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import User
-import re
-from hashid_field import HashidAutoField, HashidField
-import hashlib
+from hashid_field import HashidAutoField
+from application.utils import push_instance_destroy, push_instance_update
 
 
 class Common(models.Model):
     type = None
+    id = HashidAutoField(primary_key=True)
     date_of_creation = models.DateTimeField(verbose_name='Date of creation', auto_now_add=True)
     last_update = models.DateTimeField(verbose_name='Date of last update (wall or any widget)', auto_now=True)
 
     def uid(self):
         return hashlib.md5(f'{self.type}{self.id}'.encode('utf-8')).hexdigest()
+
+    def save(self, *args, **kwargs):
+        returned = super().save(*args, **kwargs)
+        push_instance_update(self)
+        return returned
+
+    def delete(self, *args, **kwargs):
+        push_instance_destroy(self)
+        return super().delete(*args, **kwargs)
 
     def __str__(self):
         return f'{type(self).__name__}: {self.id}'
@@ -67,6 +79,7 @@ class Widget(Common):
         'font_size', 'font_weight', 'background_color', 'text_color', 'border', 'help',
         'w', 'h', 'z', 'x', 'y',
     ]
+    sync_fields = []
     container = models.ForeignKey(Container, on_delete=models.CASCADE)
 
     w = models.IntegerField(verbose_name='Widget width', default=200, validators=[MinValueValidator(50)])
@@ -86,6 +99,32 @@ class Widget(Common):
     help = models.CharField(max_length=200, null=True, blank=True)
     title = models.CharField(max_length=200, blank=True, null=True)
 
+    def sync(self, instance):
+        print('--------------')
+        save = False
+        for field in self.sync_fields:
+            old = self.__getattribute__(field)
+            new = instance.__getattribute__(field)
+            if new != old:
+                save = True
+                self.__setattr__(field, new)
+        if save:
+            self.save()
+
+    @classmethod
+    def get_model(cls):
+        return cls
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        model = self.get_model()
+        q = model.objects.filter(sync_id=self, container__wall__owner=self.container.wall.owner)
+        if self.sync_id is not None:
+            q = q | model.objects.filter(pk=self.sync_id.id)
+        q = q.exclude(pk=self.id)
+        for widget in q:
+            widget.sync(self)
+
     class Meta:
         abstract = True
 
@@ -93,6 +132,8 @@ class Widget(Common):
 class SimpleText(Widget):
     type = 'simple_text'
     text_content = models.TextField(verbose_name='Text content of widget', null=True, blank=True)
+    sync_id = models.ForeignKey('SimpleText', blank=True, null=True, on_delete=models.SET_NULL)
+    sync_fields = ['text_content']
 
 
 class URL(Widget):
@@ -100,12 +141,16 @@ class URL(Widget):
     href = models.URLField(null=True, blank=True)
     text = models.CharField(max_length=2048, null=True, blank=True)
     open_in_new_window = models.BooleanField(default=True)
+    sync_fields = ['href', 'text', 'open_in_new_window']
+    sync_id = models.ForeignKey('URL', blank=True, null=True, on_delete=models.SET_NULL)
 
 
 class SimpleList(Widget):
     type = 'simple_list'
     items = models.JSONField(default=list)
     inner_border = models.BooleanField(default=True, help_text='Set border for items in list')
+    sync_fields = ['items', 'inner_border']
+    sync_id = models.ForeignKey('SimpleList', blank=True, null=True, on_delete=models.SET_NULL)
 
 
 class Counter(Widget):
@@ -113,17 +158,20 @@ class Counter(Widget):
     value = models.BigIntegerField(default=0)
     vertical = models.BooleanField(default=True)
     step = models.IntegerField(default=1)
+    sync_fields = ['value', 'vertical', 'step']
+    sync_id = models.ForeignKey('Counter', blank=True, null=True, on_delete=models.SET_NULL)
 
 
 class SimpleSwitch(Widget):
     type = 'simple_switch'
     value = models.BooleanField(default=False)
+    sync_fields = ['value']
+    sync_id = models.ForeignKey('SimpleSwitch', blank=True, null=True, on_delete=models.SET_NULL)
 
 
 class Port(Common):
     """ Describe static link ready to be distributed - link format should not change """
     type = 'port'
     title = models.CharField(max_length=200, blank=True, default='Untitled')
-    id = HashidAutoField(primary_key=True)
     wall = models.ForeignKey(Wall, on_delete=models.SET_NULL, null=True)
     visited = models.IntegerField(default=0, help_text='Visit counter')

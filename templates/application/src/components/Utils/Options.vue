@@ -171,6 +171,27 @@
             <div class="form-group">
                 <div class="row">
                     <div class="col-12  d-flex flex-column justify-content-center">
+                        <strong>Static link</strong>
+                        <span class="text-secondary"
+                            >Port is a static link to this wall. You should use ports for any external navigation, to be
+                            able to change target wall online.</span
+                        >
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <a :href="`/ext/${instance.id}/`" target="_blank">{{ origin }}/port/{{ instance.id }}/</a>
+                        <a
+                            @click.stop.prevent="copyToClipboard(`${origin}/port/${instance.id}/`)"
+                            class="cursor-pointer"
+                            ><i class="fas fa-copy mx-3 text-muted"></i
+                        ></a>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-12  d-flex flex-column justify-content-center">
                         <strong>Description</strong>
                         <span class="text-secondary">How is this port connected with real world</span>
                     </div>
@@ -191,26 +212,22 @@
                     </div>
                     <small class="text-muted col-12">Give your port a descriptive title</small>
                 </div>
-            </div>
-            <div class="form-group">
-                <div class="row">
-                    <div class="col-12  d-flex flex-column justify-content-center">
-                        <strong>Static link</strong>
-                        <span class="text-secondary"
-                            >Port is a static link to this wall. You should use ports for any external navigation, as
-                            other links may change</span
-                        >
+                <div class="row pb-1">
+                    <div class="col-5 d-flex flex-column justify-content-center">
+                        <i><label :for="_('wall')">Move port to wall...</label></i>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-12 text-center">
-                        <a :href="`/ext/${instance.id}/`" target="_blank">{{ origin }}/port/{{ instance.id }}/</a>
-                        <a
-                            @click.stop.prevent="copyToClipboard(`${origin}/port/${instance.id}/`)"
-                            class="cursor-pointer"
-                            ><i class="fas fa-copy mx-3 text-muted"></i
-                        ></a>
+                    <div class="col-7">
+                        <v-select
+                            :id="_('wall')"
+                            :disabled="$env.changesLocked"
+                            :options="walls_as_options"
+                            :reduce="(wall) => wall.code"
+                            v-model="instance.wall"
+                            :key="instance.wall"
+                            @input="push"
+                        ></v-select>
                     </div>
+                    <small class="text-muted col-12">Port will disappear from this wall after update.</small>
                 </div>
             </div>
         </template>
@@ -469,6 +486,49 @@
                 </div>
             </div>
 
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-12  d-flex flex-column">
+                        <strong>Synchronization</strong>
+                        <span class="text-secondary"
+                            >Setup synchronization with another widget of the <strong>same type</strong>. Only value
+                            fields are synchronized, not size or position</span
+                        >
+                    </div>
+                </div>
+                <div class="row pb-1">
+                    <div class="col-5 d-flex flex-column justify-content-center">
+                        <i><label :for="_('sync_id')">Target Sync Id</label></i>
+                    </div>
+                    <div class="col-7">
+                        <input
+                            :id="_('sync_id')"
+                            :disabled="$env.changesLocked"
+                            v-model="instance.sync_id"
+                            @input="push"
+                            class="form-control"
+                            type="text"
+                            maxlength="20"
+                        />
+                    </div>
+                    <small class="text-muted col-12"
+                        >Pass <strong>Sync Id</strong> of the widget you want to synchronize with</small
+                    >
+                </div>
+                <div class="row pb-1">
+                    <div class="col-5 d-flex flex-column justify-content-center">
+                        <i><label>Self Sync Id</label></i>
+                    </div>
+                    <div class="col-7">
+                        <button class="w-100 btn btn-sm border" @click="copyToClipboard(instance.id)">
+                            Copy
+                            <i class="fas fa-copy mx-3 text-muted"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted col-12"><strong>Sync Id</strong> of this widget</small>
+                </div>
+            </div>
+
             <hr />
 
             <!--Options by widget type========================================================================================================-->
@@ -654,6 +714,7 @@
     import $ from "jquery";
     import TextEditor from "./TextEditor";
     import { types, copyToClipboard } from "../../common";
+    import vSelect from "vue-select";
 
     export default {
         name: "Options",
@@ -661,6 +722,7 @@
             return {
                 types,
                 warningClass: "options-warning",
+                warningClassField: "options-warning-field",
             };
         },
         computed: {
@@ -670,18 +732,29 @@
             origin() {
                 return window.location.origin;
             },
+            walls_as_options() {
+                if (!this.$store.state.walls) {
+                    return [];
+                }
+                let result = [];
+                for (let wall of this.$store.state.walls) {
+                    result.push({
+                        label: wall.title,
+                        code: wall.id,
+                    });
+                }
+                return result;
+            },
         },
         methods: {
             setWarningFromResponse(response) {
                 this.unsetWarning();
                 for (var [field, error] of Object.entries(response.responseJSON)) {
+                    error = $(`<p class="${this.warningClass} col-12 text-danger">${error[0]}</p>`);
                     $(`[for='${this._(field)}']`)
-                        .addClass("text-danger")
-                        .append(
-                            $(`
-                        <p class="${this.warningClass}"><small>${error[0]}</small></p>
-                    `)
-                        );
+                        .addClass(`text-danger ${this.warningClassField}`)
+                        .closest(".row")
+                        .append(error);
                 }
             },
             async onDeleteInstance() {
@@ -691,9 +764,7 @@
                 }
             },
             unsetWarning() {
-                $(`.${this.warningClass}`)
-                    .parent()
-                    .removeClass("text-danger");
+                $(`.${this.warningClassField}`).removeClass("text-danger");
                 $(`.${this.warningClass}`).remove();
             },
             async push() {
@@ -710,6 +781,7 @@
             },
         },
         components: {
+            vSelect,
             TextEditor,
             VueDraggableResizable,
         },
