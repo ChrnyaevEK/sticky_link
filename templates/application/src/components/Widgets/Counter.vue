@@ -1,9 +1,7 @@
 <template id="counter-template">
     <WidgetBaseResizable :widget="widget">
         <div class="w-100 h-100 d-flex flex-column justify-content-center align-items-center">
-            <span class="w-100 text-truncate"
-                >{{ widget.title }} <span class="text-muted" title="Counter step"> {{ widget.step }} </span></span
-            >
+            <span class="w-100 text-truncate">{{ widget.title }}</span>
             <div
                 class="d-flex w-100 h-100 justify-content-between align-items-center"
                 :class="{ 'flex-column': widget.vertical }"

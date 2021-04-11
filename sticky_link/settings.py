@@ -137,6 +137,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),  # General static files
+    os.path.join(BASE_DIR, "templates/application/dist/static"),  # General static files
 ]
 
 # Registration settings
