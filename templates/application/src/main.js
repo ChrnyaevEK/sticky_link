@@ -45,8 +45,6 @@ new Vue({
 }).$mount("#app");
 
 if (process.env.NODE_ENV == "development") {
-    console.log(window.ga)
-    window.ga('set', 'sendHitTask', null);
-} else {
-    window.ga("send", "pageview");
+    window.ga("set", "sendHitTask", null);
 }
+window.ga("send", "pageview");
