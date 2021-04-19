@@ -43,3 +43,10 @@ new Vue({
     store,
     template: "<router-view/>",
 }).$mount("#app");
+
+if (process.env.NODE_ENV == "development") {
+    console.log(window.ga)
+    window.ga('set', 'sendHitTask', null);
+} else {
+    window.ga("send", "pageview");
+}
