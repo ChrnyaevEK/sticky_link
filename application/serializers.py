@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from application import models
 from django.contrib.auth.models import User
-from application.utils import get_version
 from django.core.exceptions import PermissionDenied
 
 
@@ -54,31 +53,17 @@ class CustomModelSerializer(serializers.ModelSerializer):
     type = serializers.ReadOnlyField()
     uid = serializers.ReadOnlyField()
     id = serializers.ReadOnlyField()
-
-    def to_representation(self, instance):
-        """Add version hash"""
-        representation = super().to_representation(instance)
-        representation['version'] = get_version(instance)
-        return representation
+    version = serializers.ReadOnlyField()
+    date_of_creation = serializers.ReadOnlyField()
+    last_update = serializers.ReadOnlyField()
 
     def update(self, instance, validated_data):
-        try:
-            owner = instance.owner
-        except AttributeError:  # It is not Wall...
-            try:
-                owner = instance.wall.owner
-            except AttributeError:  # It is not Container
-                try:
-                    owner = instance.container.wall.owner
-                except AttributeError:
-                    raise PermissionDenied
         user = self.context['request'].user
-        if user.is_anonymous or owner != user:  # Check if no protected fields are to be updated
-            try:  # Any protected fields?
-                if set(instance.protected_fields).intersection(validated_data.keys()):
-                    raise PermissionDenied()
-            except AttributeError:
-                pass
+        owner = instance.related_wall_instance.owner
+
+        if (user.is_anonymous or user != owner) and not instance.validate_anonymous_access(validated_data.keys()):
+            raise PermissionDenied()  # User has no right to change any of accessed fields
+
         return super().update(instance, validated_data)
 
 
@@ -91,7 +76,7 @@ class UserSerializer(CustomModelSerializer):
 
 
 class CustomWidgetSerializer(CustomModelSerializer):
-    referenced = serializers.ReadOnlyField()
+    is_referenced = serializers.ReadOnlyField()
     pass
 
 
@@ -132,10 +117,6 @@ class ContainerSerializer(CustomModelSerializer):
 
 
 class WallSerializer(CustomModelSerializer):
-    owner = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
-
     class Meta:
         fields = '__all__'
         model = models.Wall
