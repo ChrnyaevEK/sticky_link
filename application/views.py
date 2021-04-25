@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect
 from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
+from application.lang import Public
 
 
 def _get_protected_queryset(model, user):
@@ -39,11 +40,13 @@ class App:
         try:
             port = models.Port.objects.get(pk=uid)
         except models.Port.DoesNotExist:
-            return HttpResponseNotFound('Port does not exist')
-        port.visited += 1
+            return HttpResponseNotFound(Public.Error.port_does_not_exist)
+
+        port.visited += 1  # Update port statistics
         port.save()
+
         if port.wall is None:
-            return HttpResponseNotFound('Port refer invalid resource')
+            return HttpResponseNotFound(Public.Error.port_refer_invalid_resource)
         return redirect(f'/wall/view/{port.wall.id}/')
 
     @staticmethod
@@ -53,10 +56,11 @@ class App:
             wall = _get_protected_queryset(models.Wall, request.user).get(pk=wall_id)
         except models.Wall.DoesNotExist:
             wall = None
+            meta = None
+
             containers = []
             widgets = []
             ports = []
-            meta = None
         else:
             containers = []
             widgets = []
@@ -82,7 +86,7 @@ class App:
             ports = _get_protected_queryset(models.Port, request.user).filter(wall=wall)
             ports = serializers.PortSerializer(ports, many=True).data
             wall = serializers.WallSerializer(wall).data
-        walls = WallViewSet.get_list(request)
+        walls = WallViewSet.generate_list(request)
         if not walls and wall:
             walls = [wall]
         elif not walls:
@@ -105,27 +109,55 @@ class UserViewSet(ReadOnlyModelViewSet):
     serializer_class = serializers.UserSerializer
 
     def retrieve(self, request, *args, **kwargs):
-        return self._get(request, *args, **kwargs)
+        return JsonResponse(self.generate_user(request))
 
     def list(self, request, *args, **kwargs):
-        return self._get(request, *args, **kwargs)
+        return JsonResponse(self.generate_user(request))
 
     @staticmethod
-    def _get(request, *args, **kwargs):
-        return JsonResponse(serializers.UserSerializer(request.user).data)
+    def generate_user(request):
+        return serializers.UserSerializer(request.user).data
 
 
-class CustomModelViewSet(ModelViewSet):
+class CommonModelViewSet(ModelViewSet):
+    model_class = None
 
     def get_permissions(self):
-        """
-        Instantiates and returns the list of permissions that this view requires.
-        """
-        if self.action in ('list', 'retrieve', 'partial_update', 'update'):
-            permission_classes = []
+        if self.action in ('list', 'retrieve', 'partial_update', 'update'):  # Anonymous user may change data
+            return []
         else:
-            permission_classes = [IsAuthenticated]
-        return [permission() for permission in permission_classes]
+            return [IsAuthenticated()]
+
+    def get_queryset(self):
+        return self.generate_query_set(self.request.user)
+
+    @classmethod
+    def generate_query_set(cls, request):
+        return _get_protected_queryset(cls.model_class, request.user)
+
+
+class WallViewSet(CommonModelViewSet):
+    serializer_class = serializers.WallSerializer
+    model_class = models.Wall
+
+    def list(self, request, *args, **kwargs):
+        return Response(self.generate_list(request))
+
+    @classmethod
+    def generate_list(cls, request):
+        if not request.user.is_authenticated:
+            return []
+
+        walls_query = cls.generate_query_set(request).filter(owner=request.user)
+        return cls.serializer_class(walls_query, many=True).data
+
+
+class ContainerViewSet(CommonModelViewSet):
+    serializer_class = serializers.ContainerSerializer
+    model_class = models.Container
+
+
+class SyncViewSet(CommonModelViewSet):
 
     def update(self, request, pk=None, *args, **kwargs):
         try:
@@ -136,73 +168,36 @@ class CustomModelViewSet(ModelViewSet):
             # Validate sync_id. Find any object that belong to user and has id equal to requested sync id
             if sync_id and not self.get_queryset().filter(pk=sync_id, container__wall__owner=request.user).exists():
                 return JsonResponse({
-                    'sync_id': ['Make sure the sync ID belong to user and widgets have the same type.']
+                    'sync_id': [Public.Error.sync_id_miss_match]
                 }, status=400)
         return super().update(request, *args, **kwargs)
 
 
-class WallViewSet(CustomModelViewSet):
-    serializer_class = serializers.WallSerializer
-
-    def get_queryset(self):
-        return _get_protected_queryset(models.Wall, self.request.user)
-
-    def list(self, request, *args, **kwargs):
-        return Response(self.get_list(request))
-
-    @classmethod
-    def get_list(cls, request):
-        if request.user.is_authenticated:
-            walls_query = _get_protected_queryset(models.Wall, request.user).filter(owner=request.user)
-            return cls.serializer_class(walls_query, many=True).data
-        else:
-            return []
-
-
-class ContainerViewSet(CustomModelViewSet):
-    serializer_class = serializers.ContainerSerializer
-
-    def get_queryset(self):
-        return _get_protected_queryset(models.Container, self.request.user)
-
-
-class SimpleTextViewSet(CustomModelViewSet):
+class SimpleTextViewSet(SyncViewSet):
     serializer_class = serializers.SimpleTextSerializer
-
-    def get_queryset(self):
-        return _get_protected_queryset(models.SimpleText, self.request.user)
+    model_class = models.SimpleText
 
 
-class URLViewSet(CustomModelViewSet):
+class URLViewSet(SyncViewSet):
     serializer_class = serializers.URLSerializer
-
-    def get_queryset(self):
-        return _get_protected_queryset(models.URL, self.request.user)
+    model_class = models.URL
 
 
-class SimpleListViewSet(CustomModelViewSet):
+class SimpleListViewSet(SyncViewSet):
     serializer_class = serializers.SimpleListSerializer
-
-    def get_queryset(self):
-        return _get_protected_queryset(models.SimpleList, self.request.user)
+    model_class = models.SimpleList
 
 
-class CounterViewSet(CustomModelViewSet):
+class CounterViewSet(SyncViewSet):
     serializer_class = serializers.CounterSerializer
-
-    def get_queryset(self):
-        return _get_protected_queryset(models.Counter, self.request.user)
+    model_class = models.Counter
 
 
-class SimpleSwitchViewSet(CustomModelViewSet):
+class SimpleSwitchViewSet(SyncViewSet):
     serializer_class = serializers.SimpleSwitchSerializer
-
-    def get_queryset(self):
-        return _get_protected_queryset(models.SimpleSwitch, self.request.user)
+    model_class = models.SimpleSwitch
 
 
-class PortViewSet(CustomModelViewSet):
+class PortViewSet(SyncViewSet):
     serializer_class = serializers.PortSerializer
-
-    def get_queryset(self):
-        return _get_protected_queryset(models.Port, self.request.user)
+    model_class = models.Port

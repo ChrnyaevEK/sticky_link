@@ -29,7 +29,7 @@
     >
         <div class="quick-access widget-quick-access hidden" v-if="$env.edit">
             <button
-                v-if="widget.sync_id || widget.referenced"
+                v-if="widget.sync_id || widget.is_referenced"
                 :title="
                     widget.sync_id
                         ? `This widget is synchronized with ${widget.sync_id}`

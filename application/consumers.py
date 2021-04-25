@@ -1,8 +1,5 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 class Event:
@@ -11,13 +8,17 @@ class Event:
 
 
 class WallConsumer(AsyncWebsocketConsumer):
-    @staticmethod
-    def generate_group_name(wall_id):
+    group_name = None
+
+    @classmethod
+    def generate_group_name(cls, wall_id):
         return str(wall_id)
 
-    async def connect(self):
-        logger.info('Connected!')
+    def __init__(self, *args, **kwargs):
         self.group_name = self.generate_group_name(self.scope['url_route']['kwargs']['id'])
+        super().__init__(*args, **kwargs)
+
+    async def connect(self):
         await self.channel_layer.group_add(
             self.group_name,
             self.channel_name,

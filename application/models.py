@@ -94,6 +94,9 @@ class Common(Base):
                 }
             })
 
+    class Meta:
+        abstract = True
+
 
 class Wall(Common):
     type = 'wall'
@@ -144,14 +147,18 @@ class SyncManager(Common):
         for instance in bounded.exclude(pk=self.id):
             instance.synchronize_with_instance(self)
 
+    class Meta:
+        abstract = True
+
+
+class ColorValidator(BaseValidator):
+    regex = re.compile(r'^#[0-9a-fA-F]{8}$|#[0-9a-fA-F]{6}$|#[0-9a-fA-F]{4}$|#[0-9a-fA-F]{3}$')  # ARGB hex color
+
+    def compare(self, a, b):
+        return self.regex.match(a)
+
 
 class Widget(SyncManager):
-    class ColorValidator(BaseValidator):
-        regex = re.compile(r'^#[0-9a-fA-F]{8}$|#[0-9a-fA-F]{6}$|#[0-9a-fA-F]{4}$|#[0-9a-fA-F]{3}$')  # ARGB hex color
-
-        def compare(self, a, b):
-            return self.regex.match(a)
-
     title = models.CharField(max_length=200, blank=True, null=True)
     container = models.ForeignKey(Container, on_delete=models.CASCADE)
     help = models.CharField(max_length=200, null=True, blank=True)
