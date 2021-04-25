@@ -140,6 +140,9 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "templates/application/dist/static"),  # General static files
 ]
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # Registration settings
 ACCOUNT_ACTIVATION_DAYS = 7
 REGISTRATION_OPEN = True

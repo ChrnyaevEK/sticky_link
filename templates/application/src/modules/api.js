@@ -21,60 +21,55 @@ export default {
         try {
             return await $.ajax({
                 ...settings,
+                data: settings.data ? JSON.stringify(settings.data) : undefined,
                 crossDomain: true,
-                url: `${process.env.VUE_APP_API_HOST}${settings.url}`,
+                contentType: "application/json",
+                dataType: "json",
+                processData: false,
+                url: process.env.VUE_APP_API_HOST + "/" + settings.url + "/",
                 headers: {
                     "X-CSRFToken": csrfToken,
                 },
             });
         } catch (response) {
             env.handleBadRequest(response);
-            throw response
+            throw response;
         }
     },
-    get(path) {
-        return this.ajax({
-            url: `/${path}/`,
-        });
+    get(type) {
+        return this.ajax({ url: type });
     },
     retrieve(type, id) {
-        return this.ajax({
-            url: `/${type}/${id}/`,
-        });
+        return this.ajax({ url: type + "/" + id });
     },
     list(type) {
-        return this.ajax({
-            url: `/${type}/`,
-        });
+        return this.ajax({ url: type });
     },
     create(type, data) {
         return this.ajax({
             type: "POST",
-            url: `/${type}/`,
-            contentType: "application/json",
-            data: JSON.stringify(data),
+            url: type,
+            data,
         });
     },
     update(type, id, data) {
         return this.ajax({
             type: "PUT",
-            url: `/${type}/${id}/`,
-            contentType: "application/json",
-            data: JSON.stringify(data),
+            url: type + "/" + id,
+            data,
         });
     },
     update_partial(type, id, data) {
         return this.ajax({
             type: "PATCH",
-            url: `/${type}/${id}/`,
-            contentType: "application/json",
-            data: JSON.stringify(data),
+            url: type + "/" + id,
+            data,
         });
     },
     delete(type, id) {
         return this.ajax({
             type: "DELETE",
-            url: `/${type}/${id}/`,
+            url: type + "/" + id,
         });
     },
 };

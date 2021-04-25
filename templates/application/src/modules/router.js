@@ -57,6 +57,7 @@ const router = new VueRouter({
 
 router.beforeEach(async (to, from, next) => {
     await store.dispatch("fetchState", to.params.wallId);
+    await env.closeOptions()
     env.wallId = to.params.wallId;
     env.setTabTitle();
     if (store.state.containers) {

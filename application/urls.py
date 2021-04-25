@@ -22,5 +22,6 @@ urlpatterns = [
     path('api/state/<str:wall_id>/', views.App.state, name="state"),
     path('api/', include(router.urls), name="api"),
     *static(settings.STATIC_URL, document_root='templates/application/dist/static'),
+    *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
     re_path('.*', views.App.enter),
 ]

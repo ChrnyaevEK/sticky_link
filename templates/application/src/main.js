@@ -7,7 +7,6 @@ import "bootstrap";
 import "./css/main.scss";
 import "@fortawesome/fontawesome-free/js/all.js";
 import "@fortawesome/fontawesome-free/css/all.css";
-import { generateId } from "./common";
 import $ from "jquery";
 import Rollbar from "rollbar";
 import JqueryRollbarPlugin from "rollbar-jquery";
@@ -15,7 +14,17 @@ import JqueryRollbarPlugin from "rollbar-jquery";
 Vue.config.productionTip = false;
 Vue.prototype.$env = env;
 Vue.prototype.$io = io;
-Vue.prototype._ = generateId;
+Vue.prototype._ = function(value) {
+    return this._uid + "-" + value;
+};
+
+Vue.directive("scope", {
+    // v-scope:<id>.<property> => id="xxx-property"
+    bind: (el, binding, vnode) => {
+        let value = Object.keys(binding.modifiers).join("") || binding.value;
+        el.setAttribute(binding.arg, vnode.context._(value));
+    },
+});
 
 window.jQuery = $; // Ref. to rollbar-jquery source code
 JqueryRollbarPlugin();

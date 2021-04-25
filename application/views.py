@@ -15,10 +15,14 @@ def _get_protected_queryset(model, user):
         q = Q(allow_anonymous_view=True)
         if not user.is_anonymous:
             q.add(Q(owner=user), Q.OR)
-    elif model == models.Container or model == models.Port:
+    elif model == models.Container:
         q = Q(wall__allow_anonymous_view=True)
         if not user.is_anonymous:
             q.add(Q(wall__owner=user), Q.OR)
+    elif model == models.Port:
+        q = Q(wall__allow_anonymous_view=True)
+        if not user.is_anonymous:
+            q.add(Q(owner=user), Q.OR)
     else:
         q = Q(container__wall__allow_anonymous_view=True)
         if not user.is_anonymous:
@@ -45,8 +49,12 @@ class App:
         port.visited += 1  # Update port statistics
         port.save()
 
+        if port.redirect_url:
+            return redirect(port.redirect_url)
+
         if port.wall is None:
             return HttpResponseNotFound(Public.Error.port_refer_invalid_resource)
+
         return redirect(f'/wall/view/{port.wall.id}/')
 
     @staticmethod
@@ -71,6 +79,7 @@ class App:
                         (models.SimpleList, serializers.SimpleListSerializer),
                         (models.Counter, serializers.CounterSerializer),
                         (models.SimpleSwitch, serializers.SimpleSwitchSerializer),
+                        (models.File, serializers.FileSerializer),
                 ):
                     for widget in model.objects.filter(container=container):
                         widgets.append(serializer(widget).data)
@@ -129,7 +138,7 @@ class CommonModelViewSet(ModelViewSet):
             return [IsAuthenticated()]
 
     def get_queryset(self):
-        return self.generate_query_set(self.request.user)
+        return self.generate_query_set(self.request)
 
     @classmethod
     def generate_query_set(cls, request):
@@ -142,6 +151,10 @@ class WallViewSet(CommonModelViewSet):
 
     def list(self, request, *args, **kwargs):
         return Response(self.generate_list(request))
+
+    def create(self, request, *args, **kwargs):
+        request.data['owner'] = request.user.id
+        return super().create(request, *args, **kwargs)
 
     @classmethod
     def generate_list(cls, request):
@@ -201,3 +214,16 @@ class SimpleSwitchViewSet(SyncViewSet):
 class PortViewSet(SyncViewSet):
     serializer_class = serializers.PortSerializer
     model_class = models.Port
+
+    def create(self, request, *args, **kwargs):
+        request.data['owner'] = request.user.id
+        return super().create(request, *args, **kwargs)
+
+
+# class FileViewSet(SyncViewSet):
+#     serializer_class = serializers.FileSerializer
+#     model_class = models.File
+#
+#     def create(self, request, *args, **kwargs):
+#         request.data['owner'] = request.user.id
+#         return super().create(request, *args, **kwargs)

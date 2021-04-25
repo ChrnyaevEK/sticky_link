@@ -21,7 +21,7 @@
         <div class="d-flex">
             <input
                 type="text"
-                :id="_('item-input')"
+                v-scope:id.item-input
                 v-model="item"
                 @keyup.enter="addItem"
                 class="form-control"

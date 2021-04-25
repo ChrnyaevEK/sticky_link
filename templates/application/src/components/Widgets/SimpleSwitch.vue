@@ -1,18 +1,15 @@
 <template id="simple-switch-template">
     <WidgetBaseResizable :widget="widget">
-        <div
-            class="custom-control custom-switch"
-            :title="widget.title"
-        >
+        <div class="custom-control custom-switch" :title="widget.title">
             <input
                 type="checkbox"
                 @change="changeValue"
                 :checked="widget.value"
-                :id="_('value')"
+                v-scope:id.value
                 :disabled="$env.widgetsLocked || $env.changesLocked"
                 class="custom-control-input"
             />
-            <label class="custom-control-label" :for="_('value')">{{ widget.title }}</label>
+            <label class="custom-control-label" v-scope:for.value>{{ widget.title }}</label>
         </div>
     </WidgetBaseResizable>
 </template>

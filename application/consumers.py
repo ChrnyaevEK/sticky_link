@@ -15,10 +15,11 @@ class WallConsumer(AsyncWebsocketConsumer):
         return str(wall_id)
 
     def __init__(self, *args, **kwargs):
-        self.group_name = self.generate_group_name(self.scope['url_route']['kwargs']['id'])
+        self.group_name = None
         super().__init__(*args, **kwargs)
 
     async def connect(self):
+        self.group_name = self.generate_group_name(self.scope['url_route']['kwargs']['id'])
         await self.channel_layer.group_add(
             self.group_name,
             self.channel_name,

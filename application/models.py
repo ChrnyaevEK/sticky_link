@@ -68,31 +68,33 @@ class Common(Base):
         return super().delete(*args, **kwargs)
 
     def propagate_instance_updated(self):
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            WallConsumer.generate_group_name(self.related_wall_instance.id),
-            {
-                'type': ConsumerEvent.instance_update,
-                'instance': {
-                    'type': self.type,
-                    'id': self.id,
-                    'uid': self.uid,
-                    'version': self.version,
-                },
-            })
+        if self.related_wall_instance is not None:
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                WallConsumer.generate_group_name(self.related_wall_instance.id),
+                {
+                    'type': ConsumerEvent.instance_update,
+                    'instance': {
+                        'type': self.type,
+                        'id': self.id,
+                        'uid': self.uid,
+                        'version': self.version,
+                    },
+                })
 
     def propagate_instance_deleted(self):
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            WallConsumer.generate_group_name(self.related_wall_instance.id),
-            {
-                'type': ConsumerEvent.instance_destroy,
-                'instance': {
-                    'type': self.type,
-                    'id': self.id,
-                    'uid': self.uid,
-                }
-            })
+        if self.related_wall_instance is not None:
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                WallConsumer.generate_group_name(self.related_wall_instance.id),
+                {
+                    'type': ConsumerEvent.instance_destroy,
+                    'instance': {
+                        'type': self.type,
+                        'id': self.id,
+                        'uid': self.uid,
+                    }
+                })
 
     class Meta:
         abstract = True
@@ -160,6 +162,8 @@ class ColorValidator(BaseValidator):
 
 class Widget(SyncManager):
     title = models.CharField(max_length=200, blank=True, null=True)
+    description = models.CharField(verbose_name='Widget description', max_length=500, blank=True, null=True)
+
     container = models.ForeignKey(Container, on_delete=models.CASCADE)
     help = models.CharField(max_length=200, null=True, blank=True)
 
@@ -183,7 +187,7 @@ class Widget(SyncManager):
     @staticmethod
     def validate_anonymous_access(accessed_fields):
         protected_fields = {'font_size', 'font_weight', 'background_color', 'text_color', 'border', 'help', 'w', 'h',
-                            'z', 'x', 'y', 'sync_fields', 'container'}
+                            'z', 'x', 'y', 'sync_fields', 'container', 'owner'}
         return not protected_fields.intersection(accessed_fields) and super().validate_anonymous_access(accessed_fields)
 
     def save(self, *args, **kwargs):
@@ -255,3 +259,18 @@ class Port(Common):
     title = models.CharField(max_length=200, blank=True, default='Untitled')
     wall = models.ForeignKey(Wall, on_delete=models.SET_NULL, null=True)
     visited = models.IntegerField(default=0, help_text='Visit counter')
+
+    redirect_url = models.URLField(verbose_name='Redirect URL', help_text='Override default redirect (to this wall)',
+                                   null=True, blank=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+
+
+# class File(Widget):
+#     type = 'file'
+#     sync_fields = ['href']
+#
+#     file = models.FileField(verbose_name='Uploaded file', null=True, blank=True)
+#     image = models.ImageField(verbose_name='Uploaded image', null=True, blank=True)
+#     owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+#
+#     sync_id = models.ForeignKey('URL', blank=True, null=True, on_delete=models.SET_NULL)

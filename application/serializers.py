@@ -126,3 +126,12 @@ class PortSerializer(CustomModelSerializer):
     class Meta:
         fields = '__all__'
         model = models.Port
+
+
+# class FileSerializer(CustomModelSerializer):
+#     file = serializers.FileField(use_url=True)
+#     image = serializers.ImageField(use_url=True)
+#
+#     class Meta:
+#         fields = '__all__'
+#         model = models.File

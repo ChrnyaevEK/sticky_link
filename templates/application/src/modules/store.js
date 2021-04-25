@@ -40,12 +40,14 @@ export default new Vuex.Store({
     strict: true,
     state: {
         user: null,
+
         walls: null,
         containers: null,
         ports: null,
         widgets: null,
+        
         meta: null,
-
+        
         app: {
             title: process.env.VUE_APP_TITLE,
             grid: 3,
@@ -75,7 +77,7 @@ export default new Vuex.Store({
     },
     actions: {
         async fetchState(context, wallId) {
-            let state = wallId != undefined ? await api.retrieve("state", wallId) : await api.get("state");
+            let state = wallId === undefined ? await api.get("state") : await api.retrieve("state", wallId);
             context.commit("setState", state);
         },
         async fetchInstance(context, instance) {

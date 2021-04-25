@@ -23,10 +23,6 @@ export function deepCopy(data) {
     return JSON.parse(JSON.stringify(data));
 }
 
-export function generateId(property) {
-    return `${this._uid}-${property}`;
-}
-
 export function copyToClipboard(text) {
     let input = document.body.appendChild(document.createElement("input"));
     input.value = text;
@@ -50,6 +46,5 @@ export const types = {
 export default {
     types,
     difference,
-    generateId,
     sleep,
 };

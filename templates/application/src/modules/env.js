@@ -67,12 +67,13 @@ export default new Vue({
         handleUnexpected() {
             io.alert("Something went wrong...", "danger");
         },
-        handleBadRequest(response) {
+        async handleBadRequest(response) {
             if (response.responseJSON && response.responseJSON.detail) {
                 io.alert(response.responseJSON.detail, "danger");
             } else if (response.status >= 500) {
                 io.alert("Server error occurred", "danger");
             }
+            await this.unlockChanges()
         },
         makeMutable() {
             // To allow straight mutations

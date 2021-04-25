@@ -6,6 +6,7 @@ export default new Vue({
             html: null,
             type: null,
             visible: false,
+            fadeOutCoolDown: 1000,
         },
         saveUtil: {
             state: null,
@@ -19,10 +20,10 @@ export default new Vue({
             timeoutDuration: 5000,
         },
         changeUtil: {
-            state: null,
+            state: false,
             states: {
-                newVersionAvailable: "The wall has changed",
-                lastVersion: null,
+                synchronizing: true,
+                synchronized: false,
             },
             timeoutId: null,
             timeoutDuration: 1000,
@@ -49,11 +50,11 @@ export default new Vue({
         },
         change(active) {
             if (active) {
-                this.changeUtil.state = this.changeUtil.states.newVersionAvailable;
+                this.changeUtil.state = this.changeUtil.states.synchronizing;
             } else {
                 clearTimeout(this.changeUtil.timeoutId);
                 this.changeUtil.timeoutId = setTimeout(() => {
-                    this.changeUtil.state = this.changeUtil.states.lastVersion;
+                    this.changeUtil.state = this.changeUtil.states.synchronized;
                 }, this.changeUtil.timeoutDuration);
             }
         },

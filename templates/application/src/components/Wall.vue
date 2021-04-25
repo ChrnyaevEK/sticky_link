@@ -23,7 +23,7 @@
                     {{ container.title }} <small class="mx-1">{{ container.description }}</small>
                 </div>
                 <div
-                    :id="_(container.id)"
+                    v-scope:id="container.id"
                     class="overflow-auto border container-wrap scrollable-element relative bg-white"
                 >
                     <vue-draggable-resizable
