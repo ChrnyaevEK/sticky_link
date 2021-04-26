@@ -4,7 +4,8 @@
         style="z-index: 1;"
         v-show="io.alertUtil.visible"
         v-html="io.alertUtil.html"
-        @mouseout="handleMouseOut"
+        @mouseleave="handleMouseLeave"
+        @mouseenter="handleMouseEnter"
     >
         <a class="close btn" aria-label="Close" @click="close">
             <span aria-hidden="true">&times;</span>
@@ -21,13 +22,15 @@
             };
         },
         methods: {
-            handleMouseOut() {
-                if (this.fadeOutId == null) {
-                    this.fadeOutId = setTimeout(() => {
-                        this.fadeOutId == null
-                        this.close();
-                    }, this.io.alertUtil.fadeOutCoolDown);
-                }
+            handleMouseLeave() {
+                clearTimeout(this.fadeOutId);
+                this.fadeOutId = setTimeout(() => {
+                    this.fadeOutId == null;
+                    this.close();
+                }, this.io.alertUtil.fadeOutCoolDown);
+            },
+            handleMouseEnter() {
+                clearTimeout(this.fadeOutId);
             },
             close() {
                 this.io.alertUtil.visible = false;

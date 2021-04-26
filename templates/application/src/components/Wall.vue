@@ -39,6 +39,7 @@
                         :w="container.w"
                         :minHeight="100"
                         class="relative overflow-hidden wall-only no-border"
+                        style="touch-action: initial;"
                         :grid="[$store.state.app.grid, $store.state.app.grid]"
                     >
                         <template v-for="widget of $store.state.widgets">
@@ -73,7 +74,11 @@
             <span v-if="$store.state.user.is_authenticated">No wall is selected...</span>
             <span v-else>No wall is available... Login to continue</span>
         </div>
-        <SelectCreate @wallCreated="onCreateWall" @portSelected="onPortSelected" v-if="$env.edit && $store.state.user.is_authenticated"></SelectCreate>
+        <SelectCreate
+            @wallCreated="onCreateWall"
+            @portSelected="onPortSelected"
+            v-if="$env.edit && $store.state.user.is_authenticated"
+        ></SelectCreate>
     </div>
 </template>
 
@@ -135,9 +140,9 @@
                     },
                 });
             },
-            onPortSelected(port){
-                this.$env.openOptions(port)
-            }
+            onPortSelected(port) {
+                this.$env.openOptions(port);
+            },
         },
     };
 </script>

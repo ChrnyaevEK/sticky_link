@@ -53,7 +53,7 @@ new Vue({
     template: "<router-view/>",
 }).$mount("#app");
 
-if (process.env.NODE_ENV == "development") {
-    window.ga("set", "sendHitTask", null);
-}
+// if (process.env.NODE_ENV == "development") {
+//     window.ga("set", "sendHitTask", null);
+// }
 window.ga("send", "pageview");

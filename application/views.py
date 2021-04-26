@@ -79,7 +79,6 @@ class App:
                         (models.SimpleList, serializers.SimpleListSerializer),
                         (models.Counter, serializers.CounterSerializer),
                         (models.SimpleSwitch, serializers.SimpleSwitchSerializer),
-                        (models.File, serializers.FileSerializer),
                 ):
                     for widget in model.objects.filter(container=container):
                         widgets.append(serializer(widget).data)

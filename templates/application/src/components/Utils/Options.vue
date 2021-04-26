@@ -10,33 +10,27 @@
         :parent="false"
         class="bg-white border shadow options options-position options-size p-2 m-1 scrollbar-hidden"
     >
-        <form v-scope:id.form>
-            <div class="form-group d-flex justify-content-between align-items-center options-drag cursor-move">
-                <strong>Options</strong>
-                <a class="btn" @click="$env.closeOptions()"><i class="fas fa-times"></i></a>
-            </div>
-            <hr />
-            <wall-options v-if="instance.type == types.Wall" :instance="instance" @push="push"></wall-options>
-            <container-options
-                v-else-if="instance.type == types.Container"
-                :instance="instance"
-                @push="push"
-            ></container-options>
-            <port-options v-else-if="instance.type == types.Port" :instance="instance" @push="push"></port-options>
-            <widgets-options v-else :instance="instance" @push="push"></widgets-options>
-            <div class="form-group">
-                <button
-                    :disabled="$env.changesLocked"
-                    class="btn btn-sm btn-danger w-100"
-                    @click.stop="onDeleteInstance"
-                >
-                    Delete
-                </button>
-            </div>
-            <div class="form-group text-center">
-                <small class="text-secondary">All changes are automatically saved</small>
-            </div>
-        </form>
+        <div class="form-group d-flex justify-content-between align-items-center options-drag cursor-move">
+            <strong>Options</strong>
+            <a class="btn" @click="$env.closeOptions()"><i class="fas fa-times"></i></a>
+        </div>
+        <hr />
+        <wall-options v-if="instance.type == types.Wall" :instance="instance" @push="push"></wall-options>
+        <container-options
+            v-else-if="instance.type == types.Container"
+            :instance="instance"
+            @push="push"
+        ></container-options>
+        <port-options v-else-if="instance.type == types.Port" :instance="instance" @push="push"></port-options>
+        <widgets-options v-else :instance="instance" @push="push"></widgets-options>
+        <div class="form-group">
+            <button :disabled="$env.changesLocked" class="btn btn-sm btn-danger w-100" @click.stop="onDeleteInstance">
+                Delete
+            </button>
+        </div>
+        <div class="form-group text-center">
+            <small class="text-secondary">All changes are automatically saved</small>
+        </div>
     </vue-draggable-resizable>
 </template>
 
@@ -70,8 +64,9 @@
                 this.unsetWarning();
                 for (var [field, error] of Object.entries(response.responseJSON)) {
                     error = $(`<p class="${this.warningClass} col-12 text-danger">${error[0]}</p>`);
-                    console.log(this._(field))
-                    $(this.$el).find(`[for*="${field}"]`)
+                    console.log(this._(field));
+                    $(this.$el)
+                        .find(`[for*="${field}"]`)
                         .addClass(`text-danger ${this.warningClassField}`)
                         .closest(".row")
                         .append(error);
@@ -88,7 +83,6 @@
                 $(`.${this.warningClass}`).remove();
             },
             async push() {
-                document.getElementById(this._('form')).checkValidity()
                 try {
                     await this.$store.dispatch("updateOrAddInstance", this.instance);
                 } catch (err) {
