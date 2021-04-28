@@ -262,7 +262,6 @@ class Port(Common):
 
     redirect_url = models.URLField(verbose_name='Redirect URL', help_text='Override default redirect (to this wall)',
                                    null=True, blank=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
 
 
 # class File(Widget):
