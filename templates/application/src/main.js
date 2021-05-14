@@ -38,6 +38,11 @@ rollbar.configure({
     },
 });
 
+if (process.env.NODE_ENV == "production") {
+    window.gtag("js", new Date());
+    window.gtag("config", "G-NGS03ZXLXN");
+}
+
 new Vue({
     router,
     store,
