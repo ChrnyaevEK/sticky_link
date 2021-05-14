@@ -7,6 +7,7 @@ import "bootstrap";
 import "./css/main.scss";
 import "@fortawesome/fontawesome-free/js/all.js";
 import "@fortawesome/fontawesome-free/css/all.css";
+import { generateId } from "./common";
 import $ from "jquery";
 import Rollbar from "rollbar";
 import JqueryRollbarPlugin from "rollbar-jquery";
@@ -47,9 +48,13 @@ rollbar.configure({
     },
 });
 
+if (process.env.NODE_ENV == "production") {
+    window.gtag("js", new Date());
+    window.gtag("config", "G-NGS03ZXLXN");
+}
+
 new Vue({
     router,
     store,
     template: "<router-view/>",
 }).$mount("#app");
-
