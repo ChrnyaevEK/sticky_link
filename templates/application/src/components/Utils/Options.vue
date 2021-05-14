@@ -15,16 +15,20 @@
             <a class="btn" @click="$env.dispatch('closeOptions')"><i class="fas fa-times"></i></a>
         </div>
         <hr />
-        <wall-options v-if="instance.type == types.Wall" :instance="instance" @push="push"></wall-options>
+        <wall-options v-if="instance.type == types.Wall" :instance="instance" @push="handlePush"></wall-options>
         <container-options
             v-else-if="instance.type == types.Container"
             :instance="instance"
-            @push="push"
+            @push="handlePush"
         ></container-options>
-        <port-options v-else-if="instance.type == types.Port" :instance="instance" @push="push"></port-options>
-        <widgets-options v-else :instance="instance" @push="push"></widgets-options>
+        <port-options v-else-if="instance.type == types.Port" :instance="instance" @push="handlePush"></port-options>
+        <widgets-options v-else :instance="instance" @push="handlePush"></widgets-options>
         <div class="form-group">
-            <button :disabled="$env.state.changesLock" class="btn btn-sm btn-danger w-100" @click.stop="onDeleteInstance">
+            <button
+                :disabled="$env.state.changesLock"
+                class="btn btn-sm btn-danger w-100"
+                @click.stop="handleInstanceDelete"
+            >
                 Delete
             </button>
         </div>
@@ -60,6 +64,26 @@
             },
         },
         methods: {
+            async handleInstanceDelete() {
+                if (confirm("Are you sure?")) {
+                    let type = this.instance.type;
+                    
+                    await this.$store.dispatch("deleteInstance", this.instance);
+                    
+                    this.$env.dispatch("closeOptions");
+                    if (type == "wall") {
+                        this.$env.dispatch("handleWallDeleted");
+                    }
+                }
+            },
+            async handlePush() {
+                try {
+                    await this.$store.dispatch("updateOrAddInstance", this.instance);
+                } catch (err) {
+                    return this.setWarningFromResponse(err);
+                }
+                this.unsetWarning();
+            },
             setWarningFromResponse(response) {
                 this.unsetWarning();
                 for (var [field, error] of Object.entries(response.responseJSON)) {
@@ -72,23 +96,9 @@
                         .append(error);
                 }
             },
-            async onDeleteInstance() {
-                if (confirm("Are you sure?")) {
-                    await this.$store.dispatch("deleteInstance", this.instance);
-                    this.$env.state.dispath('closeOptions');
-                }
-            },
             unsetWarning() {
                 $(`.${this.warningClassField}`).removeClass("text-danger");
                 $(`.${this.warningClass}`).remove();
-            },
-            async push() {
-                try {
-                    await this.$store.dispatch("updateOrAddInstance", this.instance);
-                } catch (err) {
-                    return this.setWarningFromResponse(err);
-                }
-                this.unsetWarning();
             },
         },
         components: {

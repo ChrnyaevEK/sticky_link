@@ -8,7 +8,7 @@
             <div
                 class="w-100 h-100 py-1 overflow-auto pb-5"
                 @click="
-                    unsetWidgetSelection();
+                    handleUnselectWidgets();
                     $env.dispatch('closeOptions');
                 "
             >
@@ -28,8 +28,8 @@
                         <vue-draggable-resizable
                             @click.native.stop="$env.dispatch('closeOptions')"
                             @touchstart.native="$env.dispatch('closeOptions')"
-                            @resizing="onResizing"
-                            @activated="onActivated(container)"
+                            @resizing="handleContainerResizing"
+                            @activated="handleContainerActivated(container)"
                             :resizable="$env.state.editMode && !$env.state.changesLock"
                             :draggable="false"
                             :parent="false"
@@ -44,7 +44,7 @@
                             <template v-for="widget of $store.state.widgets">
                                 <component
                                     v-if="widget.container == container.id"
-                                    :is="toComponent(widget)"
+                                    :is="getComponent(widget)"
                                     :key="widget.type + widget.id"
                                     :widget="widget"
                                 >
@@ -106,7 +106,7 @@
                 </div>
                 <button
                     class="mr-1 btn btn-sm btn-success text-white border"
-                    @click="createWall"
+                    @click="$env.dispatch('handleCreateWall')"
                     title="Add new wall"
                     :disabled="$env.state.changesLock"
                 >
@@ -145,7 +145,7 @@
                 <button
                     v-if="$store.state.ports && $env.state.wall"
                     class="mr-1 btn btn-sm btn-success text-white border"
-                    @click="createInstance('port')"
+                    @click="$env.dispatch('handleCreatePort')"
                     title="Add new port"
                     :disabled="$env.state.changesLock"
                 >
@@ -154,7 +154,7 @@
             </div>
             <span class="overflow-auto scrollbar-hidden d-flex" v-if="$env.state.wall">
                 <button
-                    @click.stop="createInstance('container')"
+                    @click.stop="$env.dispatch('handleCreateContainer')"
                     class="mr-1 btn btn-sm bg-light border text-nowrap"
                     title="Add Container to hold widgets"
                     :disabled="$env.state.changesLock"
@@ -162,7 +162,7 @@
                     Container
                 </button>
                 <button
-                    @click.stop="createInstance('simple_text')"
+                    @click.stop="$env.dispatch('handleCreateWidget', 'simple_text')"
                     class="mr-1 btn btn-sm bg-light border text-nowrap"
                     title="Add new widget of type Simple text"
                     :disabled="$env.state.changesLock"
@@ -170,7 +170,7 @@
                     Text
                 </button>
                 <button
-                    @click.stop="createInstance('url')"
+                    @click.stop="$env.dispatch('handleCreateWidget', 'url')"
                     class="mr-1 btn btn-sm bg-light border text-nowrap"
                     title="Add new widget of type URL"
                     :disabled="$env.state.changesLock"
@@ -178,7 +178,7 @@
                     URL
                 </button>
                 <button
-                    @click.stop="createInstance('counter')"
+                    @click.stop="$env.dispatch('handleCreateWidget', 'counter')"
                     class="mr-1 btn btn-sm bg-light border text-nowrap"
                     title="Add new widget of type Counter"
                     :disabled="$env.state.changesLock"
@@ -186,7 +186,7 @@
                     Counter
                 </button>
                 <button
-                    @click.stop="createInstance('simple_list')"
+                    @click.stop="$env.dispatch('handleCreateWidget', 'simple_list')"
                     class="mr-1 btn btn-sm bg-light border text-nowrap"
                     title="Add new widget of type Simple list"
                     :disabled="$env.state.changesLock"
@@ -194,7 +194,7 @@
                     List
                 </button>
                 <button
-                    @click.stop="createInstance('simple_switch')"
+                    @click.stop="$env.dispatch('handleCreateWidget', 'simple_switch')"
                     class="mr-1 btn btn-sm bg-light border text-nowrap"
                     title="Add new widget of type Switch"
                     :disabled="$env.state.changesLock"
@@ -217,7 +217,6 @@
     import VueDraggableResizable from "vue-draggable-resizable";
     import $ from "jquery";
 
-    import router from "../modules/router";
     import store from "../modules/store";
     import env from "../modules/env";
 
@@ -234,7 +233,7 @@
     }
 
     export default {
-        name: 'Wall',
+        name: "Wall",
         components: {
             VueDraggableResizable,
             Options,
@@ -242,72 +241,32 @@
         beforeRouteEnter: setupRoutine,
         beforeRouteUpdate: setupRoutine,
         methods: {
-            onResizing(x, y, w, h) {
+            handleContainerResizing(x, y, w, h) {
                 let instance = Object.assign({}, this.$env.state.container, { h });
+
                 this.$store.dispatch("recalculateWidgets", instance);
                 this.$store.dispatch("updateOrAddInstance", instance);
             },
-            toComponent(widget) {
-                return [SimpleText, URL, Counter, SimpleList, SimpleSwitch].filter(
-                    (klass) => widget.type == klass.type
-                )[0];
-            },
-            onActivated(container) {
-                this.$env.dispatch("setContainerByContainerId", container.id);
+            handleContainerActivated(container) {
                 window.dispatchEvent(new Event("resize"));
-
-                let containerId = "#" + this._(container.id);
-                container = $(containerId);
-
+                this.$env.dispatch("setContainerByContainerId", container.id);
                 if (this.$env.state.editMode) {
                     $(".quick-access")
-                        .not(`${containerId} .quick-access`)
+                        .not(`${"#" + this._(container.id)} .quick-access`)
                         .addClass("hidden");
-                    container
+                    $("#" + this._(container.id))
                         .parent()
                         .find(".container-quick-access")
                         .removeClass("hidden");
                 }
             },
-            unsetWidgetSelection() {
+            handleUnselectWidgets() {
                 $(".quick-access").addClass("hidden");
             },
-            async createInstance(type) {
-                if (type == "container") {
-                    let index = 0;
-                    for (let container of this.$store.state.containers) {
-                        if (container.index > index) {
-                            index = container.index + 1;
-                        }
-                    }
-                    await this.$store.dispatch("createInstance", {
-                        type,
-                        index,
-                        wall: this.$env.state.wall.id,
-                    });
-                } else if (type == "port") {
-                    let port = await this.$store.dispatch("createInstance", {
-                        type: "port",
-                        wall: this.$env.state.wall.id,
-                    });
-                    this.$env.dispatch("openOptions", port);
-                } else {
-                    await this.$store.dispatch("createInstance", { type, container: this.$env.state.container.id });
-                    this.$store.dispatch("recalculateWidgets", this.$env.state.container);
-                }
-            },
-            async createWall() {
-                let wall = await this.$store.dispatch("createInstance", { type: "wall" });
-                this.$notify({
-                    text: "New wall has been created!",
-                    type: "success",
-                });
-                router.push({
-                    name: "wallEdit",
-                    params: {
-                        wallId: wall.id,
-                    },
-                });
+            getComponent(widget) {
+                return [SimpleText, URL, Counter, SimpleList, SimpleSwitch].filter(
+                    (klass) => widget.type == klass.type
+                )[0];
             },
         },
     };

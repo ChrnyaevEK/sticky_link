@@ -86,18 +86,18 @@ export default new Vuex.Store({
             return instance;
         },
         async createInstance(context, instance) {
-            await env.dispatch('lockChanges');
+            await env.dispatch("lockChanges");
             instance = await api.create(instance.type, instance);
             context.commit("updateOrAddInstance", instance);
-            await env.dispatch('unlockChanges');
+            await env.dispatch("unlockChanges");
             return instance;
         },
         async deleteInstance(context, instance) {
-            await env.dispatch('lockChanges'); // Lock changes to prevent update for deleted instance
+            await env.dispatch("lockChanges"); // Lock changes to prevent update for deleted instance
             await um.cancelPending(instance); // cancel or wait for pending update
             await api.delete(instance.type, instance.id, instance.uid); // Perform delete
             context.commit("deleteInstance", instance); // Delete local copy
-            await env.dispatch('unlockChanges'); // Unlock changes
+            await env.dispatch("unlockChanges"); // Unlock changes
         },
         async updateOrAddInstance(context, instance) {
             io.save(true);

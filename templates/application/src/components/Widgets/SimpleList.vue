@@ -1,8 +1,9 @@
 <template id="simple-list-template">
     <WidgetBaseResizable :widget="widget">
-        <span class="w-100 text"
-            >{{ widget.title }} <small class="text-muted">{{ widget.items.length }}</small></span
-        >
+        <span class="w-100">
+            <span v-show="widget.title" class="mr-2 text-truncate widget-title"> {{ widget.title }}</span>
+            <small class="text-muted">{{ widget.items.length }}</small>
+        </span>
         <div class="form-group w-100 h-100 overflow-auto border-bottom border-top py-1">
             <div
                 class="d-flex text-break mb-1"
@@ -13,9 +14,15 @@
                 <span class="w-100 p-1">
                     {{ val }}
                 </span>
-                <button @click.stop="removeItem(i)" :disabled="$env.state.widgetsLock || $env.state.changesLock" class="btn">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div class="d-flex flex-column">
+                    <button
+                        @click.stop="removeItem(i)"
+                        :disabled="$env.state.widgetsLock || $env.state.changesLock"
+                        class="btn btn-sm"
+                    >
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
         </div>
         <div class="d-flex">

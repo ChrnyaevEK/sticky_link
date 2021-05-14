@@ -1,7 +1,8 @@
 <template id="simple-text-template">
     <WidgetBaseResizable :widget="widget">
+        <span v-show="widget.title" class="w-100 text-truncate widget-title">{{ widget.title }}</span>
         <span
-            class="flex-grow-1 text-truncate text-wrap text-break ql-editor editor"
+            class="w-100 h-100 flex-grow-1 text-truncate text-wrap text-break ql-editor editor p-0"
             v-html="widget.text_content"
         ></span>
     </WidgetBaseResizable>

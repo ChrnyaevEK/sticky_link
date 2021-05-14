@@ -174,7 +174,7 @@ class Widget(SyncManager):
     x = models.IntegerField(verbose_name='Offset left from parent', default=0, validators=[MinValueValidator(0)])
     y = models.IntegerField(verbose_name='Offset top from parent', default=0, validators=[MinValueValidator(0)])
 
-    font_size = models.IntegerField(verbose_name='Widget font size', default=16,
+    font_size = models.IntegerField(verbose_name='Widget font size', default=14,
                                     validators=[MaxValueValidator(40), MinValueValidator(6)])
     font_weight = models.IntegerField(verbose_name='Widget font weight', default=400,
                                       validators=[MaxValueValidator(900), MinValueValidator(100)])

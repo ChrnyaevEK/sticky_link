@@ -1,6 +1,7 @@
 import Vue from "vue";
 import VueX from "vuex";
 import store from "./store";
+import router from "./router";
 
 Vue.use(VueX);
 
@@ -50,13 +51,70 @@ export default new VueX.Store({
     },
 
     actions: {
+        async handleCreateWidget(context, type) {
+            let widget = await store.dispatch("createInstance", {
+                type,
+                container: context.state.container.id,
+            });
+            store.dispatch("recalculateWidgets", context.state.container);
+            Vue.notify({
+                text: `Widget ${widget.type} ${widget.title} was created!`,
+                type: "success",
+            });
+        },
+        async handleCreateContainer(context) {
+            let index = 0;
+            for (let container of store.state.containers) {
+                if (container.index > index) {
+                    index = container.index + 1;
+                }
+            }
+            let container = await store.dispatch("createInstance", {
+                wall: context.state.wall.id,
+                type: "container",
+                index,
+            });
+            Vue.notify({
+                text: `Container ${container.title} was created!`,
+                type: "success",
+            });
+        },
+        async handleCreatePort(context) {
+            let port = await store.dispatch("createInstance", {
+                wall: context.state.wall.id,
+                type: "port",
+            });
+            context.dispatch("openOptions", port);
+            Vue.notify({
+                text: `Port ${port.title} was created!`,
+                type: "success",
+            });
+        },
+        async handleCreateWall() {
+            let wall = await store.dispatch("createInstance", {
+                type: "wall",
+            });
+            Vue.notify({
+                text: `Wall ${wall.title} was created!`,
+                type: "success",
+            });
+            router.push({
+                name: "wallEdit",
+                params: {
+                    wallId: wall.id,
+                },
+            });
+        },
+        handleWallDeleted(context) {
+            router.push({ name: context.state.editMode ? "wallEdit" : "wallView" });
+        },
         async setEditMode(context) {
-            context.commit('setEditMode')
-            await nextTick()
+            context.commit("setEditMode");
+            await nextTick();
         },
         async setViewMode(context) {
-            context.commit('setViewMode')
-            await nextTick()
+            context.commit("setViewMode");
+            await nextTick();
         },
         async setWallByWallId(context, wallId) {
             context.commit("setWallByWallId", wallId);

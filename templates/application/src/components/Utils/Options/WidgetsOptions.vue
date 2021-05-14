@@ -38,7 +38,6 @@
                 <input
                     slot="input"
                     v-scope:id.z
-                    :step="$store.state.app.grid"
                     v-model.number="instance.z"
                     @input="$emit('push')"
                     :disabled="$env.state.changesLock"
