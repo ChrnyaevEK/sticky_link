@@ -70,7 +70,7 @@
                         </button>
                     </div>
                     <div
-                        v-if="$env.state.editMode && $store.state.user.is_authenticated"
+                        v-if="$env.state.editMode"
                         class="my-1 w-100 d-flex justify-content-end"
                     >
                         <span class="overflow-auto scrollbar-hidden d-flex" v-if="$env.state.wall">

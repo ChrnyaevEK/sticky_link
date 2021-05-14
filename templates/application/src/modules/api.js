@@ -69,7 +69,7 @@ export default {
             data,
         });
     },
-    update_partial(type, id, data) {
+    updatePartial(type, id, data) {
         return this.ajax({
             type: "PATCH",
             url: type + "/" + id,

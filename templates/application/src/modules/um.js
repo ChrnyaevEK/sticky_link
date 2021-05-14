@@ -31,9 +31,8 @@ export default new Vue({
                 // Already waiting to push update?
                 this.waiter[instance.uid] = (async () => {
                     await sleep(this.coolDown);
-                    delete this.waiter[instance.uid];
                     if (this.handler[instance.uid]) {
-                        let remote = await api.update_partial(instance.type, instance.id, this.handler[instance.uid]);
+                        let remote = await api.updatePartial(instance.type, instance.id, this.handler[instance.uid]);
                         if (this.remote[instance.uid] !== undefined) {
                             // Ws finished before http - resolve miss match
                             if (this.remote[instance.uid] !== remote.version) await this.resolveNewVersion(remote);
@@ -42,6 +41,7 @@ export default new Vue({
                         delete this.handler[instance.uid];
                         return remote;
                     }
+                    delete this.waiter[instance.uid];
                 })();
             }
             return this.waiter[instance.uid];
