@@ -288,7 +288,7 @@
         methods: {
             copyToClipboard(text) {
                 copyToClipboard(text);
-                this.$io.alert("Copied to clipboard!", "success");
+                this.$notify({ text: "Copied to clipboard!", type: "success" });
             },
         },
         components: {

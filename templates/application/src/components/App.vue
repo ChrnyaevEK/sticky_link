@@ -43,14 +43,14 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
         </nav>
-        <AlertUtil></AlertUtil>
+        <Notification></Notification>
         <router-view></router-view>
     </div>
 </template>
 
 <script>
     import SaveUtil from "./Utils/SaveUtil";
-    import AlertUtil from "./Utils/AlertUtil";
+    import Notification from "vue-notification";
     import $ from "jquery";
 
     export default {
@@ -63,7 +63,7 @@
         },
         components: {
             SaveUtil,
-            AlertUtil,
+            Notification,
         },
         created() {
             $(document).keyup((e) => {

@@ -10,7 +10,9 @@
         class="widget"
         :class="[
             widget.border ? 'widget-border' : 'no-border',
-            $env.state.optionsSource && $env.state.optionsSource.id == widget.id && $env.state.optionsSource.type == widget.type
+            $env.state.optionsSource &&
+            $env.state.optionsSource.id == widget.id &&
+            $env.state.optionsSource.type == widget.type
                 ? 'shadow'
                 : '',
         ]"
@@ -93,7 +95,7 @@
             },
             deleteWidget() {
                 if (confirm("Are you sure?")) {
-                    this.$env.dispatch('closeOptions');
+                    this.$env.dispatch("closeOptions");
                     this.$store.dispatch("deleteInstance", this.widget);
                 }
             },
@@ -109,12 +111,12 @@
             },
             onOpenOptions() {
                 if (this.$env.state.mode == this.$env.state.editMode) {
-                    this.$env.dispatch('openOptions', this.widget);
+                    this.$env.dispatch("openOptions", this.widget);
                 }
             },
             copySyncWidget() {
                 copyToClipboard(this.widget.sync_id);
-                this.$io.alert("Copied to clipboard!", "success");
+                this.$notify({ text: "Copied to clipboard!", type: "success" });
             },
         },
         components: {

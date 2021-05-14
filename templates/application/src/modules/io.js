@@ -2,12 +2,6 @@ import Vue from "vue";
 
 export default new Vue({
     data: {
-        alertUtil: {
-            html: null,
-            type: null,
-            visible: false,
-            fadeOutCoolDown: 1000,
-        },
         saveUtil: {
             state: null,
             type: null,
@@ -30,11 +24,6 @@ export default new Vue({
         },
     },
     methods: {
-        alert(html, type) {
-            this.alertUtil.html = html;
-            this.alertUtil.type = type;
-            this.alertUtil.visible = true;
-        },
         save(active) {
             if (active) {
                 this.saveUtil.state = this.saveUtil.states.saving;

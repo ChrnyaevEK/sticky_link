@@ -1,6 +1,9 @@
 <template>
     <div class="h-100 bg-light d-flex flex-column justify-content-between align-items-center overflow-hidden p-1">
-        <div v-if="$env.state.wall && ($env.state.wall.title || $env.state.wall.description)" class="w-100 text-nowrap overflow-hidden">
+        <div
+            v-if="$env.state.wall && ($env.state.wall.title || $env.state.wall.description)"
+            class="w-100 text-nowrap overflow-hidden"
+        >
             {{ $env.state.wall.title }} <small class="mx-1">{{ $env.state.wall.description }}</small>
         </div>
         <div
@@ -132,7 +135,10 @@
                 $(".quick-access").addClass("hidden");
             },
             onCreateWall(wall) {
-                this.$io.alert("New wall has been created!", "success");
+                this.$notify({
+                    text: "New wall has been created!",
+                    type: "success",
+                });
                 router.push({
                     name: "wallEdit",
                     params: {
