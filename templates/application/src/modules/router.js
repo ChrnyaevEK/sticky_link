@@ -9,26 +9,6 @@ import ws from "./ws";
 import $ from "jquery";
 
 Vue.use(VueRouter);
-async function enterRoutine(to, from, next) {
-    try {
-        await store.dispatch("fetchState", to.params.wallId);
-    } catch (e) {
-        return next({
-            name: "error",
-        });
-    }
-    await env.dispatch("closeOptions");
-    await env.dispatch("setWallByWallId", to.params.wallId);
-    $("#tab-title").text(`${store.state.user.username} @ ${process.env.VUE_APP_TITLE}`);
-    if (store.state.containers) {
-        let container = store.state.containers[0];
-        if (container) {
-            await env.dispatch("setContainerByContainerId", container.id);
-        }
-    }
-    Vue.nextTick(next);
-}
-
 const router = new VueRouter({
     mode: "history",
     routes: [
@@ -42,7 +22,6 @@ const router = new VueRouter({
                     alias: "",
                     component: Wall,
                     async beforeEnter(to, from, next) {
-                        await enterRoutine(to, from, next);
                         if (env.state.wall && !store.state.meta.edit_permission) {
                             return next({ to: "wallView", params: to.params });
                         }
@@ -58,7 +37,6 @@ const router = new VueRouter({
                     path: "wall/view/:wallId?",
                     component: Wall,
                     async beforeEnter(to, from, next) {
-                        await enterRoutine(to, from, next);
                         if (env.state.wall && !store.state.meta.view_permission) {
                             return next({ to: "wallEdit" });
                         }
@@ -82,5 +60,17 @@ const router = new VueRouter({
         },
     ],
 });
-
+router.beforeEach(async (to, from, next) => {
+    try {
+        await store.dispatch("fetchState", to.params.wallId);
+    } catch (e) {
+        return next({
+            name: "error",
+        });
+    }
+    if (store.state.user) {
+        $("#tab-title").text(`${store.state.user.username} @ ${process.env.VUE_APP_TITLE}`);
+    }
+    next();
+});
 export default router;

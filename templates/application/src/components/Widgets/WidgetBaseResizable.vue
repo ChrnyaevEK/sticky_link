@@ -1,7 +1,7 @@
 <template>
     <vue-draggable-resizable
-        :draggable="!$env.state.changesLock && $env.state.mode == $env.editMode"
-        :resizable="!$env.state.changesLock && $env.state.mode == $env.editMode"
+        :draggable="!$env.state.changesLock && $env.state.editMode"
+        :resizable="!$env.state.changesLock && $env.state.editMode"
         @resizestop="onResizeStop"
         @dragstop="onDrag"
         @activated="onActivated"
@@ -29,7 +29,7 @@
         :grid="[$store.state.app.grid, $store.state.app.grid]"
         ref="base"
     >
-        <div class="quick-access widget-quick-access hidden" v-if="$env.state.mode == $env.state.editMode">
+        <div class="quick-access widget-quick-access hidden" v-if="$env.state.editMode">
             <button
                 v-if="widget.sync_id || widget.is_referenced"
                 :title="
@@ -101,7 +101,7 @@
             },
             onActivated() {
                 this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
-                if (this.$env.state.mode == this.$env.state.editMode) {
+                if (this.$env.state.editMode) {
                     window.dispatchEvent(new Event("resize"));
                     $(".widget-quick-access").addClass("hidden");
                     $(this.$el)
@@ -110,7 +110,7 @@
                 }
             },
             onOpenOptions() {
-                if (this.$env.state.mode == this.$env.state.editMode) {
+                if (this.$env.state.editMode) {
                     this.$env.dispatch("openOptions", this.widget);
                 }
             },

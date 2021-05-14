@@ -10,6 +10,9 @@ import "@fortawesome/fontawesome-free/css/all.css";
 import $ from "jquery";
 import Rollbar from "rollbar";
 import JqueryRollbarPlugin from "rollbar-jquery";
+import Notifications from "vue-notification";
+
+Vue.use(Notifications);
 
 Vue.config.productionTip = false;
 Vue.prototype.$env = env;

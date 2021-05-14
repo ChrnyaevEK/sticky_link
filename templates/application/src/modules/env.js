@@ -11,14 +11,13 @@ async function nextTick() {
 }
 
 export default new VueX.Store({
-    editMode: Symbol(),
-    viewMode: Symbol(),
     state: {
         wall: null,
         container: null,
         changesLock: false, // Look resizing, dragging, instance mutations
         widgetsLock: false,
-        mode: null,
+        editMode: false,
+        viewMode: false,
         optionsSource: null,
     },
     mutations: {
@@ -31,10 +30,12 @@ export default new VueX.Store({
                 : null;
         },
         setEditMode(state) {
-            state.mode = this.editMode;
+            state.editMode = true;
+            state.viewMode = false;
         },
         setViewMode(state) {
-            state.mode = this.viewMode;
+            state.editMode = false;
+            state.viewMode = true;
         },
         setChangesLock(state, lock) {
             state.changesLock = lock;

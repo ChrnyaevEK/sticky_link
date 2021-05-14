@@ -12,10 +12,10 @@
                             v-show="$store.state.user.is_authenticated"
                             class="nav-link"
                             :to="{
-                                name: $env.state.mode == $env.editMode ? 'wallView' : 'wallEdit',
+                                name: $env.state.editMode ? 'wallView' : 'wallEdit',
                                 params: $route.params,
                             }"
-                            >{{ $env.state.mode == $env.editMode ? "View" : "Edit" }}
+                            >{{ $env.state.editMode ? "View" : "Edit" }}
                         </router-link>
                     </li>
                     <li class="nav-item">
@@ -43,14 +43,13 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
         </nav>
-        <Notification></Notification>
+        <notifications></notifications>
         <router-view></router-view>
     </div>
 </template>
 
 <script>
     import SaveUtil from "./Utils/SaveUtil";
-    import Notification from "vue-notification";
     import $ from "jquery";
 
     export default {
@@ -63,7 +62,6 @@
         },
         components: {
             SaveUtil,
-            Notification,
         },
         created() {
             $(document).keyup((e) => {
