@@ -6,7 +6,7 @@
                 @change="changeValue"
                 :checked="widget.value"
                 v-scope:id.value
-                :disabled="$env.widgetsLocked || $env.changesLocked"
+                :disabled="$env.state.widgetsLock || $env.state.changesLock"
                 class="custom-control-input"
             />
             <label class="custom-control-label" v-scope:for.value>{{ widget.title }}</label>

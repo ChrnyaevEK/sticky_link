@@ -12,10 +12,10 @@
                             v-show="$store.state.user.is_authenticated"
                             class="nav-link"
                             :to="{
-                                name: $env.edit ? 'wallView' : 'wallEdit',
+                                name: $env.state.mode == $env.editMode ? 'wallView' : 'wallEdit',
                                 params: $route.params,
                             }"
-                            >{{ $env.edit ? "View" : "Edit" }}
+                            >{{ $env.state.mode == $env.editMode ? "View" : "Edit" }}
                         </router-link>
                     </li>
                     <li class="nav-item">
@@ -27,7 +27,7 @@
             </div>
             <SaveUtil></SaveUtil>
             <div class="mx-5 text-secondary d-sm-none">
-                <span v-if="!$env.wall && $store.state.user.is_authenticated">
+                <span v-if="!$env.state.wall && $store.state.user.is_authenticated">
                     Select or create a <span class="text-success font-weight-bold">wall</span> to continue
                 </span>
             </div>
@@ -67,7 +67,7 @@
         },
         created() {
             $(document).keyup((e) => {
-                if (e.keyCode === 27) this.$env.closeOptions(); // esc
+                if (e.keyCode === 27) this.$env.dispatch("closeOptions");
             });
         },
     };

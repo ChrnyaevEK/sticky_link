@@ -1,6 +1,6 @@
 <template>
     <vue-draggable-resizable
-        v-if="$env.openOptionsFor !== null"
+        v-if="$env.state.optionsSource !== null"
         dragHandle=".options-drag"
         @click.native.stop
         @touchstart.native.stop.prevent
@@ -12,7 +12,7 @@
     >
         <div class="form-group d-flex justify-content-between align-items-center options-drag cursor-move">
             <strong>Options</strong>
-            <a class="btn" @click="$env.closeOptions()"><i class="fas fa-times"></i></a>
+            <a class="btn" @click="$env.dispatch('closeOptions')"><i class="fas fa-times"></i></a>
         </div>
         <hr />
         <wall-options v-if="instance.type == types.Wall" :instance="instance" @push="push"></wall-options>
@@ -24,7 +24,7 @@
         <port-options v-else-if="instance.type == types.Port" :instance="instance" @push="push"></port-options>
         <widgets-options v-else :instance="instance" @push="push"></widgets-options>
         <div class="form-group">
-            <button :disabled="$env.changesLocked" class="btn btn-sm btn-danger w-100" @click.stop="onDeleteInstance">
+            <button :disabled="$env.state.changesLock" class="btn btn-sm btn-danger w-100" @click.stop="onDeleteInstance">
                 Delete
             </button>
         </div>
@@ -56,7 +56,7 @@
         },
         computed: {
             instance() {
-                return this.$env.makeMutable(this.$env.openOptionsFor);
+                return Object.assign({}, this.$env.state.optionsSource);
             },
         },
         methods: {
@@ -75,7 +75,7 @@
             async onDeleteInstance() {
                 if (confirm("Are you sure?")) {
                     await this.$store.dispatch("deleteInstance", this.instance);
-                    this.$env.closeOptions();
+                    this.$env.state.dispath('closeOptions');
                 }
             },
             unsetWarning() {

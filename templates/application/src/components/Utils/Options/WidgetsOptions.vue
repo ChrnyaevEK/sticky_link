@@ -13,7 +13,7 @@
                     :step="$store.state.app.grid"
                     v-model.number="instance.x"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                     type="number"
                     min="0"
@@ -27,7 +27,7 @@
                     :step="$store.state.app.grid"
                     v-model.number="instance.y"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                     type="number"
                     min="0"
@@ -41,7 +41,7 @@
                     :step="$store.state.app.grid"
                     v-model.number="instance.z"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                     type="number"
                     min="0"
@@ -64,7 +64,7 @@
                     :step="$store.state.app.grid"
                     v-model.number="instance.w"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                     type="number"
                     min="50"
@@ -78,7 +78,7 @@
                     v-scope:id.h
                     v-model.number="instance.h"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                     type="number"
                     step="1"
@@ -99,7 +99,7 @@
                     v-scope:id.font_size
                     v-model.number="instance.font_size"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                     type="number"
                     step="1"
@@ -114,7 +114,7 @@
                     v-scope:id.font_weight
                     v-model.number="instance.font_weight"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                     type="number"
                     step="100"
@@ -137,7 +137,7 @@
                     v-scope:id.background_color
                     v-model="instance.background_color"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                     type="color"
                 />
@@ -150,7 +150,7 @@
                     v-scope:id.text_color
                     v-model="instance.text_color"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                     type="color"
                 />
@@ -162,7 +162,7 @@
                     v-scope:id.border
                     v-model="instance.border"
                     @change="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-check-input"
                     type="checkbox"
                 />
@@ -182,7 +182,7 @@
                     v-scope:id.title
                     v-model="instance.title"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                 />
                 <span slot="help">Name you widget</span>
@@ -194,7 +194,7 @@
                     v-scope:id.help
                     v-model="instance.help"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                     maxlength="200"
                 />
@@ -217,7 +217,7 @@
                     v-scope:id.sync_id
                     v-model="instance.sync_id"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                     type="text"
                     maxlength="20"
@@ -240,25 +240,25 @@
             v-if="instance.type == types.Counter"
             :instance="instance"
             @push="$emit('push')"
-            :disabled="$env.changesLocked"
+            :disabled="$env.state.changesLock"
         ></counter-options>
         <url-options
             v-if="instance.type == types.URL"
             :instance="instance"
             @push="$emit('push')"
-            :disabled="$env.changesLocked"
+            :disabled="$env.state.changesLock"
         ></url-options>
         <simple-text-options
             v-if="instance.type == types.SimpleText"
             :instance="instance"
             @push="$emit('push')"
-            :disabled="$env.changesLocked"
+            :disabled="$env.state.changesLock"
         ></simple-text-options>
         <simple-list-options
             v-if="instance.type == types.SimpleList"
             :instance="instance"
             @push="$emit('push')"
-            :disabled="$env.changesLocked"
+            :disabled="$env.state.changesLock"
         ></simple-list-options>
     </div>
 </template>

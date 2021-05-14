@@ -1,83 +1,92 @@
 import Vue from "vue";
-import $ from "jquery";
+import VueX from "vuex";
 import store from "./store";
-import io from "./io";
 
-export default new Vue({
-    data: {
-        changesLocked: false, // Look resizing, dragging, instance mutations
+Vue.use(VueX);
 
-        openOptionsFor: null,
-        edit: false,
+async function nextTick() {
+    await new Promise((resolve) => {
+        Vue.nextTick(resolve);
+    });
+}
 
-        wallId: null,
-        containerId: null,
+export default new VueX.Store({
+    editMode: Symbol(),
+    viewMode: Symbol(),
+    state: {
+        wall: null,
+        container: null,
+        changesLock: false, // Look resizing, dragging, instance mutations
+        widgetsLock: false,
+        mode: null,
+        optionsSource: null,
     },
-    computed: {
-        wall() {
-            return store.state.walls ? store.state.walls.filter((w) => w.id == this.wallId)[0] : null;
+    mutations: {
+        setWallByWallId(state, wallId) {
+            state.wall = store.state.walls ? store.state.walls.filter((w) => w.id == wallId)[0] : null;
         },
-        container() {
-            return store.state.containers ? store.state.containers.filter((c) => c.id == this.containerId)[0] : null;
+        setContainerByContainerId(state, containerId) {
+            state.container = store.state.containers
+                ? store.state.containers.filter((c) => c.id == containerId)[0]
+                : null;
         },
-        widgetsLocked(){
-            return this.edit && this.wall && this.wall.lock_widgets
-        }
+        setEditMode(state) {
+            state.mode = this.editMode;
+        },
+        setViewMode(state) {
+            state.mode = this.viewMode;
+        },
+        setChangesLock(state, lock) {
+            state.changesLock = lock;
+        },
+        setWidgetsLock(state, lock) {
+            state.widgetsLock = lock;
+        },
+        setOptionsSource(state, source) {
+            state.optionsSource = source;
+        },
+        //this.edit && this.wall && this.wall.lock_widgets
     },
-    methods: {
-        async lockChanges() {
-            this.changesLocked = true;
-            await new Promise((resolve) => {
-                Vue.nextTick(resolve);
-            });
+
+    actions: {
+        async setEditMode(context) {
+            context.commit('setEditMode')
+            await nextTick()
         },
-        async unlockChanges() {
-            this.changesLocked = false;
-            await new Promise((resolve) => {
-                Vue.nextTick(resolve);
-            });
+        async setViewMode(context) {
+            context.commit('setViewMode')
+            await nextTick()
         },
-        async lockWidgets() {
-            this.widgetsLocked = true;
-            await new Promise((resolve) => {
-                Vue.nextTick(resolve);
-            });
+        async setWallByWallId(context, wallId) {
+            context.commit("setWallByWallId", wallId);
+            await nextTick();
         },
-        async unlockWidgets() {
-            this.widgetsLocked = false;
-            await new Promise((resolve) => {
-                Vue.nextTick(resolve);
-            });
+        async setContainerByContainerId(context, containerId) {
+            context.commit("setContainerByContainerId", containerId);
+            await nextTick();
         },
-        async openOptions(instance) {
-            this.openOptionsFor = instance;
-            await new Promise((resolve) => {
-                Vue.nextTick(resolve);
-            });
+        async lockChanges(context) {
+            context.commit("setChangesLock", true);
         },
-        async closeOptions() {
-            this.openOptionsFor = null;
-            await new Promise((resolve) => {
-                Vue.nextTick(resolve);
-            });
+        async unlockChanges(context) {
+            context.commit("setChangesLock", false);
+            await nextTick();
         },
-        setTabTitle() {
-            $("#tab-title").text(`${store.state.user.username} @ ${process.env.VUE_APP_TITLE}`);
+        async lockWidgets(context) {
+            context.commit("setWidgetsLock", true);
+            await nextTick();
         },
-        handleUnexpected() {
-            io.alert("Something went wrong...", "danger");
+        async unlockWidgets(context) {
+            context.commit("setWidgetsLock", false);
+            await nextTick();
         },
-        async handleBadRequest(response) {
-            if (response.responseJSON && response.responseJSON.detail) {
-                io.alert(response.responseJSON.detail, "danger");
-            } else if (response.status >= 500) {
-                io.alert("Server error occurred", "danger");
-            }
-            await this.unlockChanges()
+        async openOptions(context, instance) {
+            context.commit("setOptionsSource", instance);
+            await nextTick();
         },
-        makeMutable() {
-            // To allow straight mutations
-            return Object.assign({}, ...arguments);
+        async closeOptions(context) {
+            context.commit("setOptionsSource", null);
+            await nextTick();
         },
     },
 });

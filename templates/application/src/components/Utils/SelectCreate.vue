@@ -17,7 +17,7 @@
                         class="dropdown-item btn btn-sm"
                         v-for="wall of $store.state.walls"
                         :key="wall.id"
-                        :class="{ active: wall.id == $env.wallId, 'text-secondary': !wall.title }"
+                        :class="{ active: wall.id == $env.state.wall.id, 'text-secondary': !wall.title }"
                         :to="{
                             name: 'wallEdit',
                             params: { wallId: wall.id },
@@ -30,19 +30,19 @@
                 class="mr-1 btn btn-sm btn-success text-white border"
                 @click="createWall"
                 title="Add new wall"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
             >
                 <i class="fas fa-plus"></i>
             </button>
             <button
-                v-if="$env.wall"
+                v-if="$env.state.wall"
                 class="mr-1 btn btn-sm btn-default"
-                @click.stop="$env.openOptions($env.wall)"
-                :disabled="$env.changesLocked"
+                @click.stop="$env.dispatch('openOptions', $env.state.wall)"
+                :disabled="$env.state.changesLock"
             >
                 <i class="fas fa-ellipsis-v"></i>
             </button>
-            <div v-if="$store.state.ports && $env.wall">
+            <div v-if="$store.state.ports && $env.state.wall">
                 <a
                     class="btn btn-sm dropdown-toggle"
                     id="wall-list"
@@ -65,21 +65,21 @@
                 </div>
             </div>
             <button
-                v-if="$store.state.ports && $env.wall"
+                v-if="$store.state.ports && $env.state.wall"
                 class="mr-1 btn btn-sm btn-success text-white border"
                 @click="createPort"
                 title="Add new port"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
             >
                 <i class="fas fa-plus"></i>
             </button>
         </div>
-        <span class="overflow-auto scrollbar-hidden d-flex" v-if="$env.wall">
+        <span class="overflow-auto scrollbar-hidden d-flex" v-if="$env.state.wall">
             <button
                 @click.stop="createInstance('container')"
                 class="mr-1 btn btn-sm bg-light border text-nowrap"
                 title="Add Container to hold widgets"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
             >
                 Container
             </button>
@@ -87,7 +87,7 @@
                 @click.stop="createInstance('simple_text')"
                 class="mr-1 btn btn-sm bg-light border text-nowrap"
                 title="Add new widget of type Simple text"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
             >
                 Text
             </button>
@@ -95,7 +95,7 @@
                 @click.stop="createInstance('url')"
                 class="mr-1 btn btn-sm bg-light border text-nowrap"
                 title="Add new widget of type URL"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
             >
                 URL
             </button>
@@ -103,7 +103,7 @@
                 @click.stop="createInstance('counter')"
                 class="mr-1 btn btn-sm bg-light border text-nowrap"
                 title="Add new widget of type Counter"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
             >
                 Counter
             </button>
@@ -111,7 +111,7 @@
                 @click.stop="createInstance('simple_list')"
                 class="mr-1 btn btn-sm bg-light border text-nowrap"
                 title="Add new widget of type Simple list"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
             >
                 List
             </button>
@@ -119,7 +119,7 @@
                 @click.stop="createInstance('simple_switch')"
                 class="mr-1 btn btn-sm bg-light border text-nowrap"
                 title="Add new widget of type Switch"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
             >
                 Switch
             </button>
@@ -133,19 +133,19 @@
             async createInstance(type) {
                 switch (type) {
                     case "container":
-                        if (this.$env.wall) {
+                        if (this.$env.state.wall) {
                             let index = 0;
                             for (let container of this.$store.state.containers) {
                                 if (container.index > index) {
                                     index = container.index + 1;
                                 }
                             }
-                            await this.$store.dispatch("createInstance", { type, wall: this.$env.wall.id, index });
+                            await this.$store.dispatch("createInstance", { type, wall: this.$env.state.wall.id, index });
                         }
                         break;
                     default:
-                        await this.$store.dispatch("createInstance", { type, container: this.$env.containerId });
-                        this.$store.dispatch("recalculateWidgets", this.$env.container);
+                        await this.$store.dispatch("createInstance", { type, container: this.$env.state.container.id });
+                        this.$store.dispatch("recalculateWidgets", this.$env.state.container);
                         break;
                 }
             },
@@ -154,7 +154,7 @@
                 this.$emit("wallCreated", wall);
             },
             async createPort() {
-                var port = await this.$store.dispatch("createInstance", { type: "port", wall: this.$env.wall.id });
+                var port = await this.$store.dispatch("createInstance", { type: "port", wall: this.$env.state.wall.id });
                 this.$emit("portSelected", port);
             },
             portSelected(port) {

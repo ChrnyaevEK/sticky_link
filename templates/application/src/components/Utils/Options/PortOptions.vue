@@ -27,7 +27,7 @@
                     v-scope:id.title
                     v-model="instance.title"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                     maxlength="200"
                 />
@@ -44,7 +44,7 @@
                     v-model="instance.wall"
                     :key="instance.wall"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                 ></v-select>
                 <span slot="help">Port will disappear from this wall after update.</span>
             </options-item>
@@ -56,7 +56,7 @@
                     v-scope:id.redirect_url
                     v-model="instance.redirect_url"
                     @input="$emit('push')"
-                    :disabled="$env.changesLocked"
+                    :disabled="$env.state.changesLock"
                     class="form-control"
                 />
                 <span slot="help">Redirect to any address. If no address specified - redirect to selected wall</span>

@@ -10,7 +10,7 @@
                 v-scope:id.inner_border
                 v-model="instance.inner_border"
                 @change="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 class="form-check-input"
                 type="checkbox"
             />

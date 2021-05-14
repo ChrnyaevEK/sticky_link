@@ -262,14 +262,3 @@ class Port(Common):
 
     redirect_url = models.URLField(verbose_name='Redirect URL', help_text='Override default redirect (to this wall)',
                                    null=True, blank=True)
-
-
-# class File(Widget):
-#     type = 'file'
-#     sync_fields = ['href']
-#
-#     file = models.FileField(verbose_name='Uploaded file', null=True, blank=True)
-#     image = models.ImageField(verbose_name='Uploaded image', null=True, blank=True)
-#     owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
-#
-#     sync_id = models.ForeignKey('URL', blank=True, null=True, on_delete=models.SET_NULL)

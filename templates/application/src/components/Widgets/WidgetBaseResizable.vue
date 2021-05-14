@@ -1,7 +1,7 @@
 <template>
     <vue-draggable-resizable
-        :draggable="!$env.changesLocked && $env.edit"
-        :resizable="!$env.changesLocked && $env.edit"
+        :draggable="!$env.state.changesLock && $env.state.mode == $env.editMode"
+        :resizable="!$env.state.changesLock && $env.state.mode == $env.editMode"
         @resizestop="onResizeStop"
         @dragstop="onDrag"
         @activated="onActivated"
@@ -10,7 +10,7 @@
         class="widget"
         :class="[
             widget.border ? 'widget-border' : 'no-border',
-            $env.openOptionsFor && $env.openOptionsFor.id == widget.id && $env.openOptionsFor.type == widget.type
+            $env.state.optionsSource && $env.state.optionsSource.id == widget.id && $env.state.optionsSource.type == widget.type
                 ? 'shadow'
                 : '',
         ]"
@@ -27,7 +27,7 @@
         :grid="[$store.state.app.grid, $store.state.app.grid]"
         ref="base"
     >
-        <div class="quick-access widget-quick-access hidden" v-if="$env.edit">
+        <div class="quick-access widget-quick-access hidden" v-if="$env.state.mode == $env.state.editMode">
             <button
                 v-if="widget.sync_id || widget.is_referenced"
                 :title="
@@ -35,17 +35,17 @@
                         ? `This widget is synchronized with ${widget.sync_id}`
                         : 'This widget is referenced by at least one widget'
                 "
-                :disabled="$env.changesLocked || !widget.sync_id"
+                :disabled="$env.state.changesLock || !widget.sync_id"
                 class="btn btn-sm btn-light border"
                 @click="copySyncWidget"
             >
                 <i class="fas fa-link"></i>
             </button>
-            <button :disabled="$env.changesLocked" class="btn btn-sm btn-danger" @click="deleteWidget">
+            <button :disabled="$env.state.changesLock" class="btn btn-sm btn-danger" @click="deleteWidget">
                 <i class="fas fa-trash"></i>
             </button>
             <button
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 class="btn btn-sm btn-light border"
                 @click="$store.dispatch('copyWidget', widget)"
             >
@@ -81,25 +81,25 @@
         methods: {
             onResizeStop(x, y, w, h) {
                 this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
-                if (!this.$env.changesLocked) {
+                if (!this.$env.state.changesLock) {
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { w, h }));
                 }
             },
             onDrag(x, y) {
                 this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
-                if (!this.$env.changesLocked) {
+                if (!this.$env.state.changesLock) {
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { x, y }));
                 }
             },
             deleteWidget() {
                 if (confirm("Are you sure?")) {
-                    this.$env.closeOptions();
+                    this.$env.dispatch('closeOptions');
                     this.$store.dispatch("deleteInstance", this.widget);
                 }
             },
             onActivated() {
                 this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
-                if (this.$env.edit) {
+                if (this.$env.state.mode == this.$env.state.editMode) {
                     window.dispatchEvent(new Event("resize"));
                     $(".widget-quick-access").addClass("hidden");
                     $(this.$el)
@@ -108,8 +108,8 @@
                 }
             },
             onOpenOptions() {
-                if (this.$env.edit) {
-                    this.$env.openOptions(this.widget);
+                if (this.$env.state.mode == this.$env.state.editMode) {
+                    this.$env.dispatch('openOptions', this.widget);
                 }
             },
             copySyncWidget() {

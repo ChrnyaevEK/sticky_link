@@ -6,6 +6,7 @@ import Wall from "../components/Wall";
 import store from "./store";
 import env from "./env";
 import ws from "./ws";
+import $ from "jquery";
 
 Vue.use(VueRouter);
 async function enterRoutine(to, from, next) {
@@ -16,12 +17,14 @@ async function enterRoutine(to, from, next) {
             name: "error",
         });
     }
-    await env.closeOptions()
-    env.wallId = to.params.wallId;
-    env.setTabTitle();
+    await env.dispatch("closeOptions");
+    await env.dispatch("setWallByWallId", to.params.wallId);
+    $("#tab-title").text(`${store.state.user.username} @ ${process.env.VUE_APP_TITLE}`);
     if (store.state.containers) {
         let container = store.state.containers[0];
-        env.containerId = container ? container.id : null;
+        if (container) {
+            await env.dispatch("setContainerByContainerId", container.id);
+        }
     }
     Vue.nextTick(next);
 }
@@ -40,13 +43,13 @@ const router = new VueRouter({
                     component: Wall,
                     async beforeEnter(to, from, next) {
                         await enterRoutine(to, from, next);
-                        if (env.wall && !store.state.meta.edit_permission) {
+                        if (env.state.wall && !store.state.meta.edit_permission) {
                             return next({ to: "wallView", params: to.params });
                         }
                         if (to.params.wallId !== undefined) {
                             ws.open(to.params.wallId);
                         }
-                        env.edit = true;
+                        await env.dispatch("setEditMode");
                         next();
                     },
                 },
@@ -56,13 +59,13 @@ const router = new VueRouter({
                     component: Wall,
                     async beforeEnter(to, from, next) {
                         await enterRoutine(to, from, next);
-                        if (env.wall && !store.state.meta.view_permission) {
+                        if (env.state.wall && !store.state.meta.view_permission) {
                             return next({ to: "wallEdit" });
                         }
                         if (to.params.wallId !== undefined) {
                             ws.open(to.params.wallId);
                         }
-                        env.edit = false;
+                        await env.dispatch("setViewMode");
                         next();
                     },
                 },

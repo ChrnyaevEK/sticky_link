@@ -10,7 +10,7 @@
                 key="fa-chevron-up"
                 class="btn border w-100"
                 @click="changeValue(widget.step)"
-                :disabled="$env.widgetsLocked || $env.changesLocked"
+                :disabled="$env.state.widgetsLock || $env.state.changesLock"
             >
                 <i class="fa fa-chevron-up"></i>
             </button>
@@ -19,7 +19,7 @@
                 key="fa-chevron-left"
                 class="btn border h-100"
                 @click="changeValue(-widget.step)"
-                :disabled="$env.widgetsLocked || $env.changesLocked"
+                :disabled="$env.state.widgetsLock || $env.state.changesLock"
             >
                 <i class="fa fa-chevron-left"></i>
             </button>
@@ -31,7 +31,7 @@
                 key="fa-chevron-down"
                 class="btn border w-100"
                 @click="changeValue(-widget.step)"
-                :disabled="$env.widgetsLocked || $env.changesLocked"
+                :disabled="$env.state.widgetsLock || $env.state.changesLock"
             >
                 <i class="fa fa-chevron-down"></i>
             </button>
@@ -40,7 +40,7 @@
                 key="fa-chevron-right"
                 class="btn border h-100"
                 @click="changeValue(widget.step)"
-                :disabled="$env.widgetsLocked || $env.changesLocked"
+                :disabled="$env.state.widgetsLock || $env.state.changesLock"
             >
                 <i class="fa fa-chevron-right"></i>
             </button>

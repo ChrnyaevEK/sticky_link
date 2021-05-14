@@ -7,7 +7,6 @@ import "bootstrap";
 import "./css/main.scss";
 import "@fortawesome/fontawesome-free/js/all.js";
 import "@fortawesome/fontawesome-free/css/all.css";
-import { generateId } from "./common";
 import $ from "jquery";
 import Rollbar from "rollbar";
 import JqueryRollbarPlugin from "rollbar-jquery";
@@ -43,7 +42,10 @@ rollbar.configure({ reportLevel: "error" });
 rollbar.configure({
     onSendCallback: function(isUncaught) {
         if (isUncaught) {
-            env.handleUnexpected();
+            Vue.notify({
+                type: "error",
+                text: "Something went wrong...",
+            });
         }
     },
 });

@@ -14,8 +14,8 @@ function determineSource(instance) {
             return "walls";
         case "container":
             return "containers";
-        case 'port':
-            return 'ports'
+        case "port":
+            return "ports";
         default:
             return "widgets";
     }
@@ -45,9 +45,9 @@ export default new Vuex.Store({
         containers: null,
         ports: null,
         widgets: null,
-        
+
         meta: null,
-        
+
         app: {
             title: process.env.VUE_APP_TITLE,
             grid: 3,
@@ -86,18 +86,18 @@ export default new Vuex.Store({
             return instance;
         },
         async createInstance(context, instance) {
-            await env.lockChanges();
+            await env.dispatch('lockChanges');
             instance = await api.create(instance.type, instance);
             context.commit("updateOrAddInstance", instance);
-            await env.unlockChanges();
+            await env.dispatch('unlockChanges');
             return instance;
         },
         async deleteInstance(context, instance) {
-            await env.lockChanges(); // Lock changes to prevent update for deleted instance
+            await env.dispatch('lockChanges'); // Lock changes to prevent update for deleted instance
             await um.cancelPending(instance); // cancel or wait for pending update
             await api.delete(instance.type, instance.id, instance.uid); // Perform delete
             context.commit("deleteInstance", instance); // Delete local copy
-            await env.unlockChanges(); // Unlock changes
+            await env.dispatch('unlockChanges'); // Unlock changes
         },
         async updateOrAddInstance(context, instance) {
             io.save(true);
@@ -132,7 +132,7 @@ export default new Vuex.Store({
             let update = [];
             for (let widget of context.state.widgets) {
                 if (widget.container == container.id) {
-                    widget = fitWidget(env.makeMutable(widget), container);
+                    widget = fitWidget(Object.assign({}, widget), container);
                     update.push(context.dispatch("updateOrAddInstance", widget));
                 }
             }

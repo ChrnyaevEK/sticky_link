@@ -4,7 +4,7 @@
             <span slot="title">Content</span>
             <span slot="description">Add text content to widget</span>
         </options-item>
-        <TextEditor v-model="instance.text_content" @input="$emit('push')" :disabled="$env.changesLocked"></TextEditor>
+        <TextEditor v-model="instance.text_content" @input="$emit('push')" :disabled="$env.state.changesLock"></TextEditor>
     </div>
 </template>
 

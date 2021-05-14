@@ -9,7 +9,7 @@
             <input
                 slot="input"
                 @input="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 v-model="instance.title"
                 v-scope.id:title
                 class="form-control"
@@ -23,7 +23,7 @@
                 slot="input"
                 v-scope:id.description
                 @input="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 v-model="instance.description"
                 class="form-control"
                 maxlength="500"
@@ -37,7 +37,7 @@
                 v-scope:id.allow_anonymous_view
                 v-model="instance.allow_anonymous_view"
                 @change="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 class="form-check-input"
                 type="checkbox"
             />
@@ -50,7 +50,7 @@
                 v-scope:id.lock_widgets
                 v-model="instance.lock_widgets"
                 @change="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 class="form-check-input"
                 type="checkbox"
             />

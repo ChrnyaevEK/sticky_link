@@ -22,7 +22,7 @@ def _get_protected_queryset(model, user):
     elif model == models.Port:
         q = Q(wall__allow_anonymous_view=True)
         if not user.is_anonymous:
-            q.add(Q(owner=user), Q.OR)
+            q.add(Q(wall__owner=user), Q.OR)
     else:
         q = Q(container__wall__allow_anonymous_view=True)
         if not user.is_anonymous:
@@ -217,12 +217,3 @@ class PortViewSet(SyncViewSet):
     def create(self, request, *args, **kwargs):
         request.data['owner'] = request.user.id
         return super().create(request, *args, **kwargs)
-
-
-# class FileViewSet(SyncViewSet):
-#     serializer_class = serializers.FileSerializer
-#     model_class = models.File
-#
-#     def create(self, request, *args, **kwargs):
-#         request.data['owner'] = request.user.id
-#         return super().create(request, *args, **kwargs)

@@ -12,7 +12,7 @@
                 :step="$store.state.app.grid"
                 v-model.number="instance.h"
                 @input="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 min="50"
                 class="form-control"
                 type="number"
@@ -30,7 +30,7 @@
                 slot="input"
                 v-model="instance.title"
                 @input="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 class="form-control"
                 maxlength="200"
             />
@@ -42,7 +42,7 @@
                 slot="input"
                 v-scope:id.description
                 @input="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 v-model="instance.description"
                 class="form-control"
                 maxlength="500"

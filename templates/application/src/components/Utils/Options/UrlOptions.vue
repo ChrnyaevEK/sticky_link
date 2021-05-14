@@ -10,7 +10,7 @@
                 v-scope:id.href
                 v-model="instance.href"
                 @input="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 class="form-control"
             />
         </options-item>
@@ -21,7 +21,7 @@
                 v-scope:id.text
                 v-model="instance.text"
                 @input="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 class="form-control"
             />
             <span slot="help">This text will be shown instead of url address</span>
@@ -33,7 +33,7 @@
                 v-scope:id.open_in_new_window
                 v-model="instance.open_in_new_window"
                 @change="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 class="form-check-input"
                 type="checkbox"
             />

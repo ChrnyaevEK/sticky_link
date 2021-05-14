@@ -25,7 +25,7 @@ export default new Vue({
             await this.waiter[instance.uid]; // Wait for pending ajax
         },
         async proposeUpdate(update, instance) {
-            if (env.changesLocked) return;
+            if (env.state.changesLock) return;
             this.handler[instance.uid] = Object.assign({}, this.handler[instance.uid], update); // Merge updates
             if (!this.waiter[instance.uid]) {
                 // Already waiting to push update?

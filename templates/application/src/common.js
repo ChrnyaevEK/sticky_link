@@ -28,9 +28,9 @@ export function copyToClipboard(text) {
     input.value = text;
     input.focus();
     input.select();
-    document.execCommand('copy');
+    document.execCommand("copy");
     input.parentNode.removeChild(input);
-  }
+}
 
 export const types = {
     Wall: "wall",
@@ -40,7 +40,7 @@ export const types = {
     Counter: "counter",
     SimpleList: "simple_list",
     SimpleSwitch: "simple_switch",
-    Port: 'port',
+    Port: "port",
 };
 
 export default {

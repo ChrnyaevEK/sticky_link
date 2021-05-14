@@ -5,7 +5,7 @@
             @click.stop.prevent="openHref"
             class="w-100 h-100 text-break border cursor-pointer d-flex justify-content-center align-items-center"
             :style="`color: ${widget.text_color};`"
-            :disabled="$env.widgetsLocked || $env.changesLocked"
+            :disabled="$env.state.widgetsLock || $env.state.changesLock"
             ><u>{{ widget.text || widget.href }}</u>
             <i class="mx-2 fas fa-external-link-square-alt text-muted"></i>
         </a>
@@ -29,7 +29,7 @@
         },
         methods: {
             openHref() {
-                if (this.widget.href && !this.$env.widgetsLocked) {
+                if (this.widget.href && !this.$env.state.widgetsLock) {
                     window.open(this.widget.href, this.widget.open_in_new_window ? "_blank" : undefined);
                 }
             },

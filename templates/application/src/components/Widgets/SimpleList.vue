@@ -13,7 +13,7 @@
                 <span class="w-100 p-1">
                     {{ val }}
                 </span>
-                <button @click.stop="removeItem(i)" :disabled="$env.widgetsLocked || $env.changesLocked" class="btn">
+                <button @click.stop="removeItem(i)" :disabled="$env.state.widgetsLock || $env.state.changesLock" class="btn">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -25,9 +25,9 @@
                 v-model="item"
                 @keyup.enter="addItem"
                 class="form-control"
-                :disabled="$env.widgetsLocked || $env.changesLocked"
+                :disabled="$env.state.widgetsLock || $env.state.changesLock"
             />
-            <button @click.stop="addItem" :disabled="$env.widgetsLocked || $env.changesLocked" class="btn">
+            <button @click.stop="addItem" :disabled="$env.state.widgetsLock || $env.state.changesLock" class="btn">
                 <i class="fas fa-plus"></i>
             </button>
         </div>
@@ -56,7 +56,7 @@
         },
         methods: {
             addItem() {
-                if (this.item && !this.$env.widgetsLocked) {
+                if (this.item && !this.$env.state.widgetsLock) {
                     var items = this.widget.items ? deepCopy(this.widget.items) : [];
                     items.push(this.item);
                     this.item = undefined;
@@ -64,7 +64,7 @@
                 }
             },
             removeItem(i) {
-                if (this.widget.items && !this.$env.widgetsLocked) {
+                if (this.widget.items && !this.$env.state.widgetsLock) {
                     var items = deepCopy(this.widget.items);
                     items.splice(i, 1);
                     this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { items }));

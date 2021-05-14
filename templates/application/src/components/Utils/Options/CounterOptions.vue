@@ -12,7 +12,7 @@
                 v-scope:id.value
                 v-model.number="instance.value"
                 @input="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 class="form-control"
                 type="number"
             />
@@ -25,7 +25,7 @@
                 v-scope:id.vertical
                 v-model="instance.vertical"
                 @change="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 class="form-check-input"
                 type="checkbox"
             />
@@ -38,7 +38,7 @@
                 v-scope:id.step
                 v-model.number="instance.step"
                 @input="$emit('push')"
-                :disabled="$env.changesLocked"
+                :disabled="$env.state.changesLock"
                 class="form-control"
                 type="number"
             />

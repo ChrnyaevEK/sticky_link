@@ -1,14 +1,14 @@
 <template>
     <div class="h-100 bg-light d-flex flex-column justify-content-between align-items-center overflow-hidden p-1">
-        <div v-if="$env.wall && ($env.wall.title || $env.wall.description)" class="w-100 text-nowrap overflow-hidden">
-            {{ $env.wall.title }} <small class="mx-1">{{ $env.wall.description }}</small>
+        <div v-if="$env.state.wall && ($env.state.wall.title || $env.state.wall.description)" class="w-100 text-nowrap overflow-hidden">
+            {{ $env.state.wall.title }} <small class="mx-1">{{ $env.state.wall.description }}</small>
         </div>
         <div
             class="w-100 h-100 py-1 overflow-auto pb-5"
-            v-if="$env.wall"
+            v-if="$env.state.wall"
             @click="
                 unsetWidgetSelection();
-                $env.closeOptions();
+                $env.dispatch('closeOptions');
             "
         >
             <div
@@ -27,11 +27,11 @@
                     class="overflow-auto border container-wrap scrollable-element relative bg-white"
                 >
                     <vue-draggable-resizable
-                        @click.native.stop="$env.closeOptions()"
-                        @touchstart.native="$env.closeOptions()"
+                        @click.native.stop="$env.dispatch('closeOptions')"
+                        @touchstart.native="$env.dispatch('closeOptions')"
                         @resizing="onResizing"
                         @activated="onActivated(container)"
-                        :resizable="$env.edit && !$env.changesLocked"
+                        :resizable="$env.state.mode == $env.state.editMode && !$env.state.changesLock"
                         :draggable="false"
                         :parent="false"
                         :handles="['bm']"
@@ -57,18 +57,18 @@
                 <div
                     class="quick-access container-quick-access hidden p-1"
                     :class="{ 'container-title-offset': container.title }"
-                    v-if="$env.edit"
+                    v-if="$env.state.mode == $env.state.editMode"
                 >
                     <button
                         class="btn btn-sm btn-light border"
-                        @click.stop="$env.openOptions(container)"
-                        :disabled="$env.changesLocked"
+                        @click.stop="$env.dispatch('openOptions', container)"
+                        :disabled="$env.state.changesLock"
                     >
                         <i class="fas fa-ellipsis-v"></i>
                     </button>
                 </div>
             </div>
-            <Options v-if="$env.edit"></Options>
+            <Options v-if="$env.state.mode == $env.state.editMode"></Options>
         </div>
         <div v-else class="w-100 h-100 d-flex justify-content-center align-items-center text-secondary">
             <span v-if="$store.state.user.is_authenticated">No wall is selected...</span>
@@ -77,7 +77,7 @@
         <SelectCreate
             @wallCreated="onCreateWall"
             @portSelected="onPortSelected"
-            v-if="$env.edit && $store.state.user.is_authenticated"
+            v-if="$env.state.mode == $env.state.editMode && $store.state.user.is_authenticated"
         ></SelectCreate>
     </div>
 </template>
@@ -102,7 +102,7 @@
         },
         methods: {
             onResizing(x, y, w, h) {
-                let instance = this.$env.makeMutable(this.$env.container, { h });
+                let instance = Object.assign({}, this.$env.state.container, { h });
                 this.$store.dispatch("recalculateWidgets", instance);
                 this.$store.dispatch("updateOrAddInstance", instance);
             },
@@ -112,13 +112,13 @@
                 )[0];
             },
             onActivated(container) {
-                this.$env.containerId = container.id;
+                this.$env.dispatch("setContainerByContainerId", container.id);
                 window.dispatchEvent(new Event("resize"));
 
                 let containerId = "#" + this._(container.id);
                 container = $(containerId);
 
-                if (this.$env.edit) {
+                if (this.$env.state.mode == this.$env.state.editMode) {
                     $(".quick-access")
                         .not(`${containerId} .quick-access`)
                         .addClass("hidden");
@@ -141,7 +141,7 @@
                 });
             },
             onPortSelected(port) {
-                this.$env.openOptions(port);
+                this.$env.dispatch("openOptions", port);
             },
         },
     };

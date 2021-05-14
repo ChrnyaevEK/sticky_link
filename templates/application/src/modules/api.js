@@ -1,5 +1,5 @@
 import $ from "jquery";
-import env from "./env";
+import Vue from "vue";
 
 var csrfToken = (function getCookie(name) {
     let cookieValue = null;
@@ -32,7 +32,17 @@ export default {
                 },
             });
         } catch (response) {
-            env.handleBadRequest(response);
+            if (response.responseJSON && response.responseJSON.detail) {
+                Vue.notify({
+                    text: response.responseJSON.detail,
+                    type: "error",
+                });
+            } else if (response.status >= 500) {
+                Vue.notify({
+                    text: "Server error occurred",
+                    type: "error",
+                });
+            }
             throw response;
         }
     },
