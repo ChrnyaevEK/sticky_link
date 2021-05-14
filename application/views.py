@@ -49,6 +49,7 @@ class App:
         port.visited += 1  # Update port statistics
         port.save()
 
+        print(port.redirect_url)
         if port.redirect_url:
             return redirect(port.redirect_url)
 

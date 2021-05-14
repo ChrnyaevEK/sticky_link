@@ -22,8 +22,8 @@ export default new VueX.Store({
         optionsSource: null,
     },
     mutations: {
-        setWallByWallId(state, wallId) {
-            state.wall = store.state.walls ? store.state.walls.filter((w) => w.id == wallId)[0] : null;
+        setWallByWallId(state, wall) {
+            state.wall = wall;
         },
         setContainerByContainerId(state, containerId) {
             state.container = store.state.containers
@@ -58,7 +58,7 @@ export default new VueX.Store({
             });
             store.dispatch("recalculateWidgets", context.state.container);
             Vue.notify({
-                text: `Widget ${widget.type} ${widget.title} was created!`,
+                text: `Widget ${widget.type} ${widget.title || "Untitled"} was created!`,
                 type: "success",
             });
         },
@@ -75,7 +75,7 @@ export default new VueX.Store({
                 index,
             });
             Vue.notify({
-                text: `Container ${container.title} was created!`,
+                text: `Container ${container.title || "Untitled"} was created!`,
                 type: "success",
             });
         },
@@ -86,7 +86,7 @@ export default new VueX.Store({
             });
             context.dispatch("openOptions", port);
             Vue.notify({
-                text: `Port ${port.title} was created!`,
+                text: `Port ${port.title || "Untitled"} was created!`,
                 type: "success",
             });
         },
@@ -95,7 +95,7 @@ export default new VueX.Store({
                 type: "wall",
             });
             Vue.notify({
-                text: `Wall ${wall.title} was created!`,
+                text: `Wall ${wall.title || "Untitled"} was created!`,
                 type: "success",
             });
             router.push({
@@ -117,7 +117,15 @@ export default new VueX.Store({
             await nextTick();
         },
         async setWallByWallId(context, wallId) {
-            context.commit("setWallByWallId", wallId);
+            context.commit(
+                "setWallByWallId",
+                store.state.walls ? store.state.walls.filter((w) => w.id == wallId)[0] : null
+            );
+            if (context.state.wall && context.state.wall.lock_widgets) {
+                await context.dispatch("lockWidgets");
+            } else {
+                await context.dispatch("unlockWidgets");
+            }
             await nextTick();
         },
         async setContainerByContainerId(context, containerId) {

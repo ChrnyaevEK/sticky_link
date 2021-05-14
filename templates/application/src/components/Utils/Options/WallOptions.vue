@@ -49,7 +49,10 @@
                 slot="input"
                 v-scope:id.lock_widgets
                 v-model="instance.lock_widgets"
-                @change="$emit('push')"
+                @change="
+                    $emit('push');
+                    instance.lock_widgets ? $env.dispatch('lockWidgets') : $env.dispatch('unlockWidgets');
+                "
                 :disabled="$env.state.changesLock"
                 class="form-check-input"
                 type="checkbox"

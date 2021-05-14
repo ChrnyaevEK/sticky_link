@@ -1,5 +1,8 @@
 $enable-rounded: false;
+
 $danger: #f25f5c;
+$light: #e5edf3;
+$silver: #d8dfe5;
 
 @import "~bootstrap/scss/bootstrap";
 @import "vue-select/src/scss/vue-select.scss";
@@ -7,12 +10,13 @@ $danger: #f25f5c;
 @import "~quill/dist/quill.snow.css";
 @import "~vue-draggable-resizable/dist/VueDraggableResizable.css";
 
+
 html {
     font-size: 14px;
 }
 
-.select-create {
-    background-color: $gray-100;
+.bg-silver {
+    background-color: $silver;
 }
 
 .dropdown-item.active,
@@ -89,5 +93,5 @@ html {
 
 .widget-title {
     font-size: 1rem;
-    color: $primary;
+    color: $dark;
 }

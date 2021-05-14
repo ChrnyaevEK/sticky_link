@@ -8,7 +8,7 @@
             <button
                 v-if="widget.vertical"
                 key="fa-chevron-up"
-                class="btn border w-100"
+                class="btn border-bottom w-100"
                 @click="changeValue(widget.step)"
                 :disabled="$env.state.widgetsLock || $env.state.changesLock"
             >
@@ -17,7 +17,7 @@
             <button
                 v-else
                 key="fa-chevron-left"
-                class="btn border h-100"
+                class="btn border-right h-100"
                 @click="changeValue(-widget.step)"
                 :disabled="$env.state.widgetsLock || $env.state.changesLock"
             >
@@ -29,7 +29,7 @@
             <button
                 v-if="widget.vertical"
                 key="fa-chevron-down"
-                class="btn border w-100"
+                class="btn border-top w-100"
                 @click="changeValue(-widget.step)"
                 :disabled="$env.state.widgetsLock || $env.state.changesLock"
             >
@@ -38,7 +38,7 @@
             <button
                 v-else
                 key="fa-chevron-right"
-                class="btn border h-100"
+                class="btn border-left h-100"
                 @click="changeValue(widget.step)"
                 :disabled="$env.state.widgetsLock || $env.state.changesLock"
             >

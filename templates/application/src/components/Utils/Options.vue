@@ -26,7 +26,7 @@
         <div class="form-group">
             <button
                 :disabled="$env.state.changesLock"
-                class="btn btn-sm btn-danger w-100"
+                class="btn btn-danger w-100"
                 @click.stop="handleInstanceDelete"
             >
                 Delete
@@ -88,7 +88,6 @@
                 this.unsetWarning();
                 for (var [field, error] of Object.entries(response.responseJSON)) {
                     error = $(`<p class="${this.warningClass} col-12 text-danger">${error[0]}</p>`);
-                    console.log(this._(field));
                     $(this.$el)
                         .find(`[for*="${field}"]`)
                         .addClass(`text-danger ${this.warningClassField}`)

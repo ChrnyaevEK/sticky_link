@@ -1,6 +1,6 @@
 <template>
     <div class="w-100 h-100 d-flex flex-column">
-        <nav v-if="$store.state.user" class="navbar navbar-expand-md navbar-light border-bottom">
+        <nav v-if="$store.state.user" class="navbar navbar-expand-md navbar-light bg-silver border-bottom">
             <a class="navbar-brand" :href="homeUrl">{{ $store.state.app.title }}</a>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
@@ -43,7 +43,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
         </nav>
-        <notifications></notifications>
+        <notifications class="notification" :duration="5000" position="bottom left"></notifications>
         <router-view></router-view>
     </div>
 </template>

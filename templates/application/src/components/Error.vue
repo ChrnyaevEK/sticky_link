@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column justify-content-center align-items-center w-100 h-100">
+    <div class="d-flex flex-column justify-content-center align-items-center w-100 h-100 bg-light">
         <h4 class="text-secondary">
             <strong>An error occurred...</strong>
         </h4>
