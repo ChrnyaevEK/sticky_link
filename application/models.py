@@ -12,6 +12,9 @@ from channels.layers import get_channel_layer
 from application.consumers import Event as ConsumerEvent, WallConsumer
 from asgiref.sync import async_to_sync
 import hashlib
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _to_hash(sting):
@@ -57,17 +60,12 @@ class Base(models.Model):
         return not protected_fields.intersection(accessed_fields)
 
 
-class Common(Base):
-    def save(self, *args, **kwargs):
-        r = super().save(*args, **kwargs)
-        self.propagate_instance_updated()
-        return r
-
-    def delete(self, *args, **kwargs):
-        self.propagate_instance_deleted()
-        return super().delete(*args, **kwargs)
+class SyncManager(Base):
+    sync_fields = []
+    sync_id = None
 
     def propagate_instance_updated(self):
+        logger.info(f'Propagate instance update: {self}')
         if self.related_wall_instance is not None:
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
@@ -83,6 +81,7 @@ class Common(Base):
                 })
 
     def propagate_instance_deleted(self):
+        logger.info(f'Propagate instance delete: {self}')
         if self.related_wall_instance is not None:
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
@@ -96,11 +95,29 @@ class Common(Base):
                     }
                 })
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.prevent_synchronization = False
+
+    def synchronize_bounded_instances(self):
+        if not self.prevent_synchronization:
+            logger.info(f'Sync bounded instances with: {self}')
+            bounded = self.__class__.objects.filter(sync_id=self)
+            if self.sync_id is not None:
+                bounded = bounded | self.__class__.objects.filter(pk=self.sync_id.id)
+            for instance in bounded:
+                logger.info(f'Sync for: {instance}')
+                instance.prevent_synchronization = True
+                if instance != self:
+                    for field in instance.sync_fields:
+                        instance.__setattr__(field, self.__getattribute__(field))
+                    instance.save()
+
     class Meta:
         abstract = True
 
 
-class Wall(Common):
+class Wall(SyncManager):
     type = 'wall'
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -109,13 +126,21 @@ class Wall(Common):
     description = models.CharField(verbose_name='Wall description', max_length=500, blank=True, null=True)
     lock_widgets = models.BooleanField(verbose_name='Lock widgets at wall', default=False)
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.propagate_instance_updated()
+
+    def delete(self, *args, **kwargs):
+        self.propagate_instance_deleted()
+        super().delete(*args, **kwargs)
+
     @staticmethod
     def validate_anonymous_access(accessed_fields):
         protected_fields = {'owner', 'allowed_users', 'allow_anonymous_view', 'title', 'description', 'lock_widgets'}
         return not protected_fields.intersection(accessed_fields) and super().validate_anonymous_access(accessed_fields)
 
 
-class Container(Common):
+class Container(SyncManager):
     type = 'container'
 
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
@@ -127,30 +152,18 @@ class Container(Common):
     title = models.CharField(verbose_name='Container title', max_length=200, null=True, blank=True)
     description = models.CharField(verbose_name='Container description', max_length=500, blank=True, null=True)
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.propagate_instance_updated()
+
+    def delete(self, *args, **kwargs):
+        self.propagate_instance_deleted()
+        super().delete(*args, **kwargs)
+
     @staticmethod
     def validate_anonymous_access(accessed_fields):
         protected_fields = {'wall', 'index', 'h', 'w', 'description', 'title'}
         return not protected_fields.intersection(accessed_fields) and super().validate_anonymous_access(accessed_fields)
-
-
-class SyncManager(Common):
-    sync_fields = []
-    sync_id = None
-
-    def synchronize_with_instance(self, instance):
-        for field in self.sync_fields:
-            self.__setattr__(field, instance.__getattribute__(field))
-        self.save()
-
-    def synchronize_bounded_instances(self):
-        bounded = self.__class__.objects.filter(sync_id=self)
-        if self.sync_id is not None:
-            bounded = bounded | self.__class__.objects.filter(pk=self.sync_id.id)
-        for instance in bounded.exclude(pk=self.id):
-            instance.synchronize_with_instance(self)
-
-    class Meta:
-        abstract = True
 
 
 class ColorValidator(BaseValidator):
@@ -192,9 +205,11 @@ class Widget(SyncManager):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+        self.propagate_instance_updated()
         self.synchronize_bounded_instances()
 
     def delete(self, *args, **kwargs):
+        self.propagate_instance_deleted()
         for widget in self.__class__.objects.filter(sync_id=self):
             widget.propagate_instance_updated()
         super().delete(*args, **kwargs)
@@ -252,7 +267,7 @@ class SimpleSwitch(Widget):
     sync_id = models.ForeignKey('SimpleSwitch', blank=True, null=True, on_delete=models.SET_NULL)
 
 
-class Port(Common):
+class Port(SyncManager):
     """ Describe static link ready to be distributed - link format should not change """
     type = 'port'
 
@@ -262,3 +277,11 @@ class Port(Common):
 
     redirect_url = models.URLField(verbose_name='Redirect URL', help_text='Override default redirect (to this wall)',
                                    null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.propagate_instance_updated()
+
+    def delete(self, *args, **kwargs):
+        self.propagate_instance_deleted()
+        super().delete(*args, **kwargs)

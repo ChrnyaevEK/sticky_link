@@ -8,6 +8,9 @@ from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 from application.lang import Public
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _get_protected_queryset(model, user):

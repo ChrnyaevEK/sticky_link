@@ -48,12 +48,14 @@ const router = new VueRouter({
     ],
 });
 router.beforeEach(async (to, from, next) => {
-    try {
-        await store.dispatch("fetchState", to.params.wallId);
-    } catch (e) {
-        return next({
-            name: "error",
-        });
+    if (to.name != 'error'){
+        try {
+            await store.dispatch("fetchState", to.params.wallId);
+        } catch (e) {
+            return next({
+                name: "error",
+            });
+        }
     }
     if (store.state.user) {
         $("#tab-title").text(`${store.state.user.username} @ ${process.env.VUE_APP_TITLE}`);
