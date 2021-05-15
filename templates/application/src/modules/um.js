@@ -52,7 +52,6 @@ export default new Vue({
                 this.remote[event.instance.uid] = event.instance.version;
             } else {
                 // Else fire off update for instance, somebody just changed it
-                console.log('WS new version available', event.instance)
                 await this.resolveNewVersion(event.instance);
             }
         },

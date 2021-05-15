@@ -69,10 +69,7 @@
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                     </div>
-                    <div
-                        v-if="$env.state.editMode"
-                        class="my-1 w-100 d-flex justify-content-end"
-                    >
+                    <div v-if="$env.state.editMode" class="my-1 w-100 d-flex justify-content-end">
                         <span class="overflow-auto scrollbar-hidden d-flex" v-if="$env.state.wall">
                             <button
                                 @click.stop="
@@ -246,6 +243,11 @@
             return next({ to: env.state.editMode ? "wallEdit" : "wallView" });
         }
         ws.open(to.params.wallId);
+        if (env.state.wall.lock_widgets && !env.state.viewMode) {
+            await env.dispatch("lockWidgets");
+        } else {
+            await env.dispatch("unlockWidgets");
+        }
         await env.dispatch("setContainerByContainerId", store.state.containers[0].id);
         next();
     }

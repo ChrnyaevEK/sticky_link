@@ -121,11 +121,6 @@ export default new VueX.Store({
                 "setWallByWallId",
                 store.state.walls ? store.state.walls.filter((w) => w.id == wallId)[0] : null
             );
-            if (context.state.wall && context.state.wall.lock_widgets) {
-                await context.dispatch("lockWidgets");
-            } else {
-                await context.dispatch("unlockWidgets");
-            }
             await nextTick();
         },
         async setContainerByContainerId(context, containerId) {
