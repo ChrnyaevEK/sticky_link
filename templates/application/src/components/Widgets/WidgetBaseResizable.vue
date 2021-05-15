@@ -24,7 +24,7 @@
         :y="widget.y"
         :x="widget.x"
         :z="widget.z"
-        :minHeight="100"
+        :minHeight="50"
         :minWidth="100"
         :grid="[$store.state.app.grid, $store.state.app.grid]"
         ref="base"
