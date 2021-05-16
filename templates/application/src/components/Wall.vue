@@ -163,7 +163,7 @@
                 </div>
             </div>
             <button
-                v-if="$env.state.wall"
+                v-show="$env.state.wall"
                 class="mr-1 btn bg-white border"
                 @click.stop="$env.dispatch('openOptions', $env.state.wall)"
                 :disabled="$env.state.changesLock"
