@@ -29,6 +29,8 @@ class Base(models.Model):
     date_of_creation = models.DateTimeField(verbose_name='Date of creation', auto_now_add=True)
     last_update = models.DateTimeField(verbose_name='Date of last update (wall or any widget)', auto_now=True)
 
+    protected_fields = {'id', 'uid', 'version', 'type', 'date_of_creation', 'last_update'}
+
     def __str__(self):
         return f'{type(self).__name__}: {self.id}'
 
@@ -53,11 +55,6 @@ class Base(models.Model):
     def version(self):
         return _to_hash(self.last_update.isoformat())
 
-    @staticmethod
-    def validate_anonymous_access(accessed_fields):
-        """ Validate that accessed fields are not protected """
-        protected_fields = {'id', 'uid', 'version', 'type', 'date_of_creation', 'last_update'}
-        return not protected_fields.intersection(accessed_fields)
 
 
 class SyncManager(Base):
@@ -134,10 +131,11 @@ class Wall(SyncManager):
         self.propagate_instance_deleted()
         super().delete(*args, **kwargs)
 
-    @staticmethod
-    def validate_anonymous_access(accessed_fields):
+    @classmethod
+    def validate_anonymous_access(cls, accessed_fields):
         protected_fields = {'owner', 'allowed_users', 'allow_anonymous_view', 'title', 'description', 'lock_widgets'}
-        return not protected_fields.intersection(accessed_fields) and super().validate_anonymous_access(accessed_fields)
+        protected_fields.update(cls.protected_fields)
+        return not protected_fields.intersection(accessed_fields)
 
 
 class Container(SyncManager):
@@ -160,10 +158,11 @@ class Container(SyncManager):
         self.propagate_instance_deleted()
         super().delete(*args, **kwargs)
 
-    @staticmethod
-    def validate_anonymous_access(accessed_fields):
+    @classmethod
+    def validate_anonymous_access(cls, accessed_fields):
         protected_fields = {'wall', 'index', 'h', 'w', 'description', 'title'}
-        return not protected_fields.intersection(accessed_fields) and super().validate_anonymous_access(accessed_fields)
+        protected_fields.update(cls.protected_fields)
+        return not protected_fields.intersection(accessed_fields)
 
 
 class ColorValidator(BaseValidator):
@@ -197,11 +196,12 @@ class Widget(SyncManager):
 
     border = models.BooleanField(default=True)
 
-    @staticmethod
-    def validate_anonymous_access(accessed_fields):
+    @classmethod
+    def validate_anonymous_access(cls, accessed_fields):
         protected_fields = {'font_size', 'font_weight', 'background_color', 'text_color', 'border', 'help', 'w', 'h',
                             'z', 'x', 'y', 'sync_fields', 'container', 'owner'}
-        return not protected_fields.intersection(accessed_fields) and super().validate_anonymous_access(accessed_fields)
+        protected_fields.update(cls.protected_fields)
+        return not protected_fields.intersection(accessed_fields)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
