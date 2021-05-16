@@ -8,8 +8,7 @@ import "./css/main.scss";
 import "@fortawesome/fontawesome-free/js/all.js";
 import "@fortawesome/fontawesome-free/css/all.css";
 import $ from "jquery";
-import Rollbar from "rollbar";
-import JqueryRollbarPlugin from "rollbar-jquery";
+import Rollbar from 'vue-rollbar'
 import Notifications from "vue-notification";
 
 Vue.use(Notifications);
@@ -30,9 +29,9 @@ Vue.directive("scope", {
 });
 
 window.jQuery = $; // Ref. to rollbar-jquery source code
-JqueryRollbarPlugin();
 
-export var rollbar = new Rollbar({
+Vue.use(Rollbar, {
+    enabled: process.env.NODE_ENV == "production",
     accessToken: "352f084b3c4b4a60951b25ce2252fb6f",
     captureUncaught: process.env.NODE_ENV == "production",
     captureUnhandledRejections: process.env.NODE_ENV == "production",
@@ -40,24 +39,11 @@ export var rollbar = new Rollbar({
         environment: "production",
     },
 });
-rollbar.global({ itemsPerMinute: 5 });
-rollbar.configure({ reportLevel: "error" });
-rollbar.configure({
-    onSendCallback: function(isUncaught) {
-        if (isUncaught) {
-            Vue.notify({
-                type: "error",
-                text: "Something went wrong...",
-            });
-        }
-    },
-});
 
 if (process.env.NODE_ENV == "production") {
     window.gtag("js", new Date());
     window.gtag("config", "G-NGS03ZXLXN");
 }
-
 new Vue({
     router,
     store,

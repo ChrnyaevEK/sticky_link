@@ -210,6 +210,7 @@
                 <i class="fas fa-plus"></i>
             </button>
             <button
+                v-if="$env.state.wall"
                 @click.stop="$env.dispatch('handleCreateContainer')"
                 class="mr-2 btn btn-success border text-nowrap"
                 title="Add Container to hold widgets"
