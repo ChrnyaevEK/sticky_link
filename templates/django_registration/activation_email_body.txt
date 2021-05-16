@@ -1,4 +1,4 @@
 In order to activate your "{{site.name}}" account, please, follow the link below.
-{{scheme}}://{{site.domain}}/accounts/activate/{{activation_key}} /
+{{scheme}}://{{site.domain}}/accounts/activate/{{activation_key}}/
 
 If the link does not work, just copy-paste it to address line in your browser.
