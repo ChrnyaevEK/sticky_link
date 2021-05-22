@@ -21,7 +21,7 @@
                 </div>
             </div>
         </div>
-        <div class="d-flex">
+        <div class="d-flex w-100">
             <input
                 type="text"
                 v-scope:id.item-input
