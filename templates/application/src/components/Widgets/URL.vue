@@ -1,6 +1,5 @@
 <template id="url-template">
     <WidgetBaseResizable :widget="widget">
-        <span v-show="widget.title" class="w-100 widget-title text-truncate">{{ widget.title }}</span>
         <a
             @click.stop.prevent="openHref"
             class="w-100 h-100 text-break cursor-pointer d-flex justify-content-center align-items-center"

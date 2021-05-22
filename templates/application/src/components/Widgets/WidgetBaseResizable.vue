@@ -16,7 +16,6 @@
                 ? 'shadow'
                 : '',
         ]"
-        :title="title"
         :style="style"
         :parent="true"
         :w="widget.w"
@@ -132,10 +131,7 @@
                 `;
             },
             title() {
-                if (this.widget.title || this.widget.help) {
-                    return `Title: ${this.widget.title};\n${this.widget.help}`;
-                }
-                return "";
+                return this.widget.help || "";
             },
         },
     };

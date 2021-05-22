@@ -1,10 +1,6 @@
 <template id="simple-list-template">
     <WidgetBaseResizable :widget="widget">
-        <span class="w-100">
-            <span v-show="widget.title" class="mr-2 text-truncate widget-title"> {{ widget.title }}</span>
-            <small class="text-muted">{{ widget.items.length }}</small>
-        </span>
-        <div class="form-group w-100 h-100 overflow-auto border-bottom border-top py-1">
+        <div class="form-group w-100 h-100 overflow-auto py-1">
             <div
                 class="d-flex text-break mb-1"
                 :class="{ border: widget.inner_border }"

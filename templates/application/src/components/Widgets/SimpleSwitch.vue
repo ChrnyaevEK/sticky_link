@@ -1,8 +1,7 @@
 <template id="simple-switch-template">
     <WidgetBaseResizable :widget="widget">
-        <span v-show="widget.title" class="w-100 text-truncate widget-title">{{ widget.title }}</span>
         <div
-            class="custom-control custom-switch h-100 w-100 d-flex justify-content-center align-items-center"
+            class="custom-switch"
             :title="widget.title"
         >
             <input

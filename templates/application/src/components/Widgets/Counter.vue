@@ -1,6 +1,5 @@
 <template id="counter-template">
     <WidgetBaseResizable :widget="widget">
-        <span v-show="widget.title" class="w-100 text-truncate widget-title">{{ widget.title }}</span>
         <div
             class="d-flex w-100 h-100 justify-content-between align-items-center"
             :class="{ 'flex-column': widget.vertical }"
