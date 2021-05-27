@@ -4,7 +4,7 @@
             <options-item :isHeader="true">
                 <span slot="title">Static link</span>
                 <span slot="description"
-                    >Port is a static link to this wall. You should use ports for any external navigation, to be able to
+                    >Port is a static link to wall. You should use ports for any external navigation, to be able to
                     change target wall online.</span
                 >
             </options-item>
@@ -16,10 +16,6 @@
             </div>
         </div>
         <div class="form-group">
-            <options-item :isHeader="true">
-                <span slot="title">Description</span>
-                <span slot="description">How is this port connected with real world</span>
-            </options-item>
             <options-item>
                 <label slot="title" v-scope:for.title>Title</label>
                 <input
@@ -33,33 +29,40 @@
                 />
                 <span slot="help">Give your port a descriptive title</span>
             </options-item>
+            <options-item :isHeader="true">
+                <span slot="title">Redirection</span>
+            </options-item>
             <options-item>
-                <label slot="title" v-scope:for.wall>Move port to wall...</label>
+                <label slot="title" v-scope:for.authenticated_wall>Authenticated user</label>
                 <v-select
                     slot="input"
                     class="w-100"
-                    v-scope:id.wall
+                    v-scope:id.authenticated_wall
                     :options="walls_as_options"
                     :reduce="(wall) => wall.code"
-                    v-model="instance.wall"
-                    :key="instance.wall"
+                    v-model="instance.authenticated_wall"
+                    :key="instance.authenticated_wall"
                     @input="$emit('push')"
                     :disabled="$env.state.changesLock"
                 ></v-select>
-                <span slot="help">Port will disappear from this wall after update.</span>
+                <span slot="help">Select wall to open for authenticated users</span>
             </options-item>
             <options-item>
-                <label slot="title" v-scope:for.redirect_url>Redirect URL</label>
-                <input
+                <label slot="title" v-scope:for.anonymous_wall>Not authenticated user</label>
+                <v-select
                     slot="input"
-                    type="url"
-                    v-scope:id.redirect_url
-                    v-model="instance.redirect_url"
+                    class="w-100"
+                    v-scope:id.anonymous_wall
+                    :options="walls_as_options"
+                    :reduce="(wall) => wall.code"
+                    v-model="instance.anonymous_wall"
+                    :key="instance.anonymous_wall"
                     @input="$emit('push')"
                     :disabled="$env.state.changesLock"
-                    class="form-control"
-                />
-                <span slot="help">Redirect to any address. If no address specified - redirect to selected wall</span>
+                ></v-select>
+                <span slot="help"
+                    >Select wall to open for not authenticated users (or nothing to forbid N/A access)</span
+                >
             </options-item>
         </div>
     </div>

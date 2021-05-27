@@ -1,15 +1,5 @@
 <template>
-    <vue-draggable-resizable
-        v-if="$env.state.optionsSource !== null"
-        dragHandle=".options-drag"
-        @click.native.stop
-        @touchstart.native.stop.prevent
-        h="auto"
-        :z="101"
-        :resizable="false"
-        :parent="false"
-        class="bg-white border shadow options options-position options-size p-2 m-1 scrollbar-hidden"
-    >
+    <div>
         <div class="form-group d-flex justify-content-between align-items-center options-drag cursor-move">
             <strong>Options</strong>
             <a class="btn" @click="$env.dispatch('closeOptions')"><i class="fas fa-times"></i></a>
@@ -24,24 +14,18 @@
         <port-options v-else-if="instance.type == types.Port" :instance="instance" @push="handlePush"></port-options>
         <widgets-options v-else :instance="instance" @push="handlePush"></widgets-options>
         <div class="form-group">
-            <button
-                :disabled="$env.state.changesLock"
-                class="btn btn-danger w-100"
-                @click.stop="handleInstanceDelete"
-            >
+            <button :disabled="$env.state.changesLock" class="btn btn-danger w-100" @click.stop="handleInstanceDelete">
                 Delete
             </button>
         </div>
         <div class="form-group text-center">
             <small class="text-secondary">All changes are automatically saved</small>
         </div>
-    </vue-draggable-resizable>
+    </div>
 </template>
 
 <script>
     // Front end is absolutely passive
-    import VueDraggableResizable from "vue-draggable-resizable";
-    import "vue-draggable-resizable/dist/VueDraggableResizable.css";
     import $ from "jquery";
     import WallOptions from "./Options/WallOptions";
     import ContainerOptions from "./Options/ContainerOptions";
@@ -67,9 +51,9 @@
             async handleInstanceDelete() {
                 if (confirm("Are you sure?")) {
                     let type = this.instance.type;
-                    
+
                     await this.$store.dispatch("deleteInstance", this.instance);
-                    
+
                     this.$env.dispatch("closeOptions");
                     if (type == "wall") {
                         this.$env.dispatch("handleWallDeleted");
@@ -105,7 +89,6 @@
             ContainerOptions,
             PortOptions,
             WidgetsOptions,
-            VueDraggableResizable,
         },
     };
 </script>

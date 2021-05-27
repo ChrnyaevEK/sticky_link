@@ -23,9 +23,9 @@ def _get_protected_queryset(model, user):
         if not user.is_anonymous:
             q.add(Q(wall__owner=user), Q.OR)
     elif model == models.Port:
-        q = Q(wall__allow_anonymous_view=True)
+        q = Q()
         if not user.is_anonymous:
-            q.add(Q(wall__owner=user), Q.OR)
+            q = Q(owner=user)
     else:
         q = Q(container__wall__allow_anonymous_view=True)
         if not user.is_anonymous:
@@ -52,14 +52,11 @@ class App:
         port.visited += 1  # Update port statistics
         port.save()
 
-        print(port.redirect_url)
-        if port.redirect_url:
-            return redirect(port.redirect_url)
-
-        if port.wall is None:
+        wall = port.authenticated_wall if request.user.is_authenticated else port.anonymous_wall
+        if wall is None:
             return HttpResponseNotFound(Public.Error.port_refer_invalid_resource)
 
-        return redirect(f'/wall/view/{port.wall.id}/')
+        return redirect(f'/wall/view/{wall.id}/')
 
     @staticmethod
     @api_view(http_method_names=['GET'])
@@ -95,7 +92,7 @@ class App:
                 'edit_permission': wall.owner == request.user,
                 'view_permission': wall.allow_anonymous_view or wall.owner == request.user
             }
-            ports = _get_protected_queryset(models.Port, request.user).filter(wall=wall)
+            ports = _get_protected_queryset(models.Port, request.user)
             ports = serializers.PortSerializer(ports, many=True).data
             wall = serializers.WallSerializer(wall).data
         walls = WallViewSet.generate_list(request)

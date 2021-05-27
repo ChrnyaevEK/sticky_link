@@ -1,34 +1,24 @@
 <template>
-    <div class="h-100 w-100 bg-light d-flex flex-column justify-content-between align-items-center overflow-auto">
-        <div class="w-100 w-100" v-if="$env.state.wall">
-            <div class="px-3 w-100 text-nowrap overflow-hidden">
-                <strong v-if="$env.state.wall.title">{{ $env.state.wall.title }}</strong>
-                <small v-if="$env.state.wall.description" class="mx-1 text-secondary">{{
-                    $env.state.wall.description
-                }}</small>
+    <div>
+        <div v-if="$env.state.wall" class="row">
+            <div class="col-12">
+                <div class="px-3 text-nowrap overflow-hidden">
+                    <strong v-if="$env.state.wall.title">{{ $env.state.wall.title }}</strong>
+                    <small v-if="$env.state.wall.description" class="mx-1 text-secondary">{{
+                        $env.state.wall.description
+                    }}</small>
+                </div>
             </div>
-            <div
-                class="w-100 h-100 overflow-auto pb-5"
-                @click="
-                    handleUnselectWidgets();
-                    $env.dispatch('closeOptions');
-                "
-            >
+        </div>
+
+        <div v-if="$env.state.wall" class="row">
+            <div class="col-8 col-md-8 overflow-auto">
                 <div
                     class="d-flex flex-column relative pb-2"
                     v-for="container of $store.state.containers"
                     :key="container.id"
                 >
-                    <div class="w-100 px-3 text-nowrap overflow-hidden">
-                        <span v-if="container.title">{{ container.title }}</span>
-                        <span v-if="container.description" class="mx-1 text-secondary">{{
-                            container.description
-                        }}</span>
-                    </div>
-                    <div
-                        v-scope:id="container.id"
-                        class="overflow-auto container-wrap scrollable-element relative bg-white"
-                    >
+                    <div v-scope:id="container.id" class="overflow-auto container-wrap scrollable-element relative">
                         <vue-draggable-resizable
                             @click.native.stop="$env.dispatch('closeOptions')"
                             @touchstart.native="$env.dispatch('closeOptions')"
@@ -69,8 +59,17 @@
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                     </div>
-                    <div v-if="$env.state.editMode" class="my-1 w-100 d-flex justify-content-end">
-                        <span class="overflow-auto scrollbar-hidden d-flex" v-if="$env.state.wall">
+                    <div class="w-100 d-flex justify-content-between">
+                        <div class="w-100 px-3 text-nowrap overflow-hidden">
+                            <span v-if="container.title">{{ container.title }}</span>
+                            <span v-if="container.description" class="mx-1 text-secondary">{{
+                                container.description
+                            }}</span>
+                        </div>
+                        <span
+                            class="my-1 overflow-auto scrollbar-hidden d-flex"
+                            v-if="$env.state.wall && $env.state.editMode"
+                        >
                             <button
                                 @click.stop="
                                     handleContainerActivated(container);
@@ -109,7 +108,7 @@
                                     handleContainerActivated(container);
                                     $env.dispatch('handleCreateWidget', 'simple_list');
                                 "
-                                class="mr-1 btn  bg-white border text-nowrap"
+                                class="mr-1 btn bg-white border text-nowrap"
                                 title="Add new widget of type Simple list"
                                 :disabled="$env.state.changesLock"
                             >
@@ -120,7 +119,7 @@
                                     handleContainerActivated(container);
                                     $env.dispatch('handleCreateWidget', 'simple_switch');
                                 "
-                                class="btn  border text-nowrap bg-white"
+                                class="btn border text-nowrap bg-white"
                                 title="Add new widget of type Switch"
                                 :disabled="$env.state.changesLock"
                             >
@@ -129,14 +128,23 @@
                         </span>
                     </div>
                 </div>
+            </div>
+            <div class="col-12 col-md-4 border-left overflow-auto">
                 <Options v-if="$env.state.editMode"></Options>
             </div>
         </div>
-        <div v-else class="w-100 h-100 d-flex justify-content-center align-items-center text-secondary">
-            <span v-if="$store.state.user.is_authenticated">No wall is selected...</span>
-            <span v-else>No wall is available... Login to continue</span>
+        <div v-else class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-center align-items-center text-secondary">
+                    <span v-if="$store.state.user.is_authenticated">No wall is selected...</span>
+                    <span v-else>No wall is available... Login to continue</span>
+                </div>
+            </div>
         </div>
-        <div v-if="$env.state.editMode && $store.state.user.is_authenticated" class="w-100 d-flex justify-content-end">
+        <div
+            v-if="$env.state.editMode && $store.state.user.is_authenticated"
+            class="w-100 d-flex justify-content-start fixed-bottom"
+        >
             <div v-if="$store.state.walls">
                 <a
                     class="mr-1 btn dropdown-toggle bg-white border"
@@ -212,7 +220,7 @@
             <button
                 v-if="$env.state.wall"
                 @click.stop="$env.dispatch('handleCreateContainer')"
-                class="mr-2 btn btn-success border text-nowrap"
+                class="btn btn-success border text-nowrap"
                 title="Add Container to hold widgets"
                 :disabled="$env.state.changesLock"
             >
@@ -311,6 +319,11 @@
         position: absolute;
         bottom: 0;
     }
+
+    .container-wrap {
+        background-color: rgba(255, 255, 255, 0.777);
+    }
+
     .container-title-offset {
         margin-top: 1.5rem;
     }

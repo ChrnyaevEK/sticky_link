@@ -56,7 +56,6 @@ class Base(models.Model):
         return _to_hash(self.last_update.isoformat())
 
 
-
 class SyncManager(Base):
     sync_fields = []
     sync_id = None
@@ -272,11 +271,11 @@ class Port(SyncManager):
     type = 'port'
 
     title = models.CharField(max_length=200, blank=True, default='Untitled')
-    wall = models.ForeignKey(Wall, on_delete=models.SET_NULL, null=True)
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     visited = models.IntegerField(default=0, help_text='Visit counter')
-
-    redirect_url = models.URLField(verbose_name='Redirect URL', help_text='Override default redirect (to this wall)',
-                                   null=True, blank=True)
+    authenticated_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL,
+                                           related_name='authenticated_wall')
+    anonymous_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL, related_name='anonymous_wall')
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
