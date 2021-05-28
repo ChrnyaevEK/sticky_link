@@ -1,5 +1,5 @@
 <template>
-    <div v-if="$env.state.optionsSource">
+    <div v-if="$env.state.optionsSource" class="w-100">
         <div class="form-group d-flex justify-content-between align-items-center options-drag cursor-move">
             <strong>Options</strong>
             <a class="btn" @click="$env.dispatch('closeOptions')"><i class="fas fa-times"></i></a>

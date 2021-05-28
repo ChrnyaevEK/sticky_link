@@ -1,18 +1,18 @@
 <template>
     <div class="d-flex h-100">
-        <div class="w-100 d-flex flex-column flex-grow-1">
+        <div class="d-flex flex-column w-100 flex-grow-1">
             <!-- Wall title -->
-            <div class="d-inline-flex  overflow-hidden">
-                <span v-if="$env.state.wall" class="px-3">
+            <div class="d-flex overflow-hidden">
+                <span v-if="$env.state.wall" class="px-3 text-break">
                     <strong class="mr-1">{{ $env.state.wall.title }}</strong>
                     <span class="text-secondary">{{ $env.state.wall.description }}</span>
                 </span>
             </div>
             <!-- Container section -->
-            <div class="flex-grow-1">
-                <div v-if="$env.state.wall">
-                    <div class="d-flex flex-column" v-for="container of $store.state.containers" :key="container.id">
-                        <div v-scope:id="container.id" class="overflow-auto scrollbar-hidden">
+            <div class="flex-grow-1 w-100">
+                <div v-if="$env.state.wall" class="w-100">
+                    <div class="d-flex flex-column w-100" v-for="container of $store.state.containers" :key="container.id">
+                        <div class="overflow-auto w-100">
                             <vue-draggable-resizable
                                 @click.native.stop="$env.dispatch('closeOptions')"
                                 @touchstart.native="$env.dispatch('closeOptions')"
@@ -20,12 +20,12 @@
                                 @activated="handleContainerActivated(container)"
                                 :resizable="$env.state.editMode && !$env.state.changesLock"
                                 :draggable="false"
-                                :parent="false"
+                                :parent="true"
                                 :handles="['bm']"
                                 :h="container.h"
                                 :w="container.w"
                                 :minHeight="100"
-                                class="position-relative overflow-hidden wall-only no-border"
+                                class="position-relative wall-only no-border"
                                 style="touch-action: initial;"
                                 :grid="[$store.state.app.grid, $store.state.app.grid]"
                             >
@@ -41,7 +41,7 @@
                             </vue-draggable-resizable>
                         </div>
                         <div class="d-flex">
-                            <div class="px-3 flex-grow-1">
+                            <div class="px-3 flex-grow-1 text-break">
                                 <span class="mr-1">{{ container.title }}</span>
                                 <span class="text-secondary">{{ container.description }}</span>
                             </div>
@@ -201,9 +201,7 @@
             </div>
         </div>
         <!-- Sidebar -->
-        <div>
-            <Options class="flex-grow-1" v-if="$env.state.editMode"></Options>
-        </div>
+        <Options v-if="$env.state.editMode"></Options>
     </div>
 </template>
 
@@ -268,5 +266,8 @@
 <style scoped>
     .container-title-offset {
         margin-top: 1.5rem;
+    }
+    .wall-wrap {
+        width: 100vw;
     }
 </style>

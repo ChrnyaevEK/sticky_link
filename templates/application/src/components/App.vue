@@ -1,5 +1,5 @@
 <template>
-    <div class="w-100 h-100 d-flex flex-column">
+    <div class="h-100 d-flex flex-column overflow-hidden">
         <nav v-if="$store.state.user" class="navbar navbar-expand-md navbar-light border-bottom">
             <a class="navbar-brand" :href="homeUrl">{{ $store.state.app.title }}</a>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
