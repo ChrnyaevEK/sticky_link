@@ -1,18 +1,20 @@
 <template>
     <div class="d-flex h-100">
-        <div class="d-flex flex-column w-100 flex-grow-1">
+        <div class="d-flex flex-column w-75 flex-grow-1">
             <!-- Wall title -->
             <div class="d-flex overflow-hidden">
-                <span v-if="$env.state.wall" class="px-3 text-break">
-                    <strong class="mr-1">{{ $env.state.wall.title }}</strong>
-                    <span class="text-secondary">{{ $env.state.wall.description }}</span>
+                <span v-if="$env.state.wall" class="px-3 text-truncate">
+                    <strong class="mr-1" :title="$env.state.wall.title">{{ $env.state.wall.title }}</strong>
+                    <span class="text-secondary" :title="$env.state.wall.description">{{
+                        $env.state.wall.description
+                    }}</span>
                 </span>
             </div>
             <!-- Container section -->
-            <div class="flex-grow-1 w-100">
-                <div v-if="$env.state.wall" class="w-100">
-                    <div class="d-flex flex-column w-100" v-for="container of $store.state.containers" :key="container.id">
-                        <div class="overflow-auto w-100">
+            <div class="flex-grow-1">
+                <div v-if="$env.state.wall">
+                    <div class="d-flex flex-column" v-for="container of $store.state.containers" :key="container.id">
+                        <div class="overflow-auto scrollbar-hidden border-top border-bottom mb-1">
                             <vue-draggable-resizable
                                 @click.native.stop="$env.dispatch('closeOptions')"
                                 @touchstart.native="$env.dispatch('closeOptions')"
@@ -41,72 +43,74 @@
                             </vue-draggable-resizable>
                         </div>
                         <div class="d-flex">
-                            <div class="px-3 flex-grow-1 text-break">
+                            <div class="px-3 text-truncate">
                                 <span class="mr-1">{{ container.title }}</span>
                                 <span class="text-secondary">{{ container.description }}</span>
                             </div>
-                            <button
-                                @click.stop="
-                                    handleContainerActivated(container);
-                                    $env.dispatch('handleCreateWidget', 'simple_text');
-                                "
-                                class="mr-1 btn bg-white border text-nowrap"
-                                title="Add new widget of type Simple text"
-                                :disabled="$env.state.changesLock"
-                            >
-                                Text
-                            </button>
-                            <button
-                                @click.stop="
-                                    handleContainerActivated(container);
-                                    $env.dispatch('handleCreateWidget', 'url');
-                                "
-                                class="mr-1 btn  bg-white border text-nowrap"
-                                title="Add new widget of type URL"
-                                :disabled="$env.state.changesLock"
-                            >
-                                URL
-                            </button>
-                            <button
-                                @click.stop="
-                                    handleContainerActivated(container);
-                                    $env.dispatch('handleCreateWidget', 'counter');
-                                "
-                                class="mr-1 btn  bg-white border text-nowrap"
-                                title="Add new widget of type Counter"
-                                :disabled="$env.state.changesLock"
-                            >
-                                Counter
-                            </button>
-                            <button
-                                @click.stop="
-                                    handleContainerActivated(container);
-                                    $env.dispatch('handleCreateWidget', 'simple_list');
-                                "
-                                class="mr-1 btn bg-white border text-nowrap"
-                                title="Add new widget of type Simple list"
-                                :disabled="$env.state.changesLock"
-                            >
-                                List
-                            </button>
-                            <button
-                                @click.stop="
-                                    handleContainerActivated(container);
-                                    $env.dispatch('handleCreateWidget', 'simple_switch');
-                                "
-                                class="btn border text-nowrap bg-white"
-                                title="Add new widget of type Switch"
-                                :disabled="$env.state.changesLock"
-                            >
-                                Switch
-                            </button>
-                            <button
-                                class="btn"
-                                @click.stop="$env.dispatch('openOptions', container)"
-                                :disabled="$env.state.changesLock"
-                            >
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
+                            <div class="flex-grow-1 d-flex justify-content-end">
+                                <button
+                                    @click.stop="
+                                        handleContainerActivated(container);
+                                        $env.dispatch('handleCreateWidget', 'simple_text');
+                                    "
+                                    class="mr-1 btn btn-sm bg-white border text-nowrap"
+                                    title="Add new widget of type Simple text"
+                                    :disabled="$env.state.changesLock"
+                                >
+                                    Text
+                                </button>
+                                <button
+                                    @click.stop="
+                                        handleContainerActivated(container);
+                                        $env.dispatch('handleCreateWidget', 'url');
+                                    "
+                                    class="mr-1 btn btn-sm bg-white border text-nowrap"
+                                    title="Add new widget of type URL"
+                                    :disabled="$env.state.changesLock"
+                                >
+                                    URL
+                                </button>
+                                <button
+                                    @click.stop="
+                                        handleContainerActivated(container);
+                                        $env.dispatch('handleCreateWidget', 'counter');
+                                    "
+                                    class="mr-1 btn btn-sm bg-white border text-nowrap"
+                                    title="Add new widget of type Counter"
+                                    :disabled="$env.state.changesLock"
+                                >
+                                    Counter
+                                </button>
+                                <button
+                                    @click.stop="
+                                        handleContainerActivated(container);
+                                        $env.dispatch('handleCreateWidget', 'simple_list');
+                                    "
+                                    class="mr-1 btn btn-sm bg-white border text-nowrap"
+                                    title="Add new widget of type Simple list"
+                                    :disabled="$env.state.changesLock"
+                                >
+                                    List
+                                </button>
+                                <button
+                                    @click.stop="
+                                        handleContainerActivated(container);
+                                        $env.dispatch('handleCreateWidget', 'simple_switch');
+                                    "
+                                    class="btn border btn-sm text-nowrap bg-white"
+                                    title="Add new widget of type Switch"
+                                    :disabled="$env.state.changesLock"
+                                >
+                                    Switch
+                                </button>
+                                <button
+                                    class="btn btn-sm"
+                                    @click.stop="$env.dispatch('openOptions', container)"
+                                    :disabled="$env.state.changesLock"
+                                >
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -201,7 +205,7 @@
             </div>
         </div>
         <!-- Sidebar -->
-        <Options v-if="$env.state.editMode"></Options>
+        <Options class="w-25 border-left" v-if="$env.state.editMode"></Options>
     </div>
 </template>
 
