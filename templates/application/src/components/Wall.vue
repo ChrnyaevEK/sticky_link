@@ -17,7 +17,7 @@
                     }}</span>
                 </span>
                 <button
-                    v-if="$env.state.wall && $env.state.editMode && $store.state.user.is_authenticated"
+                    v-if="$env.state.wall && $env.state.editMode"
                     class="btn btn-sm bg-white"
                     @click.stop="$env.dispatch('openOptions', $env.state.wall)"
                     :disabled="$env.state.changesLock"

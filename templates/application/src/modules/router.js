@@ -21,6 +21,13 @@ const router = new VueRouter({
                     alias: "",
                     component: Wall,
                     async beforeEnter(to, from, next) {
+                        if (!store.state.user.is_authenticated) {
+                            return next({
+                                name: "wallView",
+                                params: to.params,
+                                query: to.query,
+                            });
+                        }
                         await env.dispatch("setEditMode");
                         next();
                     },
@@ -48,7 +55,7 @@ const router = new VueRouter({
     ],
 });
 router.beforeEach(async (to, from, next) => {
-    if (to.name != 'error'){
+    if (to.name != "error") {
         try {
             await store.dispatch("fetchState", to.params.wallId);
         } catch (e) {
