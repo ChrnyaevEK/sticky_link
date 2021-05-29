@@ -50,7 +50,7 @@ export default new Vuex.Store({
 
         app: {
             title: process.env.VUE_APP_TITLE,
-            grid: 3,
+            grid: 5,
         },
     },
     mutations: {

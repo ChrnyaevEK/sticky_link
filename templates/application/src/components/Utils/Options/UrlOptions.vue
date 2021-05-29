@@ -34,10 +34,8 @@
                 v-model="instance.open_in_new_window"
                 @change="$emit('push')"
                 :disabled="$env.state.changesLock"
-                class="form-check-input"
                 type="checkbox"
             />
-            <span slot="help">Open link in a new window</span>
         </options-item>
     </div>
 </template>

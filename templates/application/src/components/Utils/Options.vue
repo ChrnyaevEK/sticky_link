@@ -1,10 +1,8 @@
 <template>
-    <div v-if="$env.state.optionsSource" class="w-100">
-        <div class="form-group d-flex justify-content-between align-items-center options-drag cursor-move">
-            <strong>Options</strong>
+    <div>
+        <div class="text-right">
             <a class="btn" @click="$env.dispatch('closeOptions')"><i class="fas fa-times"></i></a>
         </div>
-        <hr />
         <wall-options v-if="instance.type == types.Wall" :instance="instance" @push="handlePush"></wall-options>
         <container-options
             v-else-if="instance.type == types.Container"
@@ -14,7 +12,11 @@
         <port-options v-else-if="instance.type == types.Port" :instance="instance" @push="handlePush"></port-options>
         <widgets-options v-else :instance="instance" @push="handlePush"></widgets-options>
         <div class="form-group">
-            <button :disabled="$env.state.changesLock" class="btn btn-danger w-100" @click.stop="handleInstanceDelete">
+            <button
+                :disabled="$env.state.changesLock"
+                class="btn btn-sm btn-danger w-100"
+                @click.stop="handleInstanceDelete"
+            >
                 Delete
             </button>
         </div>

@@ -2,10 +2,10 @@
     <div>
         <div class="form-group">
             <options-item :isHeader="true">
-                <span slot="title">Static link</span>
+                <span slot="title">Port</span>
                 <span slot="description"
-                    >Port is a static link to wall. You should use ports for any external navigation, to be able to
-                    change target wall online.</span
+                    >is a static link to wall. You should use ports for any external navigation, to be able to change
+                    target wall online.</span
                 >
             </options-item>
             <div class="col-12 text-center">
@@ -27,10 +27,9 @@
                     class="form-control"
                     maxlength="200"
                 />
-                <span slot="help">Give your port a descriptive title</span>
             </options-item>
             <options-item :isHeader="true">
-                <span slot="title">Redirection</span>
+                <span slot="title">Target wall</span>
             </options-item>
             <options-item>
                 <label slot="title" v-scope:for.authenticated_wall>Authenticated user</label>
@@ -61,7 +60,8 @@
                     :disabled="$env.state.changesLock"
                 ></v-select>
                 <span slot="help"
-                    >Select wall to open for not authenticated users (or nothing to forbid N/A access)</span
+                    >Select wall to open for not authenticated users (or nothing to prevent N/A access from this
+                    port)</span
                 >
             </options-item>
         </div>

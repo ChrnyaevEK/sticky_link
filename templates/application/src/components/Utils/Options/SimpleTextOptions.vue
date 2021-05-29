@@ -2,7 +2,6 @@
     <div class="form-group">
         <options-item :isHeader="true">
             <span slot="title">Content</span>
-            <span slot="description">Add text content to widget</span>
         </options-item>
         <TextEditor v-model="instance.text_content" @input="$emit('push')" :disabled="$env.state.changesLock"></TextEditor>
     </div>

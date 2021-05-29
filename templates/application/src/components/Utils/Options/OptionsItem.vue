@@ -1,18 +1,16 @@
 <template>
-    <div v-if="isHeader" class="pb-1">
-        <span class="mr-1">
-            <slot name="title"></slot>
-        </span>
-        <span class="text-secondary">
-            <slot name="description"></slot>
-        </span>
+    <div v-if="isHeader">
+        <strong class="mr-1"><slot name="title"></slot></strong>
+        <span class="text-secondary"><slot name="description"></slot></span>
     </div>
     <div v-else class="form-group">
-        <slot name="title"></slot>
-        <slot name="input"></slot>
-        <small class="text-secondary">
-            <slot name="help"></slot>
-        </small>
+        <div class="ml-2 d-flex flex-column">
+            <slot name="title"></slot>
+            <slot name="input"></slot>
+            <small class="text-secondary">
+                <slot name="help"></slot>
+            </small>
+        </div>
     </div>
 </template>
 <script>

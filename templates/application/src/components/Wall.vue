@@ -1,20 +1,35 @@
 <template>
-    <div class="d-flex h-100">
-        <div class="d-flex flex-column w-75 flex-grow-1">
+    <div class="d-flex flex-grow-1 h-100 overflow-hidden">
+        <div class="w-75 d-flex flex-column flex-grow-1 overflow-auto">
             <!-- Wall title -->
-            <div class="d-flex overflow-hidden">
-                <span v-if="$env.state.wall" class="px-3 text-truncate">
-                    <strong class="mr-1" :title="$env.state.wall.title">{{ $env.state.wall.title }}</strong>
+            <div class="d-flex justify-content-between px-2 align-items-center">
+                <span
+                    v-if="$env.state.wall"
+                    class="overflow-hidden"
+                    :class="$env.state.editMode ? 'text-truncate' : 'text-break'"
+                >
+                    <span v-show="$env.state.editMode" class="mr-2">Wall</span
+                    ><strong class="mr-1 text-primary" :title="$env.state.wall.title">{{
+                        $env.state.wall.title
+                    }}</strong>
                     <span class="text-secondary" :title="$env.state.wall.description">{{
                         $env.state.wall.description
                     }}</span>
                 </span>
+                <button
+                    v-if="$env.state.editMode && $store.state.user.is_authenticated"
+                    class="btn btn-sm bg-white"
+                    @click.stop="$env.dispatch('openOptions', $env.state.wall)"
+                    :disabled="$env.state.changesLock"
+                >
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
             </div>
             <!-- Container section -->
             <div class="flex-grow-1">
                 <div v-if="$env.state.wall">
                     <div class="d-flex flex-column" v-for="container of $store.state.containers" :key="container.id">
-                        <div class="overflow-auto scrollbar-hidden border-top border-bottom mb-1">
+                        <div class="overflow-auto" :class="{ 'border-top border-bottom': $env.state.editMode }">
                             <vue-draggable-resizable
                                 @click.native.stop="$env.dispatch('closeOptions')"
                                 @touchstart.native="$env.dispatch('closeOptions')"
@@ -22,12 +37,13 @@
                                 @activated="handleContainerActivated(container)"
                                 :resizable="$env.state.editMode && !$env.state.changesLock"
                                 :draggable="false"
-                                :parent="true"
+                                :parent="false"
                                 :handles="['bm']"
                                 :h="container.h"
                                 :w="container.w"
                                 :minHeight="100"
                                 class="position-relative wall-only no-border"
+                                :class="{ grid: $env.state.editMode }"
                                 style="touch-action: initial;"
                                 :grid="[$store.state.app.grid, $store.state.app.grid]"
                             >
@@ -42,12 +58,17 @@
                                 </template>
                             </vue-draggable-resizable>
                         </div>
-                        <div class="d-flex">
-                            <div class="px-3 text-truncate">
-                                <span class="mr-1">{{ container.title }}</span>
+                        <div class="px-2 my-1 d-flex align-items-center">
+                            <div class="mr-1" :class="$env.state.editMode ? 'text-truncate' : 'text-break'">
+                                <span v-show="$env.state.editMode" class="mr-2">Container</span
+                                ><strong class="mr-1 text-primary">{{ container.title }}</strong>
                                 <span class="text-secondary">{{ container.description }}</span>
                             </div>
-                            <div class="flex-grow-1 d-flex justify-content-end">
+                            <div
+                                v-if="$env.state.editMode"
+                                class="flex-grow-1 d-flex justify-content-end align-items-center"
+                            >
+                                <span class="mr-2 text-nowrap">Available widgets</span>
                                 <button
                                     @click.stop="
                                         handleContainerActivated(container);
@@ -118,94 +139,92 @@
             <!-- Create / select section -->
             <div>
                 <div v-if="$env.state.editMode && $store.state.user.is_authenticated">
-                    <div class="px-3 d-flex justify-content-start">
-                        <div v-if="$store.state.walls">
-                            <a
-                                class="mr-1 btn dropdown-toggle bg-white border"
-                                id="wall-list"
-                                data-toggle="dropdown"
-                                aria-haspopup="true"
-                                aria-expanded="false"
-                                title="Select wall to edit"
-                            >
-                                Walls
-                            </a>
-                            <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
-                                <router-link
-                                    class="dropdown-item btn"
-                                    v-for="wall of $store.state.walls"
-                                    :key="wall.id"
-                                    :class="{ active: wall.id == $route.params.wallId }"
-                                    :to="{
-                                        name: 'wallEdit',
-                                        params: { wallId: wall.id },
-                                    }"
-                                    >{{ wall.title }}</router-link
-                                >
-                            </div>
-                        </div>
-                        <button
-                            v-show="$env.state.wall"
-                            class="mr-1 btn bg-white border"
-                            @click.stop="$env.dispatch('openOptions', $env.state.wall)"
-                            :disabled="$env.state.changesLock"
-                        >
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                        <button
-                            class="mr-1 btn btn-success border"
-                            @click="$env.dispatch('handleCreateWall')"
-                            title="Add new wall"
-                            :disabled="$env.state.changesLock"
-                        >
-                            <i class="fas fa-plus"></i>
-                        </button>
-                        <div v-if="$store.state.ports && $env.state.wall">
-                            <a
-                                class="btn btn-s dropdown-toggle bg-white mr-1 border"
-                                id="wall-list"
-                                data-toggle="dropdown"
-                                aria-haspopup="true"
-                                aria-expanded="false"
-                                title="Select port to edit"
-                            >
-                                Ports
-                            </a>
-                            <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
+                    <div class="d-flex p-1 border-top justify-content-between align-item-center">
+                        <div class="d-flex p-1 mr-1">
+                            <div v-if="$store.state.walls">
                                 <a
-                                    class="dropdown-item btn"
-                                    v-for="port of $store.state.ports"
-                                    :key="port.id"
-                                    @click="$env.dispatch('openOptions', port)"
-                                    :title="'Visit counter: ' + port.visited"
-                                    >{{ port.title }} <small>{{ port.visited }}</small>
+                                    class="mr-1 btn dropdown-toggle bg-white"
+                                    id="wall-list"
+                                    data-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    title="Select wall to edit"
+                                >
+                                    Wall
                                 </a>
+                                <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
+                                    <router-link
+                                        class="dropdown-item btn"
+                                        v-for="wall of $store.state.walls"
+                                        :key="wall.id"
+                                        :class="{ active: wall.id == $route.params.wallId }"
+                                        :to="{
+                                            name: 'wallEdit',
+                                            params: { wallId: wall.id },
+                                        }"
+                                        >{{ wall.title }}</router-link
+                                    >
+                                </div>
                             </div>
+                            <button
+                                class="mr-1 btn btn-success"
+                                @click="$env.dispatch('handleCreateWall')"
+                                title="Add new wall"
+                                :disabled="$env.state.changesLock"
+                            >
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button
+                                v-if="$env.state.wall"
+                                @click.stop="$env.dispatch('handleCreateContainer')"
+                                class="btn btn-success text-nowrap"
+                                title="Add Container to hold widgets"
+                                :disabled="$env.state.changesLock"
+                            >
+                                Container
+                            </button>
                         </div>
-                        <button
-                            v-if="$store.state.ports && $env.state.wall"
-                            class="mr-1 btn btn-success text-white border"
-                            @click="$env.dispatch('handleCreatePort')"
-                            title="Add new port"
-                            :disabled="$env.state.changesLock"
-                        >
-                            <i class="fas fa-plus"></i>
-                        </button>
-                        <button
-                            v-if="$env.state.wall"
-                            @click.stop="$env.dispatch('handleCreateContainer')"
-                            class="btn btn-success border text-nowrap"
-                            title="Add Container to hold widgets"
-                            :disabled="$env.state.changesLock"
-                        >
-                            Container
-                        </button>
+                        <div class="d-flex p-1">
+                            <div v-if="$store.state.ports && $env.state.wall">
+                                <a
+                                    class="btn btn-s dropdown-toggle bg-white mr-1"
+                                    id="wall-list"
+                                    data-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    title="Select port to edit"
+                                >
+                                    Port
+                                </a>
+                                <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
+                                    <a
+                                        class="dropdown-item btn"
+                                        v-for="port of $store.state.ports"
+                                        :key="port.id"
+                                        @click="$env.dispatch('openOptions', port)"
+                                        :title="'Visit counter: ' + port.visited"
+                                        >{{ port.title }} <small>{{ port.visited }}</small>
+                                    </a>
+                                </div>
+                            </div>
+                            <button
+                                v-if="$store.state.ports && $env.state.wall"
+                                class="btn btn-success text-white"
+                                @click="$env.dispatch('handleCreatePort')"
+                                title="Add new port"
+                                :disabled="$env.state.changesLock"
+                            >
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         <!-- Sidebar -->
-        <Options class="w-25 border-left" v-if="$env.state.editMode"></Options>
+        <div class="w-25 border-left px-2 overflow-auto" v-if="$env.state.editMode && $env.state.optionsSource">
+            <Options></Options>
+        </div>
     </div>
 </template>
 
@@ -266,12 +285,3 @@
         },
     };
 </script>
-
-<style scoped>
-    .container-title-offset {
-        margin-top: 1.5rem;
-    }
-    .wall-wrap {
-        width: 100vw;
-    }
-</style>

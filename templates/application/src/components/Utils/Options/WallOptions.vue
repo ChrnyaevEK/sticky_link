@@ -2,7 +2,7 @@
     <div class="form-group">
         <options-item :isHeader="true">
             <span slot="title">Description</span>
-            <span slot="description">Tell more about this wall</span>
+            <span slot="description">tell more about the wall</span>
         </options-item>
         <options-item>
             <label v-scope:for.title slot="title">Title</label>
@@ -15,11 +15,10 @@
                 class="form-control"
                 maxlength="200"
             />
-            <span slot="help">Give your wall a title</span>
         </options-item>
         <options-item>
             <label v-scope:for.description slot="title">Description</label>
-            <input
+            <textarea
                 slot="input"
                 v-scope:id.description
                 @input="$emit('push')"
@@ -27,8 +26,12 @@
                 v-model="instance.description"
                 class="form-control"
                 maxlength="500"
+                rows="5"
+                style="resize: y;"
             />
-            <span slot="help">Give your wall a brief description</span>
+        </options-item>
+        <options-item :isHeader="true">
+            <span slot="title">Access</span>
         </options-item>
         <options-item>
             <label v-scope:for.allow_anonymous_view slot="title">Allow anonymous view</label>
@@ -38,10 +41,12 @@
                 v-model="instance.allow_anonymous_view"
                 @change="$emit('push')"
                 :disabled="$env.state.changesLock"
-                class="form-check-input"
                 type="checkbox"
             />
-            <span slot="help">Any one will be able to view this wall</span>
+            <span slot="help">Anyone will be able to view this wall and change widgets values</span>
+        </options-item>
+        <options-item :isHeader="true">
+            <span slot="title">Other</span>
         </options-item>
         <options-item>
             <label v-scope:for.lock_widgets slot="title">Lock widget actions</label>
@@ -54,7 +59,7 @@
                     instance.lock_widgets ? $env.dispatch('lockWidgets') : $env.dispatch('unlockWidgets');
                 "
                 :disabled="$env.state.changesLock"
-                class="form-check-input"
+                class=""
                 type="checkbox"
             />
             <span slot="help">Lock widgets to prevent miss-click in edit mode</span>

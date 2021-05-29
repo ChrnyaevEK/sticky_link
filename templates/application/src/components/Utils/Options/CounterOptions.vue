@@ -3,10 +3,10 @@
 <template>
     <div>
         <options-item :isHeader="true">
-            <span slot="title">Counter</span>
+            <span slot="title">Value control</span>
         </options-item>
         <options-item>
-            <label slot="title" v-scope:for.value>Value</label>
+            <label slot="title" v-scope:for.value>Current value</label>
             <input
                 slot="input"
                 v-scope:id.value
@@ -16,20 +16,6 @@
                 class="form-control"
                 type="number"
             />
-            <span slot="help">Set counter value</span>
-        </options-item>
-        <options-item>
-            <label slot="title" v-scope:for.vertical>Vertical orientation</label>
-            <input
-                slot="input"
-                v-scope:id.vertical
-                v-model="instance.vertical"
-                @change="$emit('push')"
-                :disabled="$env.state.changesLock"
-                class="form-check-input"
-                type="checkbox"
-            />
-            <span slot="help">Counter will be vertical if true, else horizontal</span>
         </options-item>
         <options-item>
             <label slot="title" v-scope:for.step>Step</label>
@@ -42,7 +28,21 @@
                 class="form-control"
                 type="number"
             />
-            <span slot="help">Value will changed with defined step</span>
+        </options-item>
+        <options-item :isHeader="true">
+            <span slot="title">Other</span>
+        </options-item>
+        <options-item>
+            <label slot="title" v-scope:for.vertical>Vertical orientation</label>
+            <input
+                slot="input"
+                v-scope:id.vertical
+                v-model="instance.vertical"
+                @change="$emit('push')"
+                :disabled="$env.state.changesLock"
+                type="checkbox"
+            />
+            <span slot="help">Counter may have vertical or horizontal orientation</span>
         </options-item>
     </div>
 </template>

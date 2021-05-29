@@ -4,17 +4,15 @@
             <span slot="title">Simple List</span>
         </options-item>
         <options-item>
-            <label slot="title" v-scope:for.inner_border>Items border</label>
+            <label slot="title" v-scope:for.inner_border>Item borders</label>
             <input
                 slot="input"
                 v-scope:id.inner_border
                 v-model="instance.inner_border"
                 @change="$emit('push')"
                 :disabled="$env.state.changesLock"
-                class="form-check-input"
                 type="checkbox"
             />
-            <span slot="help">Set border for items</span>
         </options-item>
     </div>
 </template>

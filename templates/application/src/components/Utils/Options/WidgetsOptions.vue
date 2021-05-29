@@ -3,10 +3,10 @@
         <div class="form-group">
             <options-item :isHeader="true">
                 <span slot="title">Position</span>
-                <span slot="description">Describe widget position with coordinates x,y,z</span>
+                <span slot="description">(offsets)</span>
             </options-item>
             <options-item>
-                <label v-scope:for.x slot="title">X</label>
+                <label v-scope:for.x slot="title">Left offset</label>
                 <input
                     slot="input"
                     v-scope:id.x
@@ -20,7 +20,7 @@
                 />
             </options-item>
             <options-item>
-                <label v-scope:for.y slot="title">Y</label>
+                <label v-scope:for.y slot="title">Top offset</label>
                 <input
                     slot="input"
                     v-scope:id.y
@@ -34,7 +34,7 @@
                 />
             </options-item>
             <options-item>
-                <label v-scope:for.z slot="title">Z</label>
+                <label v-scope:for.z slot="title">Z-index (overlay)</label>
                 <input
                     slot="input"
                     v-scope:id.z
@@ -53,7 +53,7 @@
         <div class="form-group">
             <options-item :isHeader="true">
                 <span slot="title">Size</span>
-                <span slot="description">Describe widget size. Size will be recalculated to fit parent.</span>
+                <span slot="description">(recalculated to fit parent)</span>
             </options-item>
             <options-item>
                 <label v-scope:for.w slot="title">Width</label>
@@ -89,7 +89,7 @@
         <div class="form-group">
             <options-item :isHeader="true">
                 <span slot="title">Font</span>
-                <span slot="description">Global font settings. Text editor may override this values.</span>
+                <span slot="description">(text editor may override this values)</span>
             </options-item>
             <options-item>
                 <label slot="title" v-scope:for.font_size>Size</label>
@@ -120,14 +120,13 @@
                     min="100"
                     max="900"
                 />
-                <span slot="help">Describe how bold the font is</span>
             </options-item>
         </div>
 
         <div class="form-group">
             <options-item :isHeader="true">
                 <span slot="title">Appearance</span>
-                <span slot="description">Global settings. Text editor may override this values.</span>
+                <span slot="description">(text editor may override this values)</span>
             </options-item>
             <options-item>
                 <label slot="title" v-scope:for.background_color>Background color</label>
@@ -155,24 +154,21 @@
                 />
             </options-item>
             <options-item>
-                <label slot="title" v-scope:for.border>Border</label>
+                <label slot="title" v-scope:for.border>Borders</label>
                 <input
                     slot="input"
                     v-scope:id.border
                     v-model="instance.border"
                     @change="$emit('push')"
                     :disabled="$env.state.changesLock"
-                    class="form-check-input"
                     type="checkbox"
                 />
-                <span slot="help">Control if widget has border</span>
             </options-item>
         </div>
 
         <div class="form-group">
             <options-item :isHeader="true">
                 <span slot="title">Description</span>
-                <span slot="description">Add some information about the widget</span>
             </options-item>
             <options-item>
                 <label slot="title" v-scope:for.title>Title</label>
@@ -184,7 +180,6 @@
                     :disabled="$env.state.changesLock"
                     class="form-control"
                 />
-                <span slot="help">Name you widget</span>
             </options-item>
             <options-item>
                 <label slot="title" v-scope:for.help>Help text</label>
@@ -197,7 +192,6 @@
                     class="form-control"
                     maxlength="200"
                 />
-                <span slot="help">Describe your widget</span>
             </options-item>
         </div>
 
@@ -205,12 +199,12 @@
             <options-item :isHeader="true">
                 <span slot="title">Synchronization</span>
                 <span slot="description"
-                    >Setup synchronization with another widget of the <strong>same type</strong>. Only value fields are
-                    synchronized, not size or position</span
+                    >with another widget of the <strong>same type</strong>. Only value fields are
+                    synchronized, not size, position, etc...</span
                 >
             </options-item>
             <options-item>
-                <label slot="title" v-scope:for.sync_id>Synchronize with ...</label>
+                <label slot="title" v-scope:for.sync_id>Push data to ... (ID)</label>
                 <input
                     slot="input"
                     v-scope:id.sync_id
@@ -221,20 +215,17 @@
                     type="text"
                     maxlength="20"
                 />
-                <span slot="help">Pass <strong>Sync Id</strong> of the widget you want to synchronize with</span>
+                <span slot="help">Pass <strong>Sync ID</strong> of the slave widget</span>
             </options-item>
             <options-item>
-                <label slot="title">Sync Id</label>
+                <label slot="title">Self sync ID</label>
                 <button slot="input" class="w-100 btn btn-sm border" @click="copyToClipboard(instance.id)">
                     {{ instance.id }}
                     <i class="fas fa-copy mx-3 text-muted"></i>
                 </button>
-                <span slot="help"><strong>Sync Id</strong> of this widget</span>
+                <span slot="help"><strong>Sync ID</strong> of this widget</span>
             </options-item>
         </div>
-
-        <hr />
-
         <counter-options
             v-if="instance.type == types.Counter"
             :instance="instance"
