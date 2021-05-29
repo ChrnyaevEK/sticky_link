@@ -29,7 +29,7 @@
             <div class="flex-grow-1">
                 <div v-if="$env.state.wall">
                     <div class="d-flex flex-column" v-for="container of $store.state.containers" :key="container.id">
-                        <div class="overflow-auto" :class="{ 'border-top border-bottom': $env.state.editMode }">
+                        <div class="overflow-auto">
                             <vue-draggable-resizable
                                 @click.native.stop="$env.dispatch('closeOptions')"
                                 @touchstart.native="$env.dispatch('closeOptions')"
