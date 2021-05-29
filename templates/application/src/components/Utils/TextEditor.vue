@@ -49,7 +49,6 @@
                         { script: "super" },
                         { script: "sub" },
                         "blockquote",
-                        "code-block",
                         "direction",
                         "link",
                     ],

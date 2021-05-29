@@ -17,7 +17,7 @@
                     }}</span>
                 </span>
                 <button
-                    v-if="$env.state.editMode && $store.state.user.is_authenticated"
+                    v-if="$env.state.wal && $env.state.editMode && $store.state.user.is_authenticated"
                     class="btn btn-sm bg-white"
                     @click.stop="$env.dispatch('openOptions', $env.state.wall)"
                     :disabled="$env.state.changesLock"
@@ -31,8 +31,6 @@
                     <div class="d-flex flex-column" v-for="container of $store.state.containers" :key="container.id">
                         <div class="overflow-auto">
                             <vue-draggable-resizable
-                                @click.native.stop="$env.dispatch('closeOptions')"
-                                @touchstart.native="$env.dispatch('closeOptions')"
                                 @resizing="handleContainerResizing"
                                 @activated="handleContainerActivated(container)"
                                 :resizable="$env.state.editMode && !$env.state.changesLock"
