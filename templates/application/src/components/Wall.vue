@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-grow-1 h-100 overflow-hidden bg-light">
+    <div class="d-flex flex-grow-1 h-100 overflow-hidden" :class="{ 'bg-light': $env.state.editMode }">
         <div class="w-75 d-flex flex-column flex-grow-1 overflow-auto">
             <!-- Wall title -->
             <div class="d-flex justify-content-between px-2 py-2 align-items-center">
@@ -28,7 +28,12 @@
             <!-- Container section -->
             <div class="flex-grow-1">
                 <div v-if="$env.state.wall">
-                    <div class="d-flex flex-column mb-3 bg-white border-top border-bottom" v-for="container of $store.state.containers" :key="container.id">
+                    <div
+                        class="d-flex flex-column bg-white"
+                        :class="{ 'mb-3 border-top border-bottom': $env.state.editMode }"
+                        v-for="container of $store.state.containers"
+                        :key="container.id"
+                    >
                         <div class="px-2 d-flex justify-content-between">
                             <div class="mr-1 py-1" :class="$env.state.editMode ? 'text-truncate' : 'text-break'">
                                 <span v-show="$env.state.editMode" class="mr-2">Container</span
@@ -36,6 +41,7 @@
                                 <span class="text-secondary">{{ container.description }}</span>
                             </div>
                             <button
+                                v-if="$env.state.editMode"
                                 class="btn btn-sm"
                                 @click.stop="$env.dispatch('openOptions', container)"
                                 :disabled="$env.state.changesLock"
