@@ -7,13 +7,13 @@
                     <li class="nav-item active">
                         <a class="nav-link" :href="homeUrl">Home</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" v-if="$env.state.wall">
                         <router-link
                             v-show="$store.state.user.is_authenticated"
                             class="nav-link"
                             :to="{
                                 name: $env.state.editMode ? 'wallView' : 'wallEdit',
-                                params: $route.params,
+                                params: { wallId: $env.state.wall.id },
                             }"
                             >{{ $env.state.editMode ? "View" : "Edit" }}
                         </router-link>

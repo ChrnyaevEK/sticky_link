@@ -46,6 +46,20 @@
             />
             <span slot="help">Widgets will be recalculated to fit the container.</span>
         </options-item>
+        <options-item :isHeader="true">
+            <span slot="title">Other</span>
+        </options-item>
+        <options-item>
+            <label v-scope:for.grid slot="title">Enable grid</label>
+            <input
+                slot="input"
+                v-scope:id.grid
+                v-model="instance.grid"
+                @change="$emit('push')"
+                :disabled="$env.state.changesLock"
+                type="checkbox"
+            />
+        </options-item>
     </div>
 </template>
 

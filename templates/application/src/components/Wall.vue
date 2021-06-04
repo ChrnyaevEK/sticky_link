@@ -1,8 +1,8 @@
 <template>
-    <div class="d-flex flex-grow-1 h-100 overflow-hidden">
+    <div class="d-flex flex-grow-1 h-100 overflow-hidden bg-light">
         <div class="w-75 d-flex flex-column flex-grow-1 overflow-auto">
             <!-- Wall title -->
-            <div class="d-flex justify-content-between px-2 align-items-center">
+            <div class="d-flex justify-content-between px-2 py-2 align-items-center">
                 <span
                     v-if="$env.state.wall"
                     class="overflow-hidden"
@@ -18,17 +18,31 @@
                 </span>
                 <button
                     v-if="$env.state.wall && $env.state.editMode"
-                    class="btn btn-sm bg-white"
+                    class="btn btn-sm bg-white border text-secondary"
                     @click.stop="$env.dispatch('openOptions', $env.state.wall)"
                     :disabled="$env.state.changesLock"
                 >
-                    <i class="fas fa-ellipsis-v"></i>
+                    Settings
                 </button>
             </div>
             <!-- Container section -->
             <div class="flex-grow-1">
                 <div v-if="$env.state.wall">
-                    <div class="d-flex flex-column" v-for="container of $store.state.containers" :key="container.id">
+                    <div class="d-flex flex-column mb-3 bg-white border-top border-bottom" v-for="container of $store.state.containers" :key="container.id">
+                        <div class="px-2 d-flex justify-content-between">
+                            <div class="mr-1 py-1" :class="$env.state.editMode ? 'text-truncate' : 'text-break'">
+                                <span v-show="$env.state.editMode" class="mr-2">Container</span
+                                ><strong class="mr-1 text-primary">{{ container.title }}</strong>
+                                <span class="text-secondary">{{ container.description }}</span>
+                            </div>
+                            <button
+                                class="btn btn-sm"
+                                @click.stop="$env.dispatch('openOptions', container)"
+                                :disabled="$env.state.changesLock"
+                            >
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                        </div>
                         <div class="overflow-auto">
                             <vue-draggable-resizable
                                 @resizing="handleContainerResizing"
@@ -40,8 +54,13 @@
                                 :h="container.h"
                                 :w="container.w"
                                 :minHeight="100"
-                                class="position-relative wall-only no-border"
-                                :class="{ grid: $env.state.editMode }"
+                                class="position-relative wall-only content-box"
+                                :class="{
+                                    'border-top border-bottom border-left-0 border-right-0':
+                                        $env.state.editMode && !container.grid,
+                                    'grid no-border': $env.state.editMode && container.grid,
+                                    'no-border': !$env.state.editMode,
+                                }"
                                 style="touch-action: initial;"
                                 :grid="[$store.state.app.grid, $store.state.app.grid]"
                             >
@@ -56,17 +75,11 @@
                                 </template>
                             </vue-draggable-resizable>
                         </div>
-                        <div class="px-2 my-1 d-flex align-items-center">
-                            <div class="mr-1" :class="$env.state.editMode ? 'text-truncate' : 'text-break'">
-                                <span v-show="$env.state.editMode" class="mr-2">Container</span
-                                ><strong class="mr-1 text-primary">{{ container.title }}</strong>
-                                <span class="text-secondary">{{ container.description }}</span>
-                            </div>
+                        <div class="px-2 py-1 d-flex align-items-center">
                             <div
                                 v-if="$env.state.editMode"
                                 class="flex-grow-1 d-flex justify-content-end align-items-center"
                             >
-                                <span class="mr-2 text-nowrap">Available widgets</span>
                                 <button
                                     @click.stop="
                                         handleContainerActivated(container);
@@ -122,22 +135,25 @@
                                 >
                                     Switch
                                 </button>
-                                <button
-                                    class="btn btn-sm"
-                                    @click.stop="$env.dispatch('openOptions', container)"
-                                    :disabled="$env.state.changesLock"
-                                >
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div v-else class="p-2">
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            <span class="sr-only">Close</span>
+                        </button>
+                        <div class="font-weight-bold">Select or create a wall to continue!</div>
+                        <div><i>Use [+] button to create and dropdown to select wall</i></div>
                     </div>
                 </div>
             </div>
             <!-- Create / select section -->
             <div>
                 <div v-if="$env.state.editMode && $store.state.user.is_authenticated">
-                    <div class="d-flex p-1 border-top justify-content-between align-item-center">
+                    <div class="d-flex p-1 border-top justify-content-between align-item-center bg-white">
                         <div class="d-flex p-1 mr-1">
                             <div v-if="$store.state.walls">
                                 <a

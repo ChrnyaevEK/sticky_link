@@ -14,29 +14,39 @@ const router = new VueRouter({
         {
             path: "/",
             component: App,
+            name: "home",
+            redirect: { name: "wallEdit" },
             children: [
                 {
                     name: "wallEdit",
-                    path: "wall/edit/:wallId?",
-                    alias: "",
+                    path: "edit/wall/:wallId?",
                     component: Wall,
                     async beforeEnter(to, from, next) {
                         if (!store.state.user.is_authenticated) {
                             return next({
-                                name: "wallView",
-                                params: to.params,
-                                query: to.query,
+                                name: "home",
                             });
                         }
+                        if (store.state.meta && !store.state.meta.edit_permission) {
+                            return next({
+                                name: "home",
+                            });
+                        }
+
                         await env.dispatch("setEditMode");
                         next();
                     },
                 },
                 {
                     name: "wallView",
-                    path: "wall/view/:wallId?",
+                    path: "view/wall/:wallId",
                     component: Wall,
                     async beforeEnter(to, from, next) {
+                        if (!store.state.meta.view_permission) {
+                            return next({
+                                name: "home",
+                            });
+                        }
                         await env.dispatch("setViewMode");
                         next();
                     },
@@ -45,6 +55,10 @@ const router = new VueRouter({
                     name: "error",
                     path: "/error",
                     component: Error,
+                },
+                {
+                    path: "*",
+                    redirect: { name: "home" },
                 },
             ],
         },

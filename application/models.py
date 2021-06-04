@@ -145,6 +145,7 @@ class Container(SyncManager):
 
     h = models.IntegerField(verbose_name='Container height', default=100, validators=[MinValueValidator(50)])
     w = models.IntegerField(verbose_name='Container width', default=2000)  # Should not change (is static)
+    grid = models.BooleanField(default=False)
 
     title = models.CharField(verbose_name='Container title', max_length=200, null=True, blank=True)
     description = models.CharField(verbose_name='Container description', max_length=500, blank=True, null=True)

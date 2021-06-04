@@ -1,7 +1,7 @@
 import Vue from "vue";
 import router from "./modules/router";
-import store from "./modules/store";
 import env from "./modules/env";
+import store from "./modules/store";
 import io from "./modules/io";
 import "bootstrap";
 import "./css/main.scss";
