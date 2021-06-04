@@ -22,15 +22,24 @@ const router = new VueRouter({
                     path: "edit/wall/:wallId?",
                     component: Wall,
                     async beforeEnter(to, from, next) {
-                        if (!store.state.user.is_authenticated) {
-                            return next({
-                                name: "home",
-                            });
-                        }
-                        if (store.state.meta && !store.state.meta.edit_permission) {
-                            return next({
-                                name: "home",
-                            });
+                        if (to.params.wallId != undefined) {
+                            if (
+                                store.state.meta &&
+                                !store.state.meta.edit_permission &&
+                                store.state.meta.view_permission
+                            ) {
+                                return next({
+                                    name: "wallView",
+                                    params: {
+                                        wallId: to.params.wallId,
+                                    },
+                                });
+                            }
+                        } else {
+                            if (!store.state.user.is_authenticated) {
+                                location.href = process.env.VUE_APP_LOGIN;
+                                return;
+                            }
                         }
 
                         await env.dispatch("setEditMode");
@@ -42,7 +51,13 @@ const router = new VueRouter({
                     path: "view/wall/:wallId",
                     component: Wall,
                     async beforeEnter(to, from, next) {
-                        if (!store.state.meta.view_permission) {
+                        if (store.state.meta) {
+                            if (!store.state.meta.view_permission) {
+                                return next({
+                                    name: "home",
+                                });
+                            }
+                        } else {
                             return next({
                                 name: "home",
                             });
