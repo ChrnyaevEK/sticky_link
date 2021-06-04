@@ -19,7 +19,7 @@ const router = new VueRouter({
             children: [
                 {
                     name: "wallEdit",
-                    path: "edit/wall/:wallId?",
+                    path: "wall/edit/:wallId?",
                     component: Wall,
                     async beforeEnter(to, from, next) {
                         if (to.params.wallId != undefined) {
@@ -48,7 +48,7 @@ const router = new VueRouter({
                 },
                 {
                     name: "wallView",
-                    path: "view/wall/:wallId",
+                    path: "wall/view/:wallId",
                     component: Wall,
                     async beforeEnter(to, from, next) {
                         if (store.state.meta) {
