@@ -56,7 +56,7 @@
                                 <i class="fas fa-ellipsis-h"></i>
                             </button>
                         </div>
-                        <div class="overflow-auto">
+                        <div class="overflow-auto" style="-webkit-overflow-scrolling: touch;">
                             <vue-draggable-resizable
                                 @resizing="handleContainerResizing"
                                 @activated="handleContainerActivated(container)"

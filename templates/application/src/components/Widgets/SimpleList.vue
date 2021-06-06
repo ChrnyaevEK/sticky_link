@@ -4,7 +4,7 @@
             <div class="text-secondary text-truncate" :title="widget.title">
                 {{ widget.title }}
             </div>
-            <div class="flex-grow-1 overflow-auto">
+            <div class="flex-grow-1" :class="$env.state.editMode ? 'overflow-hidden' : 'overflow-auto'">
                 <div
                     class="d-flex mb-1 align-items-start"
                     :class="{ border: widget.inner_border }"

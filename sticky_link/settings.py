@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = env.SECRET_KEY
 DEBUG = env.DEBUG
-ALLOWED_HOSTS = ['app.sticky-link.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['app.sticky-link.com', '127.0.0.1', 'localhost',  '192.168.100.4']
 CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
 

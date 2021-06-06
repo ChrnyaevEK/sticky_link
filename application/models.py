@@ -120,7 +120,7 @@ class Wall(SyncManager):
     allow_anonymous_view = models.BooleanField('Allow anonymous view mode', default=False)
     title = models.CharField(verbose_name='Wall title', max_length=200, default='Untitled', null=True, blank=True)
     description = models.CharField(verbose_name='Wall description', max_length=500, blank=True, null=True)
-    lock_widgets = models.BooleanField(verbose_name='Lock widgets at wall', default=False)
+    lock_widgets = models.BooleanField(verbose_name='Lock widgets at wall', default=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

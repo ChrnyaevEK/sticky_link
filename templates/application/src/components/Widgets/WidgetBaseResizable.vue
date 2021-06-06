@@ -5,8 +5,6 @@
         @resizestop="onResizeStop"
         @dragstop="onDrag"
         @activated="onActivated"
-        @touchstart.native="$_prevent"
-        @click.native="$_prevent"
         class="widget"
         :class="[
             widget.border ? 'widget-border' : 'no-border',
@@ -115,11 +113,6 @@
                 copyToClipboard(this.widget.sync_id);
                 this.$notify({ text: "Copied to clipboard!", type: "success" });
             },
-            $_prevent(e){
-                if (this.$env.state.editMode){
-                    e.stopPropagation()
-                }
-            }
         },
         components: {
             VueDraggableResizable,
@@ -131,6 +124,7 @@
                     color: ${this.widget.text_color};
                     font-size:${this.widget.font_size}px;
                     font-weight:${this.widget.font_weight};
+                    touch-action: ${this.$env.state.editMode ? "none" : "initial"};
                 `;
             },
             title() {
