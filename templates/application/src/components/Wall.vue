@@ -1,7 +1,7 @@
 <template>
     <div class="d-flex flex-grow-1 h-100 overflow-hidden" :class="{ 'bg-light': $env.state.editMode }">
         <div class="w-75 d-flex flex-column flex-grow-1 overflow-auto">
-            <div class="alert alert-warning d-block d-md-none" role="alert">
+            <div class="alert alert-warning d-block d-md-none" role="alert" v-if="$env.state.editMode">
                 <strong>Ups...</strong>
                 <span>
                     The device your are using is not wide enough, some features are disabled. Switch to wider screen to

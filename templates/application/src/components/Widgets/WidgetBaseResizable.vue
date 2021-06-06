@@ -5,8 +5,8 @@
         @resizestop="onResizeStop"
         @dragstop="onDrag"
         @activated="onActivated"
-        @touchstart.native.stop
-        @click.native.stop
+        @touchstart.native="$_prevent"
+        @click.native="$_prevent"
         class="widget"
         :class="[
             widget.border ? 'widget-border' : 'no-border',
@@ -115,6 +115,11 @@
                 copyToClipboard(this.widget.sync_id);
                 this.$notify({ text: "Copied to clipboard!", type: "success" });
             },
+            $_prevent(e){
+                if (this.$env.state.editMode){
+                    e.stopPropagation()
+                }
+            }
         },
         components: {
             VueDraggableResizable,
