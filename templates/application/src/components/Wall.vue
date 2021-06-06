@@ -212,27 +212,30 @@
                             </button>
                         </div>
                         <div class="d-flex p-1">
-                            <a
-                                class="btn btn-s dropdown-toggle bg-white mr-1"
-                                id="wall-list"
-                                data-toggle="dropdown"
-                                aria-haspopup="true"
-                                aria-expanded="false"
-                                title="Select port to edit"
-                            >
-                                Port
-                            </a>
-                            <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
+                            <div v-if="$store.state.ports && $env.state.wall">
                                 <a
-                                    class="dropdown-item btn"
-                                    v-for="port of $store.state.ports"
-                                    :key="port.id"
-                                    @click="$env.dispatch('openOptions', port)"
-                                    :title="'Visit counter: ' + port.visited"
-                                    >{{ port.title }} <small>{{ port.visited }}</small>
+                                    class="btn btn-s dropdown-toggle bg-white mr-1"
+                                    id="wall-list"
+                                    data-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    title="Select port to edit"
+                                >
+                                    Port
                                 </a>
+                                <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
+                                    <a
+                                        class="dropdown-item btn"
+                                        v-for="port of $store.state.ports"
+                                        :key="port.id"
+                                        @click="$env.dispatch('openOptions', port)"
+                                        :title="'Visit counter: ' + port.visited"
+                                        >{{ port.title }} <small>{{ port.visited }}</small>
+                                    </a>
+                                </div>
                             </div>
                             <button
+                                v-if="$store.state.ports && $env.state.wall"
                                 class="btn btn-success text-white"
                                 @click="$env.dispatch('handleCreatePort')"
                                 title="Add new port"
