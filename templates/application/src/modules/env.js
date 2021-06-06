@@ -49,7 +49,6 @@ export default new VueX.Store({
         },
         //this.edit && this.wall && this.wall.lock_widgets
     },
-
     actions: {
         async handleCreateWidget(context, type) {
             let widget = await store.dispatch("createInstance", {

@@ -25,23 +25,20 @@
                     </li>
                 </ul>
             </div>
-            <SaveUtil></SaveUtil>
-            <div class="mx-5 text-secondary d-sm-none">
-                <span v-if="!$env.state.wall && $store.state.user.is_authenticated">
-                    Select or create a <span class="text-success font-weight-bold">wall</span> to continue
-                </span>
+            <div class="d-flex align-items-center">
+                <SaveUtil></SaveUtil>
+                <button
+                    class="navbar-toggler ml-2"
+                    type="button"
+                    data-toggle="collapse"
+                    data-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
             </div>
-            <button
-                class="navbar-toggler"
-                type="button"
-                data-toggle="collapse"
-                data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent"
-                aria-expanded="false"
-                aria-label="Toggle navigation"
-            >
-                <span class="navbar-toggler-icon"></span>
-            </button>
         </nav>
         <notifications class="notification" :duration="5000" position="bottom left"></notifications>
         <router-view></router-view>

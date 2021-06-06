@@ -1,11 +1,18 @@
 <template>
     <div class="d-flex flex-grow-1 h-100 overflow-hidden" :class="{ 'bg-light': $env.state.editMode }">
         <div class="w-75 d-flex flex-column flex-grow-1 overflow-auto">
+            <div class="alert alert-warning d-block d-md-none" role="alert">
+                <strong>Ups...</strong>
+                <span>
+                    The device your are using is not wide enough, some features are disabled. Switch to wider screen to
+                    access full version!</span
+                >
+            </div>
             <!-- Wall title -->
-            <div class="d-flex justify-content-between px-2 py-2 align-items-center">
+            <div class="d-flex justify-content-between p-2 align-items-center">
                 <span
                     v-if="$env.state.wall"
-                    class="overflow-hidden"
+                    class="overflow-hidden py-1"
                     :class="$env.state.editMode ? 'text-truncate' : 'text-break'"
                 >
                     <span v-show="$env.state.editMode" class="mr-2">Wall</span
@@ -18,7 +25,7 @@
                 </span>
                 <button
                     v-if="$env.state.wall && $env.state.editMode"
-                    class="btn btn-sm bg-white border text-secondary"
+                    class="btn btn-sm bg-white border text-secondary d-none d-md-block"
                     @click.stop="$env.dispatch('openOptions', $env.state.wall)"
                     :disabled="$env.state.changesLock"
                 >
@@ -42,7 +49,7 @@
                             </div>
                             <button
                                 v-if="$env.state.editMode"
-                                class="btn btn-sm"
+                                class="btn btn-sm d-none d-md-block"
                                 @click.stop="$env.dispatch('openOptions', container)"
                                 :disabled="$env.state.changesLock"
                             >
@@ -60,7 +67,7 @@
                                 :h="container.h"
                                 :w="container.w"
                                 :minHeight="100"
-                                class="position-relative wall-only content-box"
+                                class="position-relative wall-only content-box overflow-hidden"
                                 :class="{
                                     'border-top border-bottom border-left-0 border-right-0':
                                         $env.state.editMode && !container.grid,
@@ -242,7 +249,11 @@
             </div>
         </div>
         <!-- Sidebar -->
-        <div class="w-25 border-left px-2 overflow-auto" v-if="$env.state.editMode && $env.state.optionsSource">
+        <div
+            class="w-25 border-left px-2 overflow-auto d-none d-md-block"
+            v-if="$env.state.editMode && $env.state.optionsSource"
+        >
+            <!-- Button trigger modal -->
             <Options></Options>
         </div>
     </div>

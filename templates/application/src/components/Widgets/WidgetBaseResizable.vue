@@ -52,7 +52,7 @@
             >
                 <i class="fas fa-copy"></i>
             </button>
-            <button class="btn btn-sm btn-light border" @click.stop="onOpenOptions">
+            <button class="btn btn-sm btn-light border d-none d-md-block" @click.stop="onOpenOptions">
                 <i class="fas fa-ellipsis-v"></i>
             </button>
         </div>
