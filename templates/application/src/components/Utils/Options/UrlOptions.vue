@@ -15,18 +15,6 @@
             />
         </options-item>
         <options-item>
-            <label slot="title" v-scope:for.text>Display text</label>
-            <input
-                slot="input"
-                v-scope:id.text
-                v-model="instance.text"
-                @input="$emit('push')"
-                :disabled="$env.state.changesLock"
-                class="form-control"
-            />
-            <span slot="help">This text will be shown instead of url address</span>
-        </options-item>
-        <options-item>
             <label slot="title" class="form-check-label" v-scope:for.open_in_new_window>New window</label>
             <input
                 slot="input"

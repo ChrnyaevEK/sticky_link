@@ -235,7 +235,6 @@ class URL(Widget):
     sync_fields = ['href', 'text', 'open_in_new_window']
 
     href = models.URLField(null=True, blank=True)
-    text = models.CharField(max_length=2048, null=True, blank=True)
     open_in_new_window = models.BooleanField(default=True)
     sync_id = models.ForeignKey('URL', blank=True, null=True, on_delete=models.SET_NULL)
 

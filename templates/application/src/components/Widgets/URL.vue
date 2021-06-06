@@ -5,7 +5,7 @@
             class="w-100 h-100 text-break cursor-pointer center-content"
             :style="`color: ${widget.text_color};`"
             :disabled="$env.state.widgetsLock || $env.state.changesLock"
-            ><u>{{ widget.text || widget.href }}</u>
+            ><u>{{ widget.title || widget.href }}</u>
             <i class="mx-2 fas fa-external-link-square-alt text-muted"></i>
         </a>
     </WidgetBaseResizable>
