@@ -2,7 +2,7 @@
     <WidgetBaseResizable :widget="widget">
         <a
             @click.stop.prevent="openHref"
-            class="w-100 h-100 text-break cursor-pointer d-flex justify-content-center align-items-center"
+            class="w-100 h-100 text-break cursor-pointer center-content"
             :style="`color: ${widget.text_color};`"
             :disabled="$env.state.widgetsLock || $env.state.changesLock"
             ><u>{{ widget.text || widget.href }}</u>

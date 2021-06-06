@@ -56,9 +56,7 @@
                 <i class="fas fa-ellipsis-v"></i>
             </button>
         </div>
-        <div class="h-100 w-100 d-flex flex-column justify-content-center align-items-center overflow-auto">
-            <slot></slot>
-        </div>
+        <slot></slot>
     </vue-draggable-resizable>
 </template>
 

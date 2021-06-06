@@ -1,38 +1,42 @@
 <template id="simple-list-template">
     <WidgetBaseResizable :widget="widget">
-        <div class="form-group w-100 h-100 overflow-auto py-1">
-            <div
-                class="d-flex text-break mb-1"
-                :class="{ border: widget.inner_border }"
-                v-for="(val, i) of widget.items"
-                :key="i"
-            >
-                <span class="w-100 p-1">
-                    {{ val }}
-                </span>
-                <div class="d-flex flex-column">
+        <div class="h-100 d-flex flex-column">
+            <div class="text-secondary text-truncate" :title="widget.title">
+                {{ widget.title }}
+            </div>
+            <div class="flex-grow-1 overflow-auto">
+                <div
+                    class="d-flex mb-1 align-items-start"
+                    :class="{ border: widget.inner_border }"
+                    v-for="(val, i) of widget.items"
+                    :key="i"
+                >
+                    <div class="d-flex flex-grow-1 p-1 text-break">
+                        <span class="mr-1 text-secondary">{{ i + 1 }}.</span>
+                        <span>{{ val }}</span>
+                    </div>
                     <button
                         @click.stop="removeItem(i)"
                         :disabled="$env.state.widgetsLock || $env.state.changesLock"
-                        class="btn btn-sm"
+                        class="btn btn-sm text-danger"
                     >
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
             </div>
-        </div>
-        <div class="d-flex w-100">
-            <input
-                type="text"
-                v-scope:id.item-input
-                v-model="item"
-                @keyup.enter="addItem"
-                class="form-control"
-                :disabled="$env.state.widgetsLock || $env.state.changesLock"
-            />
-            <button @click.stop="addItem" :disabled="$env.state.widgetsLock || $env.state.changesLock" class="btn">
-                <i class="fas fa-plus"></i>
-            </button>
+            <div class="d-flex">
+                <input
+                    type="text"
+                    v-scope:id.item-input
+                    v-model="item"
+                    @keyup.enter="addItem"
+                    class="form-control"
+                    :disabled="$env.state.widgetsLock || $env.state.changesLock"
+                />
+                <button @click.stop="addItem" :disabled="$env.state.widgetsLock || $env.state.changesLock" class="btn">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
         </div>
     </WidgetBaseResizable>
 </template>
@@ -78,15 +82,6 @@
 </script>
 
 <style scoped>
-    .overflow-auto::-webkit-scrollbar {
-        display: none;
-    }
-
-    /* Hide scrollbar for IE, Edge and Firefox */
-    .overflow-auto {
-        -ms-overflow-style: none; /* IE and Edge */
-        scrollbar-width: none; /* Firefox */
-    }
     input,
     input:active,
     input:focus {
