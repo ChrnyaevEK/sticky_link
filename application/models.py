@@ -276,6 +276,7 @@ class Port(SyncManager):
     authenticated_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL,
                                            related_name='authenticated_wall')
     anonymous_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL, related_name='anonymous_wall')
+    redirect_url = models.URLField(null=True, default=None)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

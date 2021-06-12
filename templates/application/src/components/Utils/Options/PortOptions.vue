@@ -64,6 +64,19 @@
                     port)</span
                 >
             </options-item>
+            <options-item>
+                <label slot="title" v-scope:for.redirect_url>Redirect URL</label>
+                <input
+                    type="url"
+                    slot="input"
+                    v-scope:id.redirect_url
+                    v-model="instance.redirect_url"
+                    @input="$emit('push')"
+                    :disabled="$env.state.changesLock"
+                    class="form-control"
+                />
+                <span slot="help">If no wall specified - redirected user to this URL. </span>
+            </options-item>
         </div>
     </div>
 </template>

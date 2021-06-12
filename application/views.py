@@ -54,6 +54,8 @@ class App:
 
         wall = port.authenticated_wall if request.user.is_authenticated else port.anonymous_wall
         if wall is None:
+            if port.redirect_url is not None:
+                return redirect(port.redirect_url)
             return HttpResponseNotFound(Public.Error.port_refer_invalid_resource)
 
         return redirect(f'/wall/view/{wall.id}/')
