@@ -225,45 +225,45 @@ class Widget(SyncManager):
 class SimpleText(Widget):
     type = 'simple_text'
     sync_fields = ['text_content']
-
     sync_id = models.ForeignKey('SimpleText', blank=True, null=True, on_delete=models.SET_NULL)
+
     text_content = models.TextField(verbose_name='Text content of widget', null=True, blank=True)
 
 
 class URL(Widget):
     type = 'url'
     sync_fields = ['href', 'text', 'open_in_new_window']
+    sync_id = models.ForeignKey('URL', blank=True, null=True, on_delete=models.SET_NULL)
 
     href = models.URLField(null=True, blank=True)
     open_in_new_window = models.BooleanField(default=True)
-    sync_id = models.ForeignKey('URL', blank=True, null=True, on_delete=models.SET_NULL)
 
 
 class SimpleList(Widget):
     type = 'simple_list'
     sync_fields = ['items', 'inner_border']
+    sync_id = models.ForeignKey('SimpleList', blank=True, null=True, on_delete=models.SET_NULL)
 
     items = models.JSONField(default=list)
     inner_border = models.BooleanField(default=True, help_text='Set border for items in list')
-    sync_id = models.ForeignKey('SimpleList', blank=True, null=True, on_delete=models.SET_NULL)
 
 
 class Counter(Widget):
     type = 'counter'
     sync_fields = ['value', 'vertical', 'step']
+    sync_id = models.ForeignKey('Counter', blank=True, null=True, on_delete=models.SET_NULL)
 
     value = models.BigIntegerField(default=0)
     vertical = models.BooleanField(default=True)
     step = models.IntegerField(default=1)
-    sync_id = models.ForeignKey('Counter', blank=True, null=True, on_delete=models.SET_NULL)
 
 
 class SimpleSwitch(Widget):
     type = 'simple_switch'
     sync_fields = ['value']
+    sync_id = models.ForeignKey('SimpleSwitch', blank=True, null=True, on_delete=models.SET_NULL)
 
     value = models.BooleanField(default=False)
-    sync_id = models.ForeignKey('SimpleSwitch', blank=True, null=True, on_delete=models.SET_NULL)
 
 
 class Port(SyncManager):
@@ -285,3 +285,11 @@ class Port(SyncManager):
     def delete(self, *args, **kwargs):
         self.propagate_instance_deleted()
         super().delete(*args, **kwargs)
+
+
+class File(Widget):
+    type = 'file'
+    sync_fields = ['content']
+    sync_id = models.ForeignKey('File', blank=True, null=True, on_delete=models.SET_NULL)
+
+    content = models.FileField(upload_to='uploads/%Y/%m/%d/', null=True)

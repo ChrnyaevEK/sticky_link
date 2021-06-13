@@ -1,7 +1,9 @@
 from application import models
 from application import serializers
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet, ViewSet
+
 from rest_framework.decorators import api_view
+from rest_framework.parsers import FileUploadParser
 from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
 from django.shortcuts import render, redirect
 from rest_framework.response import Response
@@ -9,6 +11,7 @@ from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 from application.lang import Public
 import logging
+from django.forms import Form, FileField
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +85,7 @@ class App:
                         (models.SimpleList, serializers.SimpleListSerializer),
                         (models.Counter, serializers.CounterSerializer),
                         (models.SimpleSwitch, serializers.SimpleSwitchSerializer),
+                        (models.File, serializers.FileSerializer),
                 ):
                     for widget in model.objects.filter(container=container):
                         widgets.append(serializer(widget).data)
@@ -92,7 +96,8 @@ class App:
                 containers = [serializers.ContainerSerializer(container).data]
             meta = {
                 'edit_permission': wall.owner == request.user,
-                'view_permission': wall.allow_anonymous_view or wall.owner == request.user
+                'view_permission': wall.allow_anonymous_view or wall.owner == request.user,
+                'file_size_max': 10485760,
             }
             ports = _get_protected_queryset(models.Port, request.user)
             ports = serializers.PortSerializer(ports, many=True).data
@@ -220,3 +225,18 @@ class PortViewSet(SyncViewSet):
     def create(self, request, *args, **kwargs):
         request.data['owner'] = request.user.id
         return super().create(request, *args, **kwargs)
+
+
+class FileUploadView(ViewSet):
+    serializer_class = serializers.UploadSerializer
+
+    def create(self, request):
+        file_uploaded = request.FILES.get('file')
+        content_type = file_uploaded.content_type
+        response = "POST API and you have uploaded a {} file".format(content_type)
+        return Response(response)
+
+
+class FileViewSet(SyncViewSet):
+    serializer_class = serializers.FileSerializer
+    model_class = models.File

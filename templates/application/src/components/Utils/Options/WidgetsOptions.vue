@@ -199,8 +199,8 @@
             <options-item :isHeader="true">
                 <span slot="title">Synchronization</span>
                 <span slot="description"
-                    >with another widget of the <strong>same type</strong>. Only value fields are
-                    synchronized, not size, position, etc...</span
+                    >with another widget of the <strong>same type</strong>. Only value fields are synchronized, not
+                    size, position, etc...</span
                 >
             </options-item>
             <options-item>
@@ -250,6 +250,12 @@
             @push="$emit('push')"
             :disabled="$env.state.changesLock"
         ></simple-list-options>
+        <file-options
+            v-if="instance.type == types.File"
+            :instance="instance"
+            @push="$emit('push')"
+            :disabled="$env.state.changesLock"
+        ></file-options>
     </div>
 </template>
 
@@ -260,6 +266,7 @@
     import SimpleListOptions from "./SimpleListOptions";
     import SimpleTextOptions from "./SimpleTextOptions";
     import UrlOptions from "./UrlOptions";
+    import FileOptions from "./FileOptions";
     import { copyToClipboard, types } from "../../../common";
 
     export default {
@@ -287,6 +294,7 @@
             SimpleListOptions,
             SimpleTextOptions,
             UrlOptions,
+            FileOptions,
         },
     };
 </script>

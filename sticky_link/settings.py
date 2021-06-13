@@ -14,6 +14,7 @@ from pathlib import Path
 from sticky_link import env
 import logging
 from systemd import journal
+from corsheaders.defaults import default_headers
 
 logging.basicConfig(level=logging.DEBUG)
 logging.root.addHandler(journal.JournaldLogHandler())
@@ -26,8 +27,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = env.SECRET_KEY
 DEBUG = env.DEBUG
-ALLOWED_HOSTS = ['app.sticky-link.com', '127.0.0.1', 'localhost',  '192.168.100.4']
+ALLOWED_HOSTS = ['app.sticky-link.com', '127.0.0.1', 'localhost', '192.168.100.4']
 CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'content-disposition',
+]
 # Application definition
 
 INSTALLED_APPS = [

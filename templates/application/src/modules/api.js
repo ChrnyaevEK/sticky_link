@@ -21,14 +21,12 @@ export default {
         try {
             return await $.ajax({
                 ...settings,
-                data: settings.data ? JSON.stringify(settings.data) : undefined,
                 crossDomain: true,
-                contentType: "application/json",
-                dataType: "json",
                 processData: false,
                 url: process.env.VUE_APP_API_HOST + "/" + settings.url + "/",
                 headers: {
                     "X-CSRFToken": csrfToken,
+                    ...(settings.headers || {}),
                 },
             });
         } catch (response) {
@@ -46,40 +44,60 @@ export default {
             throw response;
         }
     },
+    ajaxJSON(settings) {
+        return this.ajax({
+            ...settings,
+            data: settings.data ? JSON.stringify(settings.data) : undefined,
+            contentType: "application/json",
+            dataType: "json",
+        });
+    },
     get(type) {
-        return this.ajax({ url: type });
+        return this.ajaxJSON({ url: type });
     },
     retrieve(type, id) {
-        return this.ajax({ url: type + "/" + id });
+        return this.ajaxJSON({ url: type + "/" + id });
     },
     list(type) {
-        return this.ajax({ url: type });
+        return this.ajaxJSON({ url: type });
     },
     create(type, data) {
-        return this.ajax({
+        return this.ajaxJSON({
             type: "POST",
             url: type,
             data,
         });
     },
     update(type, id, data) {
-        return this.ajax({
+        return this.ajaxJSON({
             type: "PUT",
             url: type + "/" + id,
             data,
         });
     },
     updatePartial(type, id, data) {
-        return this.ajax({
+        return this.ajaxJSON({
             type: "PATCH",
             url: type + "/" + id,
             data,
         });
     },
     delete(type, id) {
-        return this.ajax({
+        return this.ajaxJSON({
             type: "DELETE",
             url: type + "/" + id,
+        });
+    },
+    upload(name, content) {
+        return this.ajax({
+            url: "content",
+            type: "POST",
+            cache: false,
+            contentType: false, 
+            data: content,
+            headers: {
+                "Content-Disposition": name,
+            },
         });
     },
 };

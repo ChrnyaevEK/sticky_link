@@ -142,11 +142,22 @@
                                         handleContainerActivated(container);
                                         $env.dispatch('handleCreateWidget', 'simple_switch');
                                     "
-                                    class="btn border btn-sm text-nowrap bg-white"
+                                    class="btn border btn-sm text-nowrap bg-white mr-1"
                                     title="Add new widget of type Switch"
                                     :disabled="$env.state.changesLock"
                                 >
                                     Switch
+                                </button>
+                                <button
+                                    @click.stop="
+                                        handleContainerActivated(container);
+                                        $env.dispatch('handleCreateWidget', 'file');
+                                    "
+                                    class="btn border btn-sm text-nowrap bg-white"
+                                    title="Add new widget of type File"
+                                    :disabled="$env.state.changesLock"
+                                >
+                                    File
                                 </button>
                             </div>
                         </div>
@@ -265,6 +276,7 @@
     import Counter from "./Widgets/Counter";
     import SimpleList from "./Widgets/SimpleList";
     import SimpleSwitch from "./Widgets/SimpleSwitch";
+    import File from "./Widgets/File";
     import Options from "./Utils/Options";
 
     import VueDraggableResizable from "vue-draggable-resizable";
@@ -309,7 +321,7 @@
                 this.$env.dispatch("setContainerByContainerId", container.id);
             },
             getComponent(widget) {
-                return [SimpleText, URL, Counter, SimpleList, SimpleSwitch].filter(
+                return [SimpleText, URL, Counter, SimpleList, SimpleSwitch, File].filter(
                     (klass) => widget.type == klass.type
                 )[0];
             },

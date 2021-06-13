@@ -41,6 +41,7 @@ export const types = {
     SimpleList: "simple_list",
     SimpleSwitch: "simple_switch",
     Port: "port",
+    File: "file",
 };
 
 export default {

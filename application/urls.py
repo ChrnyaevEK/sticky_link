@@ -12,8 +12,10 @@ router.register('url', views.URLViewSet, 'url')
 router.register('simple_list', views.SimpleListViewSet, basename='simple_list')
 router.register('counter', views.CounterViewSet, basename='counter')
 router.register('simple_switch', views.SimpleSwitchViewSet, basename='simple_switch')
+router.register('file', views.FileViewSet, basename='file')
 router.register('port', views.PortViewSet, basename='port')
 router.register('user', views.UserViewSet, basename='user')
+router.register('content', views.FileUploadView, basename='content')
 
 urlpatterns = [
     path('', views.App.enter, name="enter"),
