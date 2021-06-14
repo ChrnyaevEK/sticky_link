@@ -144,11 +144,11 @@ export default new Vuex.Store({
                 ...(context.state.widgets ? context.state.widgets : []),
             ].filter((instance) => instance.uid == uid)[0];
         },
-        async uploadContent(context, { content, name }) {
+        async uploadSource(context, { data, name, instance }) {
             io.save(true);
-            content = await api.upload(name, content);
+            data = await api.upload(instance.source.id, name, data);
             io.save(false);
-            return content;
+            return data;
         },
     },
 });

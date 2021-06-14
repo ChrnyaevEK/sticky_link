@@ -30,3 +30,4 @@ pnpm-debug.log*
 /static/app/
 /templates/application/dist/
 /templates/application/package-lock.json
+/media/*

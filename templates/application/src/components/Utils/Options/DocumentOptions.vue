@@ -4,11 +4,20 @@
             <span slot="title">Content</span>
         </options-item>
         <options-item>
+            <div slot="input" v-show="instance.source">
+                {{ instance.source.file }}
+            </div>
+        </options-item>
+        <options-item>
             <div class="mb-3 d-flex flex-column" slot="input">
                 <div class="d-flex">
-                    <input v-scope:id.content :disabled="$env.state.changesLock" type="file" />
-                    <button class="btn btn-success mr-1" @click="upload"><i class="fas fa-upload"></i></button>
-                    <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
+                    <input
+                        class="form-control-file"
+                        v-scope:id.content
+                        :disabled="$env.state.changesLock"
+                        type="file"
+                    />
+                    <button class="btn btn-sm text-success mx-2" @click="upload"><i class="fas fa-upload"></i></button>
                 </div>
                 <div class="text-danger" v-show="error">{{ error }}</div>
             </div>
@@ -43,10 +52,11 @@
                         this.error = null;
                         var data = new FormData(); //Create formdata objects to facilitate file transfer to the back end
                         data.append("file", file); //To add (encapsulate) a file object to a formdata object
-                        return this.$store.dispatch('uploadContent', {
+                        return this.$store.dispatch("uploadSource", {
+                            instance: this.instance,
                             name: file.name,
-                            content: data,
-                        })
+                            data,
+                        });
                     }
                     return (this.error = "File is larger than 10Mb");
                 }

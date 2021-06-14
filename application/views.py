@@ -3,15 +3,14 @@ from application import serializers
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet, ViewSet
 
 from rest_framework.decorators import api_view
-from rest_framework.parsers import FileUploadParser
-from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
+from rest_framework.parsers import FileUploadParser, MultiPartParser
+from django.http import JsonResponse, HttpResponse, HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 from application.lang import Public
 import logging
-from django.forms import Form, FileField
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +28,10 @@ def _get_protected_queryset(model, user):
         q = Q()
         if not user.is_anonymous:
             q = Q(owner=user)
+    elif model == models.Source:
+        q = Q(parent__container__wall__allow_anonymous_view=True)
+        if not user.is_anonymous:
+            q.add(Q(parent__container__wall__owner=user), Q.OR)
     else:
         q = Q(container__wall__allow_anonymous_view=True)
         if not user.is_anonymous:
@@ -85,7 +88,7 @@ class App:
                         (models.SimpleList, serializers.SimpleListSerializer),
                         (models.Counter, serializers.CounterSerializer),
                         (models.SimpleSwitch, serializers.SimpleSwitchSerializer),
-                        (models.File, serializers.FileSerializer),
+                        (models.Document, serializers.DocumentSerializer),
                 ):
                     for widget in model.objects.filter(container=container):
                         widgets.append(serializer(widget).data)
@@ -227,16 +230,34 @@ class PortViewSet(SyncViewSet):
         return super().create(request, *args, **kwargs)
 
 
-class FileUploadView(ViewSet):
-    serializer_class = serializers.UploadSerializer
+class SourceViewSet(CommonModelViewSet):
+    parser_classes = (MultiPartParser,)
+    model_class = models.Source
+    serializer_class = serializers.SourceSerializer
 
-    def create(self, request):
-        file_uploaded = request.FILES.get('file')
-        content_type = file_uploaded.content_type
-        response = "POST API and you have uploaded a {} file".format(content_type)
-        return Response(response)
+    def create(self, request, *args, **kwargs):
+        return HttpResponseForbidden()
+
+    def retrieve(self, request, *args, **kwargs):
+        return HttpResponseForbidden()
+
+    def list(self, request, *args, **kwargs):
+        return HttpResponseForbidden()
+
+    def destroy(self, request, *args, **kwargs):
+        print(self.model_class.objects.get(id=kwargs.get('pk')))
+        return Response('OK')
 
 
-class FileViewSet(SyncViewSet):
-    serializer_class = serializers.FileSerializer
-    model_class = models.File
+class DocumentViewSet(SyncViewSet):
+    serializer_class = serializers.DocumentSerializer
+    model_class = models.Document
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        source = models.Source()
+        source.save()
+        document = models.Document.objects.get(id=response.data['id'])
+        document.source = source
+        document.save()
+        return response

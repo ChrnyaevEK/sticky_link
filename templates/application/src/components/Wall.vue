@@ -151,13 +151,13 @@
                                 <button
                                     @click.stop="
                                         handleContainerActivated(container);
-                                        $env.dispatch('handleCreateWidget', 'file');
+                                        $env.dispatch('handleCreateWidget', 'document');
                                     "
                                     class="btn border btn-sm text-nowrap bg-white"
                                     title="Add new widget of type File"
                                     :disabled="$env.state.changesLock"
                                 >
-                                    File
+                                Document
                                 </button>
                             </div>
                         </div>
@@ -276,7 +276,7 @@
     import Counter from "./Widgets/Counter";
     import SimpleList from "./Widgets/SimpleList";
     import SimpleSwitch from "./Widgets/SimpleSwitch";
-    import File from "./Widgets/File";
+    import Document from "./Widgets/Document";
     import Options from "./Utils/Options";
 
     import VueDraggableResizable from "vue-draggable-resizable";
@@ -321,7 +321,7 @@
                 this.$env.dispatch("setContainerByContainerId", container.id);
             },
             getComponent(widget) {
-                return [SimpleText, URL, Counter, SimpleList, SimpleSwitch, File].filter(
+                return [SimpleText, URL, Counter, SimpleList, SimpleSwitch, Document].filter(
                     (klass) => widget.type == klass.type
                 )[0];
             },

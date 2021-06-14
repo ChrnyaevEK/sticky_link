@@ -128,14 +128,15 @@ class PortSerializer(CustomModelSerializer):
         model = models.Port
 
 
-class FileSerializer(CustomModelSerializer):
+class SourceSerializer(CustomModelSerializer):
     class Meta:
         fields = '__all__'
-        model = models.File
+        model = models.Source
 
 
-class UploadSerializer(serializers.Serializer):
-    file_uploaded = serializers.FileField()
+class DocumentSerializer(CustomModelSerializer):
+    source = SourceSerializer()
 
     class Meta:
-        fields = ['file_uploaded']
+        fields = '__all__'
+        model = models.Document

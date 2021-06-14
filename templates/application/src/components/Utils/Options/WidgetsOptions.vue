@@ -250,12 +250,12 @@
             @push="$emit('push')"
             :disabled="$env.state.changesLock"
         ></simple-list-options>
-        <file-options
-            v-if="instance.type == types.File"
+        <document-options
+            v-if="instance.type == types.Document"
             :instance="instance"
             @push="$emit('push')"
             :disabled="$env.state.changesLock"
-        ></file-options>
+        ></document-options>
     </div>
 </template>
 
@@ -266,7 +266,7 @@
     import SimpleListOptions from "./SimpleListOptions";
     import SimpleTextOptions from "./SimpleTextOptions";
     import UrlOptions from "./UrlOptions";
-    import FileOptions from "./FileOptions";
+    import DocumentOptions from "./DocumentOptions";
     import { copyToClipboard, types } from "../../../common";
 
     export default {
@@ -294,7 +294,7 @@
             SimpleListOptions,
             SimpleTextOptions,
             UrlOptions,
-            FileOptions,
+            DocumentOptions,
         },
     };
 </script>

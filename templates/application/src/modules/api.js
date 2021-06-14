@@ -88,15 +88,15 @@ export default {
             url: type + "/" + id,
         });
     },
-    upload(name, content) {
+    upload(id, name, data) {
         return this.ajax({
-            url: "content",
-            type: "POST",
+            url: "source/" + id,
+            type: "PUT",
             cache: false,
-            contentType: false, 
-            data: content,
+            contentType: false,
+            data,
             headers: {
-                "Content-Disposition": name,
+                "Content-Disposition": 'attachment; filename="' + name + '"',
             },
         });
     },

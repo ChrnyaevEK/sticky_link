@@ -39,13 +39,16 @@ class Base(models.Model):
 
     @property
     def related_wall_instance(self):
-        try:  # Container or Port
-            return self.wall
+        try:
+            return self.parent.container.wall
         except AttributeError:
-            try:  # Any widget
-                return self.container.wall
-            except AttributeError:  # Wall it self
-                return self
+            try:  # Container or Port
+                return self.wall
+            except AttributeError:
+                try:  # Any widget
+                    return self.container.wall
+                except AttributeError:  # Wall it self
+                    return self
 
     @property
     def uid(self):
@@ -287,9 +290,16 @@ class Port(SyncManager):
         super().delete(*args, **kwargs)
 
 
-class File(Widget):
-    type = 'file'
-    sync_fields = ['content']
-    sync_id = models.ForeignKey('File', blank=True, null=True, on_delete=models.SET_NULL)
+class Source(Base):
+    file = models.FileField(upload_to='uploads/%Y/%m/%d/', null=True)
 
-    content = models.FileField(upload_to='uploads/%Y/%m/%d/', null=True)
+    @classmethod
+    def validate_anonymous_access(cls, accessed_fields):
+        return False
+
+
+class Document(Widget):
+    type = 'document'
+    sync_fields = ['source']
+    sync_id = models.ForeignKey('Document', blank=True, null=True, on_delete=models.SET_NULL)
+    source = models.OneToOneField(Source, blank=True, null=True, on_delete=models.SET_NULL, related_name='parent')
