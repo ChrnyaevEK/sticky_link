@@ -11,6 +11,7 @@ from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 from application.lang import Public
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -244,8 +245,30 @@ class SourceViewSet(CommonModelViewSet):
     def list(self, request, *args, **kwargs):
         return HttpResponseForbidden()
 
+    def update(self, request, *args, **kwargs):
+        source = self.model_class.objects.get(id=kwargs.get('pk'))
+        try:
+            old_path = source.file.path
+        except ValueError:
+            old_path = None
+        response = super().update(request, *args, **kwargs)
+        source.parent.propagate_instance_updated()
+        try:
+            os.remove(old_path)
+        except (TypeError, OSError):
+            pass
+        return response
+
     def destroy(self, request, *args, **kwargs):
-        print(self.model_class.objects.get(id=kwargs.get('pk')))
+        source = self.model_class.objects.get(id=kwargs.get('pk'))
+        file = source.file
+        try:
+            os.remove(file.path)
+        except (ValueError, TypeError, OSError):
+            pass
+        source.file = None
+        source.save()
+        source.parent.propagate_instance_updated()
         return Response('OK')
 
 

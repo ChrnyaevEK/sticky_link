@@ -150,5 +150,10 @@ export default new Vuex.Store({
             io.save(false);
             return data;
         },
+        async removeSource(context, instance) {
+            io.save(true);
+            await api.delete('source', instance.source.id);
+            io.save(false);
+        },
     },
 });
