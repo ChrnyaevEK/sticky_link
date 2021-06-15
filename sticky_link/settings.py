@@ -145,8 +145,9 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "templates/application/dist/static"),  # General static files
 ]
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/uploads/'
+MEDIA_BASE_PATH = 'uploads'
+MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_BASE_PATH)
 
 # Registration settings
 ACCOUNT_ACTIVATION_DAYS = 7
@@ -178,3 +179,7 @@ SITE_ID = 2
 
 HASHID_FIELD_SALT = env.HASHID_FIELD_SALT
 HASHID_FIELD_ENABLE_HASHID_OBJECT = False
+
+SENDFILE_BACKEND = 'sendfile.backends.development' if DEBUG else 'sendfile.backends.nginx'
+SENDFILE_ROOT = MEDIA_ROOT
+SENDFILE_URL = '/media'

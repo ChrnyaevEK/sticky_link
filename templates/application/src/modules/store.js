@@ -147,12 +147,20 @@ export default new Vuex.Store({
         async uploadSource(context, { data, name, instance }) {
             io.save(true);
             data = await api.upload(instance.source.id, name, data);
+            Vue.notify({
+                text: "Success!",
+                type: "success",
+            });
             io.save(false);
             return data;
         },
         async removeSource(context, instance) {
             io.save(true);
-            await api.delete('source', instance.source.id);
+            await api.delete("source", instance.source.id);
+            Vue.notify({
+                text: "Success!",
+                type: "success",
+            });
             io.save(false);
         },
     },

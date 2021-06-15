@@ -12,6 +12,8 @@ from rest_framework.permissions import IsAuthenticated
 from application.lang import Public
 import logging
 import os
+from sendfile import sendfile
+from sticky_link.settings import MEDIA_BASE_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -240,13 +242,22 @@ class SourceViewSet(CommonModelViewSet):
         return HttpResponseForbidden()
 
     def retrieve(self, request, *args, **kwargs):
-        return HttpResponseForbidden()
+        try:
+            source = self.get_queryset().get(id=kwargs.get('pk'))
+        except self.model_class.DoesNotExist:
+            return HttpResponseNotFound()
+        if source.file is None:
+            return HttpResponseNotFound()
+        return sendfile(request, MEDIA_BASE_PATH + '/' + source.file.name, attachment=True)
 
     def list(self, request, *args, **kwargs):
         return HttpResponseForbidden()
 
     def update(self, request, *args, **kwargs):
-        source = self.model_class.objects.get(id=kwargs.get('pk'))
+        try:
+            source = self.get_queryset().get(id=kwargs.get('pk'))
+        except self.model_class.DoesNotExist:
+            return HttpResponseNotFound()
         try:
             old_path = source.file.path
         except ValueError:
@@ -260,7 +271,10 @@ class SourceViewSet(CommonModelViewSet):
         return response
 
     def destroy(self, request, *args, **kwargs):
-        source = self.model_class.objects.get(id=kwargs.get('pk'))
+        try:
+            source = self.get_queryset().get(id=kwargs.get('pk'))
+        except self.model_class.DoesNotExist:
+            return HttpResponseNotFound()
         file = source.file
         try:
             os.remove(file.path)
@@ -278,9 +292,12 @@ class DocumentViewSet(SyncViewSet):
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
+        try:
+            document = self.get_queryset().get(id=response.data['id'])
+        except self.model_class.DoesNotExist:
+            return HttpResponseNotFound()
         source = models.Source()
         source.save()
-        document = models.Document.objects.get(id=response.data['id'])
         document.source = source
         document.save()
         return response

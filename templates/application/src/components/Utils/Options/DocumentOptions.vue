@@ -15,7 +15,7 @@
                     <button class="btn btn-sm text-success mx-2" @click="upload"><i class="fas fa-upload"></i></button>
                 </div>
                 <div class="d-flex justify-content-between mb-1" v-if="instance.source && instance.source.file">
-                    <a :href="instance.source.file" target="_blank">Document</a>
+                    <a :href="sourceURL" target="_blank" class="text-truncate">{{ instance.source.name }}</a>
                     <button class="btn btn-sm text-danger mx-2" @click="remove"><i class="fas fa-trash"></i></button>
                 </div>
                 <div class="text-danger" v-show="error">{{ error }}</div>
@@ -36,6 +36,14 @@
             instance: {
                 type: Object,
                 required: true,
+            },
+        },
+        computed: {
+            sourceURL() {
+                if (this.instance.source && this.instance.source.file) {
+                    return process.env.VUE_APP_API_HOST + "/source/" + this.instance.source.id + "/";
+                }
+                return false;
             },
         },
         data() {

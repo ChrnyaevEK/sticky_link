@@ -129,6 +129,8 @@ class PortSerializer(CustomModelSerializer):
 
 
 class SourceSerializer(CustomModelSerializer):
+    name = serializers.ReadOnlyField()
+
     class Meta:
         fields = '__all__'
         model = models.Source

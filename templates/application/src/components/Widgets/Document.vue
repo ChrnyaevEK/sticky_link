@@ -1,7 +1,11 @@
 <template id="document-template">
     <WidgetBaseResizable :widget="widget">
-        <div class="w-100 h-100 center-content">
-            <span>{{ widget.title }}<i class="mx-2 fas fa-file-alt text-muted"></i></span>
+        <div class="w-100 h-100 center-content flex-column">
+            <div>
+                <span class="text-truncate">{{ title }}</span
+                ><i class="mx-2 fas fa-file-alt text-muted"></i>
+            </div>
+            <div class="text-muted" v-if="widget.source">Uploaded: {{ widget.source.last_update }}</div>
         </div>
     </WidgetBaseResizable>
 </template>
@@ -14,6 +18,11 @@
         template: "#document-template",
         components: {
             WidgetBaseResizable,
+        },
+        computed: {
+            title() {
+                return this.widget.title || (this.widget.source ? this.widget.source.name : "Not chosen");
+            },
         },
         props: {
             widget: {

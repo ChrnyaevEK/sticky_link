@@ -26,6 +26,11 @@ server {
         try_files /static/$1 /templates/application/dist/static/$1 =404;
     }
 
+    location ~ ^/media/(.*)$ {
+        internal;
+        root   /var/www/sticky_link;
+    }
+
     location / {
         uwsgi_pass  django;
         include     /var/www/sticky_link/deploy/uwsgi_params;

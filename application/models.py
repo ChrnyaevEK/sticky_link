@@ -3,6 +3,7 @@
     Walls are located in a different table and Wall id is a primary key for Widgets.
     Relay on ID's given by default
 """
+import os.path
 import re
 from django.db import models
 from django.core.validators import BaseValidator, MaxValueValidator, MinValueValidator
@@ -291,11 +292,18 @@ class Port(SyncManager):
 
 
 class Source(Base):
-    file = models.FileField(upload_to='uploads/%Y/%m/%d/', null=True)
+    file = models.FileField(upload_to='%Y/%m/%d/', null=True)
 
     @classmethod
     def validate_anonymous_access(cls, accessed_fields):
         return False
+
+    @property
+    def name(self):
+        try:
+            return os.path.basename(self.file.path)
+        except ValueError:
+            return None
 
 
 class Document(Widget):
