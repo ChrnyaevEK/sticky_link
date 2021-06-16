@@ -116,7 +116,6 @@ export default new Vuex.Store({
                 ...widget,
                 x: widget.x + context.state.app.grid,
                 y: widget.y + context.state.app.grid,
-                id: undefined,
             };
             for (let container of context.state.containers) {
                 if (widget.container == container.id) {

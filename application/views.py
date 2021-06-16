@@ -244,9 +244,12 @@ class SourceViewSet(CommonModelViewSet):
     def list(self, request, *args, **kwargs):
         return HttpResponseForbidden()
 
+    def get_object(self):
+        return self.get_queryset().filter(id=self.kwargs.get('pk')).first()
+
     def retrieve(self, request, *args, **kwargs):
         try:
-            source = self.get_queryset().get(id=kwargs.get('pk'))
+            source = self.get_object()
         except self.model_class.DoesNotExist:
             return HttpResponseNotFound()
         if source.file is None:
@@ -256,7 +259,7 @@ class SourceViewSet(CommonModelViewSet):
 
     def update(self, request, *args, **kwargs):
         try:
-            source = self.get_queryset().get(id=kwargs.get('pk'))
+            source = self.get_object()
         except self.model_class.DoesNotExist:
             return HttpResponseNotFound()
         try:
@@ -264,7 +267,8 @@ class SourceViewSet(CommonModelViewSet):
         except ValueError:
             old_path = None
         response = super().update(request, *args, **kwargs)
-        source.parent.propagate_instance_updated()
+        for parent in source.parent.all():
+            parent.propagate_instance_updated()
         try:
             os.remove(old_path)
         except (TypeError, OSError):
@@ -273,7 +277,7 @@ class SourceViewSet(CommonModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         try:
-            source = self.get_queryset().get(id=kwargs.get('pk'))
+            source = self.get_object()
         except self.model_class.DoesNotExist:
             return HttpResponseNotFound()
         file = source.file
@@ -283,7 +287,8 @@ class SourceViewSet(CommonModelViewSet):
             pass
         source.file = None
         source.save()
-        source.parent.propagate_instance_updated()
+        for parent in source.parent.all():
+            parent.propagate_instance_updated()
         return Response('OK')
 
 
@@ -292,12 +297,20 @@ class DocumentViewSet(SyncViewSet):
     model_class = models.Document
 
     def create(self, request, *args, **kwargs):
+        try:
+            source = self.get_queryset().get(id=request.data['id']).source
+        except (KeyError, IndexError):
+            source = models.Source()
+        else:
+            try:
+                del request.data['source']
+            except KeyError:
+                pass
         response = super().create(request, *args, **kwargs)
         try:
             document = self.get_queryset().get(id=response.data['id'])
         except self.model_class.DoesNotExist:
             return HttpResponseNotFound()
-        source = models.Source()
         source.save()
         document.source = source
         document.save()

@@ -41,7 +41,7 @@ class Base(models.Model):
     @property
     def related_wall_instance(self):
         try:
-            return self.parent.container.wall
+            return self.parent.first().container.wall
         except AttributeError:
             try:  # Container or Port
                 return self.wall
@@ -310,4 +310,4 @@ class Document(Widget):
     type = 'document'
     sync_fields = ['source']
     sync_id = models.ForeignKey('Document', blank=True, null=True, on_delete=models.SET_NULL)
-    source = models.OneToOneField(Source, blank=True, null=True, on_delete=models.SET_NULL, related_name='parent')
+    source = models.ForeignKey(Source, blank=True, on_delete=models.SET_NULL, null=True, related_name='parent')

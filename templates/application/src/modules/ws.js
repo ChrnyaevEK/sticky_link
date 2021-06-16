@@ -6,7 +6,7 @@ export default new Vue({
     data: {
         wallId: null,
         socket: null,
-        reopenTime: 1000,
+        reopenTime: 5000,
     },
     methods: {
         open(wallId) {
