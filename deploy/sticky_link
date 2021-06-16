@@ -21,7 +21,7 @@ server {
         try_files /static/$1 /templates/application/dist/static/$1 =404;
     }
 
-    location ~ ^/uploads/(.*)$ {
+    location /uploads/ {
         internal;
         root   /var/www/sticky_link;
     }
