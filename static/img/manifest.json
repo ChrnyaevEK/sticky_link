@@ -1,7 +1,7 @@
 {
   "name": "application",
   "short_name": "application",
-  "description": "Sticky link web application",
+  "description": null,
   "dir": "auto",
   "lang": "en-US",
   "display": "standalone",
