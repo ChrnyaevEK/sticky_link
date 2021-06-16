@@ -16,17 +16,12 @@ server {
     charset     utf-8;
     client_max_body_size 100M;
 
-    # Django media
-    # location /media  {
-        # alias /path/to/your/mysite/media;
-    # }
-
     location ~ ^/static/(.*)$ {
         root /var/www/sticky_link;
         try_files /static/$1 /templates/application/dist/static/$1 =404;
     }
 
-    location ~ ^/media/(.*)$ {
+    location ~ ^/uploads/(.*)$ {
         internal;
         root   /var/www/sticky_link;
     }
