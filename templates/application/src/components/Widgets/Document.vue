@@ -1,11 +1,13 @@
 <template id="document-template">
     <WidgetBaseResizable :widget="widget">
-        <div class="w-100 h-100 center-content flex-column">
+        <div class="h-100 center-content flex-column text-break overflow-hidden">
+            <strong :title="title">{{ title }}</strong>
+            <hr class="w-75 text-secondary" />
             <div>
-                <span class="text-truncate">{{ title }}</span
-                ><i class="mx-2 fas fa-file-alt text-muted"></i>
+                <a :href="sourceURL + '?attachment'" target="_blank" class="text-truncate mr-3">Download</a>
+                <a :href="sourceURL" target="_blank" class="text-truncate">Open</a>
             </div>
-            <div class="text-muted" v-if="widget.source">Uploaded: {{ timeFormatted(widget.source.last_update) }}</div>
+            <div class="text-muted" v-if="widget.source">{{ timeFormatted(widget.source.last_update) }}</div>
         </div>
     </WidgetBaseResizable>
 </template>
@@ -23,6 +25,12 @@
         computed: {
             title() {
                 return this.widget.title || (this.widget.source ? this.widget.source.name : "Not chosen");
+            },
+            sourceURL() {
+                if (this.widget.source && this.widget.source.file) {
+                    return this.$store.state.app.sourceURL + this.widget.source.id + "/";
+                }
+                return false;
             },
         },
         methods: {

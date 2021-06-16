@@ -241,6 +241,9 @@ class SourceViewSet(CommonModelViewSet):
     def create(self, request, *args, **kwargs):
         return HttpResponseForbidden()
 
+    def list(self, request, *args, **kwargs):
+        return HttpResponseForbidden()
+
     def retrieve(self, request, *args, **kwargs):
         try:
             source = self.get_queryset().get(id=kwargs.get('pk'))
@@ -248,10 +251,8 @@ class SourceViewSet(CommonModelViewSet):
             return HttpResponseNotFound()
         if source.file is None:
             return HttpResponseNotFound()
-        return sendfile(request, MEDIA_BASE_PATH + '/' + source.file.name, attachment=True)
-
-    def list(self, request, *args, **kwargs):
-        return HttpResponseForbidden()
+        return sendfile(request, MEDIA_BASE_PATH + '/' + source.file.name,
+                        attachment=request.GET.get('attachment') is not None)
 
     def update(self, request, *args, **kwargs):
         try:

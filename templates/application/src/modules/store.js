@@ -50,6 +50,7 @@ export default new Vuex.Store({
 
         app: {
             title: process.env.VUE_APP_TITLE,
+            sourceURL: process.env.VUE_APP_API_HOST + "/source/",
             grid: 5,
         },
     },
