@@ -3,7 +3,7 @@
         <div class="h-100 center-content flex-column text-break overflow-hidden">
             <strong :title="title" :class="{ 'text-muted': !title }">{{ title || "Empty" }}</strong>
             <hr class="w-75 text-secondary" />
-            <div>
+            <div v-if="title">
                 <a :href="sourceURL + '?attachment'" target="_blank" class="text-truncate mr-3">Download</a>
                 <a :href="sourceURL" target="_blank" class="text-truncate">Open</a>
             </div>

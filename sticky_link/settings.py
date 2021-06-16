@@ -182,4 +182,3 @@ HASHID_FIELD_ENABLE_HASHID_OBJECT = False
 
 SENDFILE_BACKEND = 'sendfile.backends.development' if DEBUG else 'sendfile.backends.nginx'
 SENDFILE_ROOT = MEDIA_ROOT
-SENDFILE_URL = '/uploads'
