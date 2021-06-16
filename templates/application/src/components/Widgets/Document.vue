@@ -1,7 +1,7 @@
 <template id="document-template">
     <WidgetBaseResizable :widget="widget">
         <div class="h-100 center-content flex-column text-break overflow-hidden">
-            <strong :title="title">{{ title }}</strong>
+            <strong :title="title" :class="{ 'text-muted': !title }">{{ title || "Empty" }}</strong>
             <hr class="w-75 text-secondary" />
             <div>
                 <a :href="sourceURL + '?attachment'" target="_blank" class="text-truncate mr-3">Download</a>

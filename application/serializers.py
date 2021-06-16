@@ -137,7 +137,7 @@ class SourceSerializer(CustomModelSerializer):
 
 
 class DocumentSerializer(CustomModelSerializer):
-    source = SourceSerializer()
+    source = SourceSerializer(required=False)
 
     class Meta:
         fields = '__all__'
