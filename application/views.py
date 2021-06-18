@@ -276,17 +276,12 @@ class SourceViewSet(CommonModelViewSet):
         return response
 
     def destroy(self, request, *args, **kwargs):
+        # Delete file, not source object
         try:
             source = self.get_object()
         except self.model_class.DoesNotExist:
             return HttpResponseNotFound()
-        file = source.file
-        try:
-            os.remove(file.path)
-        except (ValueError, TypeError, OSError):
-            pass
-        source.file = None
-        source.save()
+        source.delete_file()
         for parent in source.parent.all():
             parent.propagate_instance_updated()
         return Response('OK')
@@ -298,20 +293,18 @@ class DocumentViewSet(SyncViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            source = self.get_queryset().get(id=request.data['id']).source
-        except (KeyError, IndexError):
-            source = models.Source()
-        else:
-            try:
-                del request.data['source']
-            except KeyError:
-                pass
+            del request.data['source']
+        except KeyError:
+            pass
         response = super().create(request, *args, **kwargs)
-        try:
-            document = self.get_queryset().get(id=response.data['id'])
-        except self.model_class.DoesNotExist:
-            return HttpResponseNotFound()
+        document = self.get_queryset().get(id=response.data['id'])
+        source = models.Source()
         source.save()
         document.source = source
         document.save()
         return response
+
+    def destroy(self, request, *args, **kwargs):
+        document = self.get_queryset().get(id=kwargs['pk'])
+        document.source.delete()
+        return super().destroy(request, *args, **kwargs)

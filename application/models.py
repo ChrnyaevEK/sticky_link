@@ -305,6 +305,18 @@ class Source(Base):
         except ValueError:
             return None
 
+    def delete(self, using=None, keep_parents=False):
+        self.delete_file()
+        super().delete(using=None, keep_parents=False)
+
+    def delete_file(self):
+        try:
+            os.remove(self.file.path)
+        except (ValueError, TypeError, OSError):
+            pass
+        self.file = None
+        self.save()
+
 
 class Document(Widget):
     type = 'document'
