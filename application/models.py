@@ -1,8 +1,3 @@
-"""
-    Wall is a collection of Widgets. Each Widget has it's table and API.
-    Walls are located in a different table and Wall id is a primary key for Widgets.
-    Relay on ID's given by default
-"""
 import os.path
 import re
 from django.db import models
@@ -129,6 +124,9 @@ class Wall(SyncManager):
     description = models.CharField(max_length=500, blank=True, null=True)
     lock_widgets = models.BooleanField(default=True)
 
+    def __str__(self):
+        return f'{self.id} | {self.title or "Untitled wall"}'
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.propagate_instance_updated()
@@ -144,14 +142,17 @@ class Container(SyncManager):
     protected_fields.update(Base.protected_fields)
 
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
-    index = models.IntegerField(verbose_name='Index of container in wall', validators=[MinValueValidator(0)])
+    index = models.IntegerField(validators=[MinValueValidator(0)])
 
-    h = models.IntegerField(verbose_name='Container height', default=100, validators=[MinValueValidator(50)])
-    w = models.IntegerField(verbose_name='Container width', default=3000)  # Should not change (is static)
+    h = models.IntegerField(default=100, validators=[MinValueValidator(50)])
+    w = models.IntegerField(default=3000)  # Should not change (is static)
     grid = models.BooleanField(default=False)
 
-    title = models.CharField(verbose_name='Container title', max_length=200, null=True, blank=True)
-    description = models.CharField(verbose_name='Container description', max_length=500, blank=True, null=True)
+    title = models.CharField(max_length=200, null=True, blank=True)
+    description = models.CharField(max_length=500, blank=True, null=True)
+
+    def __str__(self):
+        return f'{self.id} | {self.title or "Untitled container"}'
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -160,6 +161,60 @@ class Container(SyncManager):
     def delete(self, *args, **kwargs):
         self.propagate_instance_deleted()
         super().delete(*args, **kwargs)
+
+
+class Port(SyncManager):
+    """ Describe static link ready to be distributed - link format should not change """
+    type = 'port'
+
+    title = models.CharField(max_length=200, blank=True, default='Untitled')
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    visited = models.IntegerField(default=0)
+    authenticated_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL,
+                                           related_name='authenticated_wall')
+    anonymous_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL, related_name='anonymous_wall')
+    redirect_url = models.URLField(null=True, default=None)
+
+    def __str__(self):
+        return f'{self.id} | {self.title or "Untitled port"}'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.propagate_instance_updated()
+
+    def delete(self, *args, **kwargs):
+        self.propagate_instance_deleted()
+        super().delete(*args, **kwargs)
+
+
+class Source(Base):
+    file = models.FileField(upload_to='%Y/%m/%d/', null=True)
+
+    @classmethod
+    def validate_anonymous_access(cls, accessed_fields):
+        return False
+
+    @property
+    def name(self):
+        try:
+            return os.path.basename(self.file.path)
+        except ValueError:
+            return None
+
+    def delete(self, *args, **kwargs):
+        self.delete_file()
+        super().delete(*args, **kwargs)
+
+    def delete_file(self):
+        try:
+            os.remove(self.file.path)
+        except (ValueError, TypeError, OSError):
+            pass
+        self.file = None
+        self.save()
+
+    def __str__(self):
+        return f'{self.id} | {self.name or "Untitled source"}'
 
 
 class ColorValidator(BaseValidator):
@@ -179,8 +234,8 @@ class Widget(SyncManager):
     container = models.ForeignKey(Container, on_delete=models.CASCADE)
     help = models.CharField(max_length=200, null=True, blank=True)
 
-    w = models.IntegerField(verbose_name='Width', default=200, validators=[MinValueValidator(50)])
-    h = models.IntegerField(verbose_name='Height', default=100, validators=[MinValueValidator(50)])
+    w = models.IntegerField(default=200, validators=[MinValueValidator(50)])
+    h = models.IntegerField(default=100, validators=[MinValueValidator(50)])
     z = models.IntegerField(default=0, validators=[MaxValueValidator(100), MinValueValidator(0)])
     x = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     y = models.IntegerField(default=0, validators=[MinValueValidator(0)])
@@ -207,6 +262,9 @@ class Widget(SyncManager):
     @property
     def is_referenced(self):
         return self.__class__.objects.filter(sync_id=self).exists()
+
+    def __str__(self):
+        return f'{self.id} | {self.title or "Untitled widget"}'
 
     class Meta:
         abstract = True
@@ -256,56 +314,9 @@ class SimpleSwitch(Widget):
     value = models.BooleanField(default=False)
 
 
-class Port(SyncManager):
-    """ Describe static link ready to be distributed - link format should not change """
-    type = 'port'
-
-    title = models.CharField(max_length=200, blank=True, default='Untitled')
-    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    visited = models.IntegerField(default=0)
-    authenticated_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL,
-                                           related_name='authenticated_wall')
-    anonymous_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL, related_name='anonymous_wall')
-    redirect_url = models.URLField(null=True, default=None)
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.propagate_instance_updated()
-
-    def delete(self, *args, **kwargs):
-        self.propagate_instance_deleted()
-        super().delete(*args, **kwargs)
-
-
-class Source(Base):
-    file = models.FileField(upload_to='%Y/%m/%d/', null=True)
-
-    @classmethod
-    def validate_anonymous_access(cls, accessed_fields):
-        return False
-
-    @property
-    def name(self):
-        try:
-            return os.path.basename(self.file.path)
-        except ValueError:
-            return None
-
-    def delete(self, using=None, keep_parents=False):
-        self.delete_file()
-        super().delete(using=None, keep_parents=False)
-
-    def delete_file(self):
-        try:
-            os.remove(self.file.path)
-        except (ValueError, TypeError, OSError):
-            pass
-        self.file = None
-        self.save()
-
-
 class Document(Widget):
     type = 'document'
     sync_fields = ['source']
     sync_id = models.ForeignKey('Document', blank=True, null=True, on_delete=models.SET_NULL)
+
     source = models.ForeignKey(Source, blank=True, on_delete=models.SET_NULL, null=True, related_name='parent')
