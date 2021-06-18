@@ -24,11 +24,10 @@ def _to_hash(sting):
 
 class Base(models.Model):
     type = None
-
     id = HashidAutoField(primary_key=True)
 
-    date_of_creation = models.DateTimeField(verbose_name='Date of creation', auto_now_add=True)
-    last_update = models.DateTimeField(verbose_name='Date of last update (wall or any widget)', auto_now=True)
+    date_of_creation = models.DateTimeField(auto_now_add=True)
+    last_update = models.DateTimeField(auto_now=True)
 
     protected_fields = {'id', 'uid', 'version', 'type', 'date_of_creation', 'last_update'}
 
@@ -59,13 +58,19 @@ class Base(models.Model):
     def version(self):
         return _to_hash(self.last_update.isoformat())
 
+    @classmethod
+    def validate_anonymous_access(cls, accessed_fields):
+        return not cls.protected_fields.intersection(accessed_fields)
+
 
 class SyncManager(Base):
     sync_fields = []
     sync_id = None
 
+    class Meta:
+        abstract = True
+
     def propagate_instance_updated(self):
-        logger.info(f'Propagate instance update: {self}')
         if self.related_wall_instance is not None:
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
@@ -81,7 +86,6 @@ class SyncManager(Base):
                 })
 
     def propagate_instance_deleted(self):
-        logger.info(f'Propagate instance delete: {self}')
         if self.related_wall_instance is not None:
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
@@ -101,30 +105,29 @@ class SyncManager(Base):
 
     def synchronize_bounded_instances(self):
         if not self.prevent_synchronization:
-            logger.info(f'Sync bounded instances with: {self}')
             bounded = self.__class__.objects.filter(sync_id=self)
             if self.sync_id is not None:
                 bounded = bounded | self.__class__.objects.filter(pk=self.sync_id.id)
             for instance in bounded:
-                logger.info(f'Sync for: {instance}')
                 instance.prevent_synchronization = True
                 if instance != self:
                     for field in instance.sync_fields:
                         instance.__setattr__(field, self.__getattribute__(field))
                     instance.save()
 
-    class Meta:
-        abstract = True
-
 
 class Wall(SyncManager):
     type = 'wall'
 
+    protected_fields = {'owner', 'allowed_users', 'allow_anonymous_view', 'title', 'description', 'lock_widgets'}
+    protected_fields.update(Base.protected_fields)
+
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    allow_anonymous_view = models.BooleanField('Allow anonymous view mode', default=False)
-    title = models.CharField(verbose_name='Wall title', max_length=200, default='Untitled', null=True, blank=True)
-    description = models.CharField(verbose_name='Wall description', max_length=500, blank=True, null=True)
-    lock_widgets = models.BooleanField(verbose_name='Lock widgets at wall', default=True)
+    allow_anonymous_view = models.BooleanField(default=False)
+
+    title = models.CharField(max_length=200, default='Untitled', null=True, blank=True)
+    description = models.CharField(max_length=500, blank=True, null=True)
+    lock_widgets = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -134,15 +137,11 @@ class Wall(SyncManager):
         self.propagate_instance_deleted()
         super().delete(*args, **kwargs)
 
-    @classmethod
-    def validate_anonymous_access(cls, accessed_fields):
-        protected_fields = {'owner', 'allowed_users', 'allow_anonymous_view', 'title', 'description', 'lock_widgets'}
-        protected_fields.update(cls.protected_fields)
-        return not protected_fields.intersection(accessed_fields)
-
 
 class Container(SyncManager):
     type = 'container'
+    protected_fields = {'wall', 'index', 'h', 'w', 'description', 'title'}
+    protected_fields.update(Base.protected_fields)
 
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
     index = models.IntegerField(verbose_name='Index of container in wall', validators=[MinValueValidator(0)])
@@ -162,12 +161,6 @@ class Container(SyncManager):
         self.propagate_instance_deleted()
         super().delete(*args, **kwargs)
 
-    @classmethod
-    def validate_anonymous_access(cls, accessed_fields):
-        protected_fields = {'wall', 'index', 'h', 'w', 'description', 'title'}
-        protected_fields.update(cls.protected_fields)
-        return not protected_fields.intersection(accessed_fields)
-
 
 class ColorValidator(BaseValidator):
     regex = re.compile(r'^#[0-9a-fA-F]{8}$|#[0-9a-fA-F]{6}$|#[0-9a-fA-F]{4}$|#[0-9a-fA-F]{3}$')  # ARGB hex color
@@ -177,35 +170,28 @@ class ColorValidator(BaseValidator):
 
 
 class Widget(SyncManager):
+    protected_fields = {'font_size', 'font_weight', 'background_color', 'text_color', 'border', 'help', 'w', 'h',
+                        'z', 'x', 'y', 'sync_fields', 'container', 'owner'}
+    protected_fields.update(Base.protected_fields)
     title = models.CharField(max_length=200, blank=True, null=True)
-    description = models.CharField(verbose_name='Widget description', max_length=500, blank=True, null=True)
+    description = models.CharField(max_length=500, blank=True, null=True)
 
     container = models.ForeignKey(Container, on_delete=models.CASCADE)
     help = models.CharField(max_length=200, null=True, blank=True)
 
-    w = models.IntegerField(verbose_name='Widget width', default=200, validators=[MinValueValidator(50)])
-    h = models.IntegerField(verbose_name='Widget height', default=100, validators=[MinValueValidator(50)])
-    z = models.IntegerField(verbose_name='Widget z index(stack position)', default=0,
-                            validators=[MaxValueValidator(100), MinValueValidator(0)])
-    x = models.IntegerField(verbose_name='Offset left from parent', default=0, validators=[MinValueValidator(0)])
-    y = models.IntegerField(verbose_name='Offset top from parent', default=0, validators=[MinValueValidator(0)])
+    w = models.IntegerField(verbose_name='Width', default=200, validators=[MinValueValidator(50)])
+    h = models.IntegerField(verbose_name='Height', default=100, validators=[MinValueValidator(50)])
+    z = models.IntegerField(default=0, validators=[MaxValueValidator(100), MinValueValidator(0)])
+    x = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    y = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
-    font_size = models.IntegerField(verbose_name='Widget font size', default=14,
-                                    validators=[MaxValueValidator(40), MinValueValidator(6)])
-    font_weight = models.IntegerField(verbose_name='Widget font weight', default=400,
-                                      validators=[MaxValueValidator(900), MinValueValidator(100)])
+    font_size = models.IntegerField(default=14, validators=[MaxValueValidator(40), MinValueValidator(6)])
+    font_weight = models.IntegerField(default=400, validators=[MaxValueValidator(900), MinValueValidator(100)])
 
     background_color = models.CharField(max_length=9, validators=[ColorValidator], default='#ffffff')
     text_color = models.CharField(max_length=9, validators=[ColorValidator], default='#000000')
 
     border = models.BooleanField(default=True)
-
-    @classmethod
-    def validate_anonymous_access(cls, accessed_fields):
-        protected_fields = {'font_size', 'font_weight', 'background_color', 'text_color', 'border', 'help', 'w', 'h',
-                            'z', 'x', 'y', 'sync_fields', 'container', 'owner'}
-        protected_fields.update(cls.protected_fields)
-        return not protected_fields.intersection(accessed_fields)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -231,7 +217,7 @@ class SimpleText(Widget):
     sync_fields = ['text_content']
     sync_id = models.ForeignKey('SimpleText', blank=True, null=True, on_delete=models.SET_NULL)
 
-    text_content = models.TextField(verbose_name='Text content of widget', null=True, blank=True)
+    text_content = models.TextField(null=True, blank=True)
 
 
 class URL(Widget):
@@ -249,7 +235,7 @@ class SimpleList(Widget):
     sync_id = models.ForeignKey('SimpleList', blank=True, null=True, on_delete=models.SET_NULL)
 
     items = models.JSONField(default=list)
-    inner_border = models.BooleanField(default=True, help_text='Set border for items in list')
+    inner_border = models.BooleanField(default=True)
 
 
 class Counter(Widget):
@@ -276,7 +262,7 @@ class Port(SyncManager):
 
     title = models.CharField(max_length=200, blank=True, default='Untitled')
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    visited = models.IntegerField(default=0, help_text='Visit counter')
+    visited = models.IntegerField(default=0)
     authenticated_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL,
                                            related_name='authenticated_wall')
     anonymous_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL, related_name='anonymous_wall')

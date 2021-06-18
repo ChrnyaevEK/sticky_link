@@ -12,7 +12,7 @@
                     :key="i"
                 >
                     <div class="d-flex flex-grow-1 p-1 text-break">
-                        <span class="mr-1 text-secondary">{{ i + 1 }}.</span>
+                        <span class="mr-1 text-secondary text-nowrap">{{ i + 1 }}.</span>
                         <span>{{ val }}</span>
                     </div>
                     <button
