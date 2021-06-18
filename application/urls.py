@@ -19,7 +19,7 @@ router.register('source', views.SourceViewSet, basename='source')
 
 urlpatterns = [
     path('', views.App.enter, name="enter"),
-    path('port/<str:uid>/', views.App.port, name="port"),
+    path('port/<str:pk>/', views.App.port, name="port"),
     path('api/state/', views.App.state, name="state"),
     path('api/state/<str:wall_id>/', views.App.state, name="state"),
     path('api/', include(router.urls), name="api"),

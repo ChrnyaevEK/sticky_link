@@ -4,11 +4,6 @@ from django.contrib.auth.models import User
 
 
 class ObjectSerializer(serializers.BaseSerializer):
-    """
-    A read-only serializer that coerces arbitrary complex objects
-    into primitive representations.
-    """
-
     def to_representation(self, instance):
         if isinstance(instance, (list, set, tuple)):
             return [
@@ -59,10 +54,13 @@ class CustomModelSerializer(serializers.ModelSerializer):
 
 class UserSerializer(CustomModelSerializer):
     type = serializers.ReadOnlyField(default='user')
+    username = serializers.ReadOnlyField(default='anonymous')
+    email = serializers.ReadOnlyField()
+    is_anonymous = serializers.ReadOnlyField()
+    is_authenticated = serializers.ReadOnlyField()
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'is_anonymous', 'is_authenticated']
 
 
 class CustomWidgetSerializer(CustomModelSerializer):
@@ -132,3 +130,9 @@ class DocumentSerializer(CustomModelSerializer):
     class Meta:
         fields = '__all__'
         model = models.Document
+
+
+class Meta(serializers.Serializer):
+    edit_permission = serializers.ReadOnlyField(default=False)
+    view_permission = serializers.ReadOnlyField(default=False)
+    file_size_max = serializers.ReadOnlyField(default=10485760)

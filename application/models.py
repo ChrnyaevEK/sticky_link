@@ -9,6 +9,7 @@ from application.consumers import Event as ConsumerEvent, WallConsumer
 from asgiref.sync import async_to_sync
 import hashlib
 import logging
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +57,10 @@ class Base(models.Model):
     @classmethod
     def validate_anonymous_access(cls, accessed_fields):
         return not cls.protected_fields.intersection(accessed_fields)
+
+    @classmethod
+    def pq(cls, user):  # Protected queryset
+        raise NotImplemented(f'Protected query set not implemented for {self.__class__.__name__}')
 
 
 class SyncManager(Base):
@@ -110,6 +115,11 @@ class SyncManager(Base):
                         instance.__setattr__(field, self.__getattribute__(field))
                     instance.save()
 
+    @classmethod
+    def sync_id_is_valid(cls, user, sync_id=None):  # Empty sync_id is valid
+        # Validate sync_id. Find any object that belong to user and has id equal to requested sync_id
+        return not sync_id or cls.pq(user).filter(pk=sync_id, container__wall__owner=user).exists()
+
 
 class Wall(SyncManager):
     type = 'wall'
@@ -134,6 +144,25 @@ class Wall(SyncManager):
     def delete(self, *args, **kwargs):
         self.propagate_instance_deleted()
         super().delete(*args, **kwargs)
+
+    def has_edit_permission(self, user):
+        return self.owner == user
+
+    def has_view_permission(self, user):
+        return self.allow_anonymous_view or self.owner == user
+
+    @classmethod
+    def pq(cls, user):
+        q = Q(allow_anonymous_view=True)
+        if not user.is_anonymous:
+            q.add(Q(owner=user), Q.OR)
+        return cls.objects.filter(q)
+
+    @classmethod
+    def get_available_walls(cls, user):
+        if not user.is_authenticated:
+            return []
+        return cls.pq(user).filter(owner=user)
 
 
 class Container(SyncManager):
@@ -162,6 +191,13 @@ class Container(SyncManager):
         self.propagate_instance_deleted()
         super().delete(*args, **kwargs)
 
+    @classmethod
+    def pq(cls, user):
+        q = Q(wall__allow_anonymous_view=True)
+        if not user.is_anonymous:
+            q.add(Q(wall__owner=user), Q.OR)
+        return cls.objects.filter(q)
+
 
 class Port(SyncManager):
     """ Describe static link ready to be distributed - link format should not change """
@@ -185,6 +221,13 @@ class Port(SyncManager):
     def delete(self, *args, **kwargs):
         self.propagate_instance_deleted()
         super().delete(*args, **kwargs)
+
+    @classmethod
+    def pq(cls, user):
+        q = Q()
+        if not user.is_anonymous:
+            q = Q(owner=user)
+        return cls.objects.filter(q)
 
 
 class Source(Base):
@@ -215,6 +258,13 @@ class Source(Base):
 
     def __str__(self):
         return f'{self.id} | {self.name or "Untitled source"}'
+
+    @classmethod
+    def pq(cls, user):
+        q = Q(parent__container__wall__allow_anonymous_view=True)
+        if not user.is_anonymous:
+            q.add(Q(parent__container__wall__owner=user), Q.OR)
+        return cls.objects.filter(q)
 
 
 class ColorValidator(BaseValidator):
@@ -265,6 +315,13 @@ class Widget(SyncManager):
 
     def __str__(self):
         return f'{self.id} | {self.title or "Untitled widget"}'
+
+    @classmethod
+    def pq(cls, user):
+        q = Q(container__wall__allow_anonymous_view=True)
+        if not user.is_anonymous:
+            q.add(Q(container__wall__owner=user), Q.OR)
+        return cls.objects.filter(q)
 
     class Meta:
         abstract = True
@@ -320,3 +377,11 @@ class Document(Widget):
     sync_id = models.ForeignKey('Document', blank=True, null=True, on_delete=models.SET_NULL)
 
     source = models.ForeignKey(Source, blank=True, on_delete=models.SET_NULL, null=True, related_name='parent')
+
+
+class Meta:
+    file_size_max = 10485760
+
+    def __init__(self, wall, user):
+        self.edit_permission = wall.has_edit_permission(user)
+        self.view_permission = wall.has_view_permission(user)
