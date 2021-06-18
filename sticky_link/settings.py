@@ -16,7 +16,7 @@ import logging
 from systemd import journal
 from corsheaders.defaults import default_headers
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logging.root.addHandler(journal.JournaldLogHandler())
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
