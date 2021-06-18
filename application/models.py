@@ -60,7 +60,7 @@ class Base(models.Model):
 
     @classmethod
     def pq(cls, user):  # Protected queryset
-        raise NotImplemented(f'Protected query set not implemented for {self.__class__.__name__}')
+        raise NotImplemented(f'Protected query set not implemented for {cls.__name__}')
 
 
 class SyncManager(Base):
