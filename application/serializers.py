@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from application import models
 from django.contrib.auth.models import User
-from django.core.exceptions import PermissionDenied
 
 
 class ObjectSerializer(serializers.BaseSerializer):
@@ -56,15 +55,6 @@ class CustomModelSerializer(serializers.ModelSerializer):
     version = serializers.ReadOnlyField()
     date_of_creation = serializers.ReadOnlyField()
     last_update = serializers.ReadOnlyField()
-
-    def update(self, instance, validated_data):
-        user = self.context['request'].user
-        owner = instance.related_wall_instance.owner
-
-        if (user.is_anonymous or user != owner) and not instance.validate_anonymous_access(validated_data.keys()):
-            raise PermissionDenied()  # User has no right to change any of accessed fields
-
-        return super().update(instance, validated_data)
 
 
 class UserSerializer(CustomModelSerializer):

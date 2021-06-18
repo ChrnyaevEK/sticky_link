@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.parsers import FileUploadParser, MultiPartParser
 from django.http import JsonResponse, HttpResponse, HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import render, redirect
+from django.core.exceptions import PermissionDenied
 from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
@@ -108,7 +109,7 @@ class App:
             ports = _get_protected_queryset(models.Port, request.user)
             ports = serializers.PortSerializer(ports, many=True).data
             wall = serializers.WallSerializer(wall).data
-        walls = WallViewSet.generate_list(request)
+        walls = WallViewSet.list_available_walls(request)
         if not walls and wall:
             walls = [wall]
         elif not walls:
@@ -141,49 +142,58 @@ class UserViewSet(ReadOnlyModelViewSet):
         return serializers.UserSerializer(request.user).data
 
 
-class CommonModelViewSet(ModelViewSet):
+class ProtectedModelViewSet(ModelViewSet):
     model_class = None
+    anonymous_actions = ['list', 'retrieve', 'partial_update', 'update']
 
     def get_permissions(self):
-        if self.action in ('list', 'retrieve', 'partial_update', 'update'):  # Anonymous user may change data
-            return []
-        else:
-            return [IsAuthenticated()]
+        return [] if self.action in self.anonymous_actions else [IsAuthenticated()]
 
     def get_queryset(self):
         return self.generate_query_set(self.request)
+
+    def ensure_access_allowed(self):
+        instance = self.model_class.objects.get(pk=self.kwargs['pk'])
+        user = self.request.user
+        owner = instance.related_wall_instance.owner
+        if user.is_anonymous or user != owner:
+            if not instance.validate_anonymous_access(self.request.data.keys()):
+                raise PermissionDenied()  # User has no right to change any of accessed fields
+
+    def update(self, request, *args, **kwargs):
+        self.ensure_access_allowed()
+        return super().update(request, *args, **kwargs)
 
     @classmethod
     def generate_query_set(cls, request):
         return _get_protected_queryset(cls.model_class, request.user)
 
 
-class WallViewSet(CommonModelViewSet):
+class WallViewSet(ProtectedModelViewSet):
     serializer_class = serializers.WallSerializer
     model_class = models.Wall
 
+    @classmethod
+    def list_available_walls(cls, request):
+        if not request.user.is_authenticated:
+            return []
+        walls_query = cls.generate_query_set(request).filter(owner=request.user)
+        return cls.serializer_class(walls_query, many=True).data
+
     def list(self, request, *args, **kwargs):
-        return Response(self.generate_list(request))
+        return Response(self.list_available_walls(request))
 
     def create(self, request, *args, **kwargs):
         request.data['owner'] = request.user.id
         return super().create(request, *args, **kwargs)
 
-    @classmethod
-    def generate_list(cls, request):
-        if not request.user.is_authenticated:
-            return []
 
-        walls_query = cls.generate_query_set(request).filter(owner=request.user)
-        return cls.serializer_class(walls_query, many=True).data
-
-
-class ContainerViewSet(CommonModelViewSet):
+class ContainerViewSet(ProtectedModelViewSet):
     serializer_class = serializers.ContainerSerializer
     model_class = models.Container
 
 
-class SyncViewSet(CommonModelViewSet):
+class SyncViewSet(ProtectedModelViewSet):
 
     def update(self, request, pk=None, *args, **kwargs):
         try:
@@ -233,7 +243,7 @@ class PortViewSet(SyncViewSet):
         return super().create(request, *args, **kwargs)
 
 
-class SourceViewSet(CommonModelViewSet):
+class SourceViewSet(ProtectedModelViewSet):
     parser_classes = (MultiPartParser,)
     model_class = models.Source
     serializer_class = serializers.SourceSerializer
