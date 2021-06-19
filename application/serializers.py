@@ -53,13 +53,14 @@ class CustomModelSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(CustomModelSerializer):
-    type = serializers.ReadOnlyField(default='user')
-    username = serializers.ReadOnlyField(default='anonymous')
+    type = serializers.ReadOnlyField()
+    username = serializers.ReadOnlyField()
     email = serializers.ReadOnlyField()
     is_anonymous = serializers.ReadOnlyField()
     is_authenticated = serializers.ReadOnlyField()
 
     class Meta:
+        fields = ['type', 'username', 'email', 'is_anonymous', 'is_authenticated']
         model = User
 
 

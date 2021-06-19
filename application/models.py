@@ -2,16 +2,16 @@ import os.path
 import re
 from django.db import models
 from django.core.validators import BaseValidator, MaxValueValidator, MinValueValidator
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from hashid_field import HashidAutoField
 from channels.layers import get_channel_layer
 from application.consumers import Event as ConsumerEvent, WallConsumer
 from asgiref.sync import async_to_sync
 import hashlib
-import logging
 from django.db.models import Q
 
-logger = logging.getLogger(__name__)
+User.type = 'user'
+AnonymousUser.username = 'anonymous'
 
 
 def _to_hash(sting):

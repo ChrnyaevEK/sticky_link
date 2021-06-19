@@ -105,6 +105,7 @@ export default new VueX.Store({
             });
         },
         handleWallDeleted(context) {
+            console.log(2123)
             router.push({ name: context.state.editMode ? "wallEdit" : "wallView" });
         },
         async setEditMode(context) {

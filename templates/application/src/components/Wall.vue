@@ -25,7 +25,7 @@
                 </span>
                 <button
                     v-if="$env.state.wall && $env.state.editMode"
-                    class="btn btn-sm bg-white border text-secondary d-none d-md-block"
+                    class="btn btn-sm bg-white border d-none d-md-block"
                     @click.stop="$env.dispatch('openOptions', $env.state.wall)"
                     :disabled="$env.state.changesLock"
                 >
@@ -157,7 +157,7 @@
                                     title="Add new widget of type File"
                                     :disabled="$env.state.changesLock"
                                 >
-                                Document
+                                    Document
                                 </button>
                             </div>
                         </div>
@@ -177,84 +177,80 @@
             <!-- Create / select section -->
             <div>
                 <div v-if="$env.state.editMode && $store.state.user.is_authenticated">
-                    <div class="d-flex p-1 border-top justify-content-between align-item-center bg-white">
-                        <div class="d-flex p-1 mr-1">
-                            <div v-if="$store.state.walls">
-                                <a
-                                    class="mr-1 btn dropdown-toggle bg-white"
-                                    id="wall-list"
-                                    data-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false"
-                                    title="Select wall to edit"
+                    <div class="d-flex m-2">
+                        <div v-if="$store.state.walls">
+                            <a
+                                class="mr-1 btn border dropdown-toggle bg-white"
+                                id="wall-list"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                                title="Select wall to edit"
+                            >
+                                Walls
+                            </a>
+                            <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
+                                <router-link
+                                    class="dropdown-item btn"
+                                    v-for="wall of $store.state.walls"
+                                    :key="wall.id"
+                                    :class="{ active: wall.id == $route.params.wallId }"
+                                    :to="{
+                                        name: 'wallEdit',
+                                        params: { wallId: wall.id },
+                                    }"
+                                    >{{ wall.title }}</router-link
                                 >
-                                    Wall
-                                </a>
-                                <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
-                                    <router-link
-                                        class="dropdown-item btn"
-                                        v-for="wall of $store.state.walls"
-                                        :key="wall.id"
-                                        :class="{ active: wall.id == $route.params.wallId }"
-                                        :to="{
-                                            name: 'wallEdit',
-                                            params: { wallId: wall.id },
-                                        }"
-                                        >{{ wall.title }}</router-link
-                                    >
-                                </div>
                             </div>
-                            <button
-                                class="mr-1 btn btn-success"
-                                @click="$env.dispatch('handleCreateWall')"
-                                title="Add new wall"
-                                :disabled="$env.state.changesLock"
-                            >
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button
-                                v-if="$env.state.wall"
-                                @click.stop="$env.dispatch('handleCreateContainer')"
-                                class="btn btn-success text-nowrap"
-                                title="Add Container to hold widgets"
-                                :disabled="$env.state.changesLock"
-                            >
-                                Container
-                            </button>
                         </div>
-                        <div class="d-flex p-1">
-                            <div v-if="$store.state.ports && $env.state.wall">
+                        <button
+                            class="mr-1 btn btn-success border"
+                            @click="$env.dispatch('handleCreateWall')"
+                            title="Add new wall"
+                            :disabled="$env.state.changesLock"
+                        >
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button
+                            v-if="$env.state.wall"
+                            @click.stop="$env.dispatch('handleCreateContainer')"
+                            class="btn btn-success border mr-1"
+                            title="Add Container to hold widgets"
+                            :disabled="$env.state.changesLock"
+                        >
+                            Container
+                        </button>
+                        <div v-if="$store.state.ports && $env.state.wall">
+                            <a
+                                class="btn dropdown-toggle border mr-1 bg-white"
+                                id="wall-list"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                                title="Select port to edit"
+                            >
+                                Ports
+                            </a>
+                            <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
                                 <a
-                                    class="btn btn-s dropdown-toggle bg-white mr-1"
-                                    id="wall-list"
-                                    data-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false"
-                                    title="Select port to edit"
-                                >
-                                    Port
+                                    class="dropdown-item btn"
+                                    v-for="port of $store.state.ports"
+                                    :key="port.id"
+                                    @click="$env.dispatch('openOptions', port)"
+                                    :title="'Visit counter: ' + port.visited"
+                                    >{{ port.title }} <small>{{ port.visited }}</small>
                                 </a>
-                                <div class="mr-1 dropdown-menu" aria-labelledby="wall-list">
-                                    <a
-                                        class="dropdown-item btn"
-                                        v-for="port of $store.state.ports"
-                                        :key="port.id"
-                                        @click="$env.dispatch('openOptions', port)"
-                                        :title="'Visit counter: ' + port.visited"
-                                        >{{ port.title }} <small>{{ port.visited }}</small>
-                                    </a>
-                                </div>
                             </div>
-                            <button
-                                v-if="$store.state.ports && $env.state.wall"
-                                class="btn btn-success text-white"
-                                @click="$env.dispatch('handleCreatePort')"
-                                title="Add new port"
-                                :disabled="$env.state.changesLock"
-                            >
-                                <i class="fas fa-plus"></i>
-                            </button>
                         </div>
+                        <button
+                            v-if="$store.state.ports && $env.state.wall"
+                            class="btn btn-success border"
+                            @click="$env.dispatch('handleCreatePort')"
+                            title="Add new port"
+                            :disabled="$env.state.changesLock"
+                        >
+                            <i class="fas fa-plus"></i>
+                        </button>
                     </div>
                 </div>
             </div>
