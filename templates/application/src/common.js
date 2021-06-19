@@ -68,9 +68,19 @@ export const types = {
     Document: "document",
 };
 
+export function downloadImage(data, filename = "download.jpeg") {
+    var a = document.createElement("a");
+    a.href = data;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
 export default {
     types,
     difference,
     sleep,
     timeFormatted,
+    downloadImage,
 };

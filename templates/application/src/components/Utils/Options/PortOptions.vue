@@ -8,12 +8,16 @@
                     target wall online.</span
                 >
             </options-item>
-            <div class="col-12 text-center">
-                <a :href="`/ext/${instance.id}/`" target="_blank">{{ origin }}/port/{{ instance.id }}/</a>
+            <div class="text-center">
+                <a :href="`/ext/${instance.id}/`" target="_blank"> {{ url }}</a>
                 <a @click.stop.prevent="copyToClipboard(`${origin}/port/${instance.id}/`)" class="cursor-pointer"
                     ><i class="fas fa-copy mx-3 text-muted"></i
                 ></a>
             </div>
+            <div class="d-flex align-items-center flex-column my-4">
+                <canvas id="port-qr" class="border"></canvas>
+            </div>
+            <button class="btn mt-2 bg-white border w-100" @click="saveQR">Download QR</button>
         </div>
         <div class="form-group">
             <options-item>
@@ -35,7 +39,7 @@
                 <label slot="title" v-scope:for.authenticated_wall>Authenticated user</label>
                 <v-select
                     slot="input"
-                    class="w-100"
+                    class="w-100 bg-white"
                     v-scope:id.authenticated_wall
                     :options="walls_as_options"
                     :reduce="(wall) => wall.code"
@@ -50,7 +54,7 @@
                 <label slot="title" v-scope:for.anonymous_wall>Not authenticated user</label>
                 <v-select
                     slot="input"
-                    class="w-100"
+                    class="w-100 bg-white"
                     v-scope:id.anonymous_wall
                     :options="walls_as_options"
                     :reduce="(wall) => wall.code"
@@ -84,7 +88,8 @@
     // Front end is absolutely passive
     import OptionsItem from "./OptionsItem";
     import vSelect from "vue-select";
-    import { copyToClipboard } from "../../../common";
+    import { copyToClipboard, downloadImage } from "../../../common";
+    import QRCode from "qrcode";
 
     export default {
         name: "WallOptions",
@@ -94,9 +99,20 @@
                 required: true,
             },
         },
+        data() {
+            return {
+                width: 200,
+                font: "Arial",
+                fontSize: 14,
+                margin: 4,
+            };
+        },
         computed: {
-            origin() {
-                return window.location.origin;
+            canvas() {
+                return document.getElementById("port-qr");
+            },
+            url() {
+                return window.location.origin + "/port/" + this.instance.id + "/";
             },
             walls_as_options() {
                 if (!this.$store.state.walls) {
@@ -112,10 +128,33 @@
                 return result;
             },
         },
+        mounted() {
+            QRCode.toCanvas(
+                this.canvas,
+                this.url,
+                {
+                    width: this.width,
+                    margin: this.margin,
+                },
+                function(error) {
+                    if (error) throw error;
+                }
+            );
+            let ctx = this.canvas.getContext("2d");
+            ctx.font = `${this.fontSize}px ${this.font}`;
+            let height = this.canvas.height;
+            let width = this.canvas.width;
+            ctx.fillText(this.$store.state.app.url, width - 145, 14);
+            ctx.fillText(this.instance.id, 70, height - 6);
+        },
         methods: {
             copyToClipboard(text) {
                 copyToClipboard(text);
                 this.$notify({ text: "Copied to clipboard!", type: "success" });
+            },
+            saveQR() {
+                var dataURL = this.canvas.toDataURL("image/png");
+                downloadImage(dataURL, "port_" + this.instance.id + ".png");
             },
         },
         components: {
