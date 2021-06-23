@@ -8,7 +8,7 @@ import { sleep } from "../common";
 
 export default new Vue({
     data: {
-        coolDown: 2000,
+        coolDown: 1000,
         waiter: {
             // uid: timeout id
         },
