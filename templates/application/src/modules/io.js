@@ -1,4 +1,5 @@
 import Vue from "vue";
+import $ from "jquery";
 
 export default new Vue({
     data: {
@@ -22,6 +23,9 @@ export default new Vue({
             timeoutId: null,
             timeoutDuration: 1000,
         },
+        warning: {
+            class: 'response-warning',
+        }
     },
     methods: {
         save(active) {
@@ -46,6 +50,20 @@ export default new Vue({
                     this.changeUtil.state = this.changeUtil.states.synchronized;
                 }, this.changeUtil.timeoutDuration);
             }
+        },
+        setWarning(response, target) {
+            this.unsetWarning(target);
+            for (var [field, error] of Object.entries(response.responseJSON)) {
+                error = $(`<p class="${this.warning.class} col-12 text-danger">${error[0]}</p>`);
+                target.find(`[for*="${field}"]`)
+                    .addClass(`text-danger ${this.warning.class}`)
+                    .closest("div")
+                    .append(error);
+            }
+        },
+        unsetWarning(target) {
+            target.find(`.${this.warning.class}`).removeClass("text-danger").removeClass(this.warning.class);
+            target.find(`p.${this.warning.class}`).remove();
         },
     },
 });

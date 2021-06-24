@@ -12,7 +12,7 @@
 </template>
 
 <script>
-    import WidgetBaseResizable from "../Widgets/WidgetBaseResizable";
+    import WidgetBaseResizable from "./_Base";
     export default {
         type: "url",
         name: "URL",

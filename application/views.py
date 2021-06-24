@@ -76,9 +76,9 @@ class App:
                 container = models.Container(wall=wall, index=0)
                 container.save()
                 containers = [serializers.ContainerSerializer(container).data]
-            ports = serializers.PortSerializer(models.Port.pq(user), many=True).data
             wall = serializers.WallSerializer(wall).data
 
+        ports = serializers.PortSerializer(models.Port.pq(user), many=True).data
         walls = serializers.WallSerializer(models.Wall.get_available_walls(user), many=True).data
         if not walls and wall:
             walls = [wall]

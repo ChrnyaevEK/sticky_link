@@ -1,7 +1,5 @@
 import Vue from "vue";
 import VueX from "vuex";
-import store from "./store";
-import router from "./router";
 
 Vue.use(VueX);
 
@@ -13,23 +11,13 @@ async function nextTick() {
 
 export default new VueX.Store({
     state: {
-        wall: null,
-        container: null,
-        changesLock: false, // Look resizing, dragging, instance mutations
+        changesLock: false,
         widgetsLock: false,
         editMode: false,
         viewMode: false,
         optionsSource: null,
     },
     mutations: {
-        setWallByWallId(state, wall) {
-            state.wall = wall;
-        },
-        setContainerByContainerId(state, containerId) {
-            state.container = store.state.containers
-                ? store.state.containers.filter((c) => c.id == containerId)[0]
-                : null;
-        },
         setEditMode(state) {
             state.editMode = true;
             state.viewMode = false;
@@ -47,84 +35,14 @@ export default new VueX.Store({
         setOptionsSource(state, source) {
             state.optionsSource = source;
         },
-        //this.edit && this.wall && this.wall.lock_widgets
     },
     actions: {
-        async handleCreateWidget(context, type) {
-            let widget = await store.dispatch("createInstance", {
-                type,
-                container: context.state.container.id,
-            });
-            store.dispatch("recalculateWidgets", context.state.container);
-            Vue.notify({
-                text: `Widget ${widget.type} ${widget.title || "Untitled"} was created!`,
-                type: "success",
-            });
-        },
-        async handleCreateContainer(context) {
-            let index = 0;
-            for (let container of store.state.containers) {
-                if (container.index > index) {
-                    index = container.index + 1;
-                }
-            }
-            let container = await store.dispatch("createInstance", {
-                wall: context.state.wall.id,
-                type: "container",
-                index,
-            });
-            Vue.notify({
-                text: `Container ${container.title || "Untitled"} was created!`,
-                type: "success",
-            });
-        },
-        async handleCreatePort(context) {
-            let port = await store.dispatch("createInstance", {
-                wall: context.state.wall.id,
-                type: "port",
-            });
-            context.dispatch("openOptions", port);
-            Vue.notify({
-                text: `Port ${port.title || "Untitled"} was created!`,
-                type: "success",
-            });
-        },
-        async handleCreateWall() {
-            let wall = await store.dispatch("createInstance", {
-                type: "wall",
-            });
-            Vue.notify({
-                text: `Wall ${wall.title || "Untitled"} was created!`,
-                type: "success",
-            });
-            router.push({
-                name: "wallEdit",
-                params: {
-                    wallId: wall.id,
-                },
-            });
-        },
-        handleWallDeleted(context) {
-            console.log(2123)
-            router.push({ name: context.state.editMode ? "wallEdit" : "wallView" });
-        },
         async setEditMode(context) {
             context.commit("setEditMode");
             await nextTick();
         },
         async setViewMode(context) {
             context.commit("setViewMode");
-            await nextTick();
-        },
-        async setWallByWallId(context, wallId) {
-            context.commit(
-                "setWallByWallId",
-                store.state.walls ? store.state.walls.filter((w) => w.id == wallId)[0] : null
-            );
-            await nextTick();
-        },
-        async setContainerByContainerId(context, containerId) {
-            context.commit("setContainerByContainerId", containerId);
             await nextTick();
         },
         async lockChanges(context) {

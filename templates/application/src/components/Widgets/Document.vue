@@ -13,7 +13,7 @@
 </template>
 
 <script>
-    import WidgetBaseResizable from "../Widgets/WidgetBaseResizable";
+    import WidgetBaseResizable from "./_Base";
     import { timeFormatted } from "../../common";
     export default {
         type: "document",

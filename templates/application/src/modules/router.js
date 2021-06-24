@@ -2,10 +2,16 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import App from "../components/App";
 import Error from "../components/Error";
-import Wall from "../components/Wall";
 import store from "./store";
 import env from "./env";
 import $ from "jquery";
+
+import WallEditor from "../components/Wall/Editor";
+import WallOverview from "../components/Wall/Overview";
+
+import PortEditor from "../components/Port/Editor";
+import PortOverview from "../components/Port/Overview";
+
 
 Vue.use(VueRouter);
 const router = new VueRouter({
@@ -15,14 +21,15 @@ const router = new VueRouter({
             path: "/",
             component: App,
             name: "home",
-            redirect: { name: "wallEdit" },
+            redirect: {name: "wallOverview"},
             children: [
+
                 {
                     name: "wallEdit",
                     path: "wall/edit/:wallId?",
-                    component: Wall,
+                    component: WallEditor,
                     async beforeEnter(to, from, next) {
-                        if (to.params.wallId != undefined) {
+                        if (to.params.wallId !== undefined) {
                             if (
                                 store.state.meta &&
                                 !store.state.meta.edit_permission &&
@@ -49,7 +56,7 @@ const router = new VueRouter({
                 {
                     name: "wallView",
                     path: "wall/view/:wallId",
-                    component: Wall,
+                    component: WallEditor,
                     async beforeEnter(to, from, next) {
                         if (store.state.meta) {
                             if (!store.state.meta.view_permission) {
@@ -67,13 +74,28 @@ const router = new VueRouter({
                     },
                 },
                 {
+                    name: 'wallOverview',
+                    path: 'wall/overview',
+                    component: WallOverview,
+                },
+                {
+                    name: 'portEdit',
+                    path: 'port/edit/:portId',
+                    component: PortEditor,
+                },
+                {
+                    name: 'portOverview',
+                    path: 'port/overview',
+                    component: PortOverview,
+                },
+                {
                     name: "error",
                     path: "/error",
                     component: Error,
                 },
                 {
                     path: "*",
-                    redirect: { name: "home" },
+                    redirect: {name: "home"},
                 },
             ],
         },
@@ -84,7 +106,7 @@ const router = new VueRouter({
     ],
 });
 router.beforeEach(async (to, from, next) => {
-    if (to.name != "error") {
+    if (to.name !== "error") {
         try {
             await store.dispatch("fetchState", to.params.wallId);
         } catch (e) {

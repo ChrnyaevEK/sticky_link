@@ -3,13 +3,12 @@
         <div class="text-right">
             <a class="btn" @click="$env.dispatch('closeOptions')"><i class="fas fa-times"></i></a>
         </div>
-        <wall-options v-if="instance.type == types.Wall" :instance="instance" @push="handlePush"></wall-options>
+        <wall-options v-if="instance.type === types.Wall" :instance="instance" @push="handlePush"></wall-options>
         <container-options
-            v-else-if="instance.type == types.Container"
+            v-else-if="instance.type === types.Container"
             :instance="instance"
             @push="handlePush"
         ></container-options>
-        <port-options v-else-if="instance.type == types.Port" :instance="instance" @push="handlePush"></port-options>
         <widgets-options v-else :instance="instance" @push="handlePush"></widgets-options>
         <div class="form-group">
             <button
@@ -27,11 +26,9 @@
 </template>
 
 <script>
-    // Front end is absolutely passive
     import $ from "jquery";
-    import WallOptions from "./Options/WallOptions";
-    import ContainerOptions from "./Options/ContainerOptions";
-    import PortOptions from "./Options/PortOptions";
+    import WallOptions from "./Options/Wall";
+    import ContainerOptions from "./Options/Container";
     import WidgetsOptions from "./Options/WidgetsOptions";
     import { types } from "../../common";
 
@@ -57,7 +54,7 @@
                     await this.$store.dispatch("deleteInstance", this.instance);
 
                     this.$env.dispatch("closeOptions");
-                    if (type == "wall") {
+                    if (type === "wall") {
                         this.$env.dispatch("handleWallDeleted");
                     }
                 }
@@ -70,26 +67,10 @@
                 }
                 this.unsetWarning();
             },
-            setWarningFromResponse(response) {
-                this.unsetWarning();
-                for (var [field, error] of Object.entries(response.responseJSON)) {
-                    error = $(`<p class="${this.warningClass} col-12 text-danger">${error[0]}</p>`);
-                    $(this.$el)
-                        .find(`[for*="${field}"]`)
-                        .addClass(`text-danger ${this.warningClassField}`)
-                        .closest(".row")
-                        .append(error);
-                }
-            },
-            unsetWarning() {
-                $(`.${this.warningClassField}`).removeClass("text-danger");
-                $(`.${this.warningClass}`).remove();
-            },
         },
         components: {
             WallOptions,
             ContainerOptions,
-            PortOptions,
             WidgetsOptions,
         },
     };

@@ -9,7 +9,7 @@
 
 <script>
     // Front end is absolutely passive
-    import OptionsItem from "./OptionsItem";
+    import OptionsItem from "../Options.Item";
     import TextEditor from "../TextEditor";
 
     export default {
