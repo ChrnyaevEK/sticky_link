@@ -181,7 +181,7 @@
     <!-- Sidebar -->
     <div
         class="w-25 border-left px-2 overflow-auto d-none d-md-block"
-        v-if="$env.state.editMode && $env.state.optionsSource"
+        v-if="$env.state.editMode && $env.state.targetInstance"
     >
       <!-- Button trigger modal -->
       <Options></Options>

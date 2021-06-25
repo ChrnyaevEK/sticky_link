@@ -9,10 +9,10 @@
         <label v-scope:for.x slot="title">Left offset</label>
         <input
             slot="input"
-            v-scope:id.x
-            :step="$store.state.app.grid"
-            v-model.number="instance.x"
             @input="$emit('push')"
+            v-scope:id.x
+            v-model.number="instance.x"
+            :step="$store.state.app.grid"
             :disabled="$env.state.changesLock"
             class="form-control"
             type="number"
@@ -23,10 +23,10 @@
         <label v-scope:for.y slot="title">Top offset</label>
         <input
             slot="input"
-            v-scope:id.y
-            :step="$store.state.app.grid"
-            v-model.number="instance.y"
             @input="$emit('push')"
+            v-scope:id.y
+            v-model.number="instance.y"
+            :step="$store.state.app.grid"
             :disabled="$env.state.changesLock"
             class="form-control"
             type="number"
@@ -37,9 +37,9 @@
         <label v-scope:for.z slot="title">Z-index (overlay)</label>
         <input
             slot="input"
+            @input="$emit('push')"
             v-scope:id.z
             v-model.number="instance.z"
-            @input="$emit('push')"
             :disabled="$env.state.changesLock"
             class="form-control"
             type="number"
@@ -60,9 +60,9 @@
         <input
             slot="input"
             v-scope:id.w
-            :step="$store.state.app.grid"
             v-model.number="instance.w"
             @input="$emit('push')"
+            :step="$store.state.app.grid"
             :disabled="$env.state.changesLock"
             class="form-control"
             type="number"
@@ -226,47 +226,14 @@
         <span slot="help"><strong>Sync ID</strong> of this widget</span>
       </options-item>
     </div>
-    <counter-options
-        v-if="instance.type == types.Counter"
-        :instance="instance"
-        @push="$emit('push')"
-        :disabled="$env.state.changesLock"
-    ></counter-options>
-    <url-options
-        v-if="instance.type == types.URL"
-        :instance="instance"
-        @push="$emit('push')"
-        :disabled="$env.state.changesLock"
-    ></url-options>
-    <simple-text-options
-        v-if="instance.type == types.SimpleText"
-        :instance="instance"
-        @push="$emit('push')"
-        :disabled="$env.state.changesLock"
-    ></simple-text-options>
-    <simple-list-options
-        v-if="instance.type == types.SimpleList"
-        :instance="instance"
-        @push="$emit('push')"
-        :disabled="$env.state.changesLock"
-    ></simple-list-options>
-    <document-options
-        v-if="instance.type == types.Document"
-        :instance="instance"
-        @push="$emit('push')"
-        :disabled="$env.state.changesLock"
-    ></document-options>
+    <slot></slot>
   </div>
 </template>
 
 <script>
+
+import {copyToClipboard} from "../../../common";
 import OptionsItem from "../Options.Item";
-import CounterOptions from "./Counter";
-import SimpleListOptions from "./SimpleList";
-import SimpleTextOptions from "./SimpleText";
-import UrlOptions from "./Url";
-import DocumentOptions from "./Document";
-import {copyToClipboard, types} from "../../../common";
 
 export default {
   name: "WidgetsOptions",
@@ -276,11 +243,6 @@ export default {
       required: true,
     },
   },
-  data: () => {
-    return {
-      types,
-    };
-  },
   methods: {
     copyToClipboard(text) {
       copyToClipboard(text);
@@ -289,11 +251,6 @@ export default {
   },
   components: {
     OptionsItem,
-    CounterOptions,
-    SimpleListOptions,
-    SimpleTextOptions,
-    UrlOptions,
-    DocumentOptions,
   },
 };
 </script>

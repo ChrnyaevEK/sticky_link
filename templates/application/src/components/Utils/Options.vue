@@ -1,95 +1,66 @@
 <template>
-    <div>
-        <div class="text-right">
-            <a class="btn" @click="$env.dispatch('closeOptions')"><i class="fas fa-times"></i></a>
-        </div>
-        <wall-options v-if="instance.type === types.Wall" :instance="instance" @push="handlePush"></wall-options>
-        <container-options
-            v-else-if="instance.type === types.Container"
-            :instance="instance"
-            @push="handlePush"
-        ></container-options>
-        <widgets-options v-else :instance="instance" @push="handlePush"></widgets-options>
-        <div class="form-group">
-            <button
-                :disabled="$env.state.changesLock"
-                class="btn btn-sm btn-danger w-100"
-                @click.stop="handleInstanceDelete"
-            >
-                Delete
-            </button>
-        </div>
-        <div class="form-group text-center">
-            <small class="text-secondary">All changes are automatically saved</small>
-        </div>
+  <div>
+    <div class="text-right">
+      <a class="btn" @click="$env.dispatch('closeOptions')"><i class="fas fa-times"></i></a>
     </div>
+    <component :is="component" :instance="$proxy.state.targetInstance"
+               @push="$proxy.dispatch('updateTargetInstance', $el)"></component>
+    <div class="form-group">
+      <button
+          class="btn btn-sm btn-outline-danger w-100"
+          :disabled="$env.state.changesLock"
+          @click.stop="$proxy.dispatch('deleteTargetInstance')"
+      >
+        Delete
+      </button>
+    </div>
+    <div class="form-group text-center">
+      <small class="text-secondary">All changes are automatically saved</small>
+    </div>
+  </div>
 </template>
 
 <script>
-    import $ from "jquery";
-    import WallOptions from "./Options/Wall";
-    import ContainerOptions from "./Options/Container";
-    import WidgetsOptions from "./Options/WidgetsOptions";
-    import { types } from "../../common";
+import CounterOptions from "Options/Counter";
+import SimpleListOptions from "Options/SimpleList";
+import SimpleTextOptions from "Options/SimpleText";
+import UrlOptions from "Options/Url";
+import DocumentOptions from "Options/Document";
+import WallOptions from "./Options/Wall";
+import ContainerOptions from "./Options/Container";
 
-    export default {
-        name: "Options",
-        data: function() {
-            return {
-                types,
-                warningClass: "options-warning",
-                warningClassField: "options-warning-field",
-            };
-        },
-        computed: {
-            instance() {
-                return Object.assign({}, this.$env.state.optionsSource);
-            },
-        },
-        methods: {
-            async handleInstanceDelete() {
-                if (confirm("Are you sure?")) {
-                    let type = this.instance.type;
-
-                    await this.$store.dispatch("deleteInstance", this.instance);
-
-                    this.$env.dispatch("closeOptions");
-                    if (type === "wall") {
-                        this.$env.dispatch("handleWallDeleted");
-                    }
-                }
-            },
-            async handlePush() {
-                try {
-                    await this.$store.dispatch("updateOrAddInstance", this.instance);
-                } catch (err) {
-                    return this.setWarningFromResponse(err);
-                }
-                this.unsetWarning();
-            },
-        },
-        components: {
-            WallOptions,
-            ContainerOptions,
-            WidgetsOptions,
-        },
-    };
+export default {
+  name: "Options",
+  computed: {
+    component() {
+      switch (this.instance.type) {
+        case 'wall':
+          return WallOptions;
+        case 'container':
+          return ContainerOptions;
+        case 'counter':
+          return CounterOptions
+        case 'simple_list':
+          return SimpleListOptions
+        case 'simple_text':
+          return SimpleTextOptions
+        case 'url':
+          return UrlOptions
+        case 'document':
+          return DocumentOptions
+        default:
+          throw 'Options not found'
+      }
+    }
+  },
+  components: {
+    WallOptions,
+    ContainerOptions,
+    CounterOptions,
+    SimpleListOptions,
+    SimpleTextOptions,
+    UrlOptions,
+    DocumentOptions,
+  },
+};
 </script>
-
-<style scoped>
-    .options-size {
-        max-height: 600px;
-        min-width: 200px;
-        max-width: 400px;
-        width: 50% !important;
-    }
-    .options-position {
-        position: fixed;
-        top: 0;
-        right: 0;
-    }
-    .options {
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-</style>

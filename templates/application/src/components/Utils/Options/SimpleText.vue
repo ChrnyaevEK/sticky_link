@@ -1,29 +1,33 @@
 <template>
+  <widget-options :instance="instance">
     <div class="form-group">
-        <options-item :isHeader="true">
-            <span slot="title">Content</span>
-        </options-item>
-        <TextEditor v-model="instance.text_content" @input="$emit('push')" :disabled="$env.state.changesLock"></TextEditor>
+      <options-item :isHeader="true">
+        <span slot="title">Content</span>
+      </options-item>
+      <TextEditor v-model="instance.text_content" @input="$emit('push')"
+                  :disabled="$env.state.changesLock"></TextEditor>
     </div>
+  </widget-options>
 </template>
 
 <script>
-    // Front end is absolutely passive
-    import OptionsItem from "../Options.Item";
-    import TextEditor from "../TextEditor";
+import OptionsItem from "../Options.Item";
+import WidgetOptions from "./_WidgetOptions";
+import TextEditor from "../TextEditor";
 
-    export default {
-        name: "SimpleTextOptions",
-        props: {
-            instance: {
-                type: Object,
-                required: true,
-            },
-        },
+export default {
+  name: "SimpleTextOptions",
+  props: {
+    instance: {
+      type: Object,
+      required: true,
+    },
+  },
 
-        components: {
-            TextEditor,
-            OptionsItem,
-        },
-    };
+  components: {
+    WidgetOptions,
+    TextEditor,
+    OptionsItem,
+  },
+};
 </script>

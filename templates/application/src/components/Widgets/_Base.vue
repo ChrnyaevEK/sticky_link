@@ -8,9 +8,9 @@
         class="widget"
         :class="[
             widget.border ? 'widget-border' : 'no-border',
-            $env.state.optionsSource &&
-            $env.state.optionsSource.id == widget.id &&
-            $env.state.optionsSource.type == widget.type
+            $env.state.targetInstance &&
+            $env.state.targetInstance.id == widget.id &&
+            $env.state.targetInstance.type == widget.type
                 ? 'shadow'
                 : '',
         ]"

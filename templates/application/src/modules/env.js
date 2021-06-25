@@ -3,11 +3,11 @@ import VueX from "vuex";
 
 Vue.use(VueX);
 
-async function nextTick() {
-    await new Promise((resolve) => {
-        Vue.nextTick(resolve);
-    });
-}
+// async function nextTick() {
+//     await new Promise((resolve) => {
+//         Vue.nextTick(resolve);
+//     });
+// }
 
 export default new VueX.Store({
     state: {
@@ -15,7 +15,6 @@ export default new VueX.Store({
         widgetsLock: false,
         editMode: false,
         viewMode: false,
-        optionsSource: null,
     },
     mutations: {
         setEditMode(state) {
@@ -32,41 +31,31 @@ export default new VueX.Store({
         setWidgetsLock(state, lock) {
             state.widgetsLock = lock;
         },
-        setOptionsSource(state, source) {
-            state.optionsSource = source;
-        },
     },
     actions: {
-        async setEditMode(context) {
+        setEditMode(context) {
             context.commit("setEditMode");
-            await nextTick();
         },
-        async setViewMode(context) {
+        setViewMode(context) {
             context.commit("setViewMode");
-            await nextTick();
         },
-        async lockChanges(context) {
+        lockChanges(context) {
             context.commit("setChangesLock", true);
         },
-        async unlockChanges(context) {
+        unlockChanges(context) {
             context.commit("setChangesLock", false);
-            await nextTick();
         },
-        async lockWidgets(context) {
+        lockWidgets(context) {
             context.commit("setWidgetsLock", true);
-            await nextTick();
         },
-        async unlockWidgets(context) {
+        unlockWidgets(context) {
             context.commit("setWidgetsLock", false);
-            await nextTick();
         },
-        async openOptions(context, instance) {
-            context.commit("setOptionsSource", instance);
-            await nextTick();
+        openOptions(context, instance) {
+            context.commit("setTargetInstance", instance);
         },
-        async closeOptions(context) {
-            context.commit("setOptionsSource", null);
-            await nextTick();
+        closeOptions(context) {
+            context.commit("setTargetInstance", null);
         },
     },
 });
