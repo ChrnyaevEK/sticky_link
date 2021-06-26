@@ -5,7 +5,6 @@
         <strong>Ups...</strong>
         <span> The device your are using is not wide enough, some features are disabled. Switch to wider screen to access full version!</span>
       </div>
-      <!-- Wall title -->
       <div class="d-flex justify-content-end p-2 align-items-center">
         <span
             class="overflow-hidden py-1 flex-grow-1"
@@ -15,6 +14,7 @@
           <span class="text-secondary" :title="wall.description">{{ wall.description }}</span>
         </span>
         <router-link
+            v-if="$env.state.editMode"
             class="btn btn-sm btn-outline-primary mr-1"
             :to="{ name: 'wallView', params: { wallId: wall.id }}"
         > View
@@ -35,9 +35,9 @@
         >
 
         </container>
-        <div class="d-flex justify-content-end p-2">
+        <div v-if="$env.state.editMode" class="d-flex justify-content-end p-2">
           <button
-              @click.stop="$proxy.dispatch('createContainer')"
+              @click.stop="$proxy.dispatch('createContainer', wall)"
               :disabled="$env.state.changesLock"
               class="btn btn-sm btn-outline-success"
               title="Add Container to hold widgets"
@@ -52,7 +52,6 @@
         class="w-25 border-left px-2 overflow-auto d-none d-md-block"
         v-if="$env.state.editMode && $proxy.state.targetInstance"
     >
-      <!-- Button trigger modal -->
       <Options></Options>
     </div>
   </div>
@@ -62,8 +61,6 @@
 import Options from "../Utils/Options";
 import Container from '../Widgets/Container'
 
-import proxy from "../../modules/proxy";
-import router from "../../modules/router";
 import env from "../../modules/env";
 import ws from "../../modules/ws";
 
@@ -81,7 +78,7 @@ export default {
   },
   computed: {
     wall() {
-      return proxy.getters.getWallById(router.currentRoute.params.wallId)
+      return this.$store.getters.getWallById(this.$route.params.wallId)
     }
   },
   async updated() {

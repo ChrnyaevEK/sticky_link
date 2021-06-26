@@ -1,18 +1,24 @@
 <template>
   <div class="btn-outline-light my-1 p-1">
     <div class="d-flex align-items-center">
-      <span class=" flex-grow-1">
-        <router-link :to="{name: 'wallEdit', params: { wallId: wall.id }}">
-          {{ wall.title }}
-        </router-link>
-        <span class="text-truncate text-secondary">
+      <div class="d-flex flex-grow-1 text-truncate">
+        <strong class="text-dark mr-1 d-none d-sm-block">
+          {{ wall.allow_anonymous_view ? 'Public' : 'Private' }}
+        </strong>
+        <div class="mr-1" :class="wall.title ? 'text-dark' : 'text-muted'">
+          {{ wall.title || 'No title' }}
+        </div>
+        <div v-show="wall.description" class="text-secondary mr-1">
           {{ wall.description }}
-        </span>
-      </span>
-      <strong class="text-dark mr-1">
-        {{ wall.allow_anonymous_view ? 'Public' : 'Private' }}
-      </strong>
-      <button class="btn btn-sm text-danger" @click="deleteWall">
+        </div>
+      </div>
+      <router-link class="mr-2" :to="{name: 'wallEdit', params: { wallId: wall.id }}">
+        Edit
+      </router-link>
+      <router-link class="mr-2" :to="{name: 'wallView', params: { wallId: wall.id }}">
+        View
+      </router-link>
+      <button class="btn btn-sm text-danger mr-1" @click="$proxy.dispatch('deleteWall', wall)">
         <i class="fas fa-trash"></i>
       </button>
       <router-link class="btn btn-sm text-dark" :to="{name: 'wallSettings', params: { wallId: wall.id }}">
@@ -30,12 +36,5 @@ export default {
       required: true,
     }
   },
-  methods: {
-    deleteWall() {
-      if (confirm("Are you sure?")) {
-        this.$store.dispatch("deleteInstance", this.wall);
-      }
-    },
-  }
 }
 </script>

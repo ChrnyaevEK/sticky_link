@@ -4,12 +4,6 @@ import proxy from "./proxy";
 
 Vue.use(VueX);
 
-// async function nextTick() {
-//     await new Promise((resolve) => {
-//         Vue.nextTick(resolve);
-//     });
-// }
-
 export default new VueX.Store({
     state: {
         changesLock: false,
@@ -56,7 +50,7 @@ export default new VueX.Store({
             await proxy.dispatch("setTargetInstance", instance);
         },
         async closeOptions() {
-            await proxy.dispatch("setTargetInstance", null);
+            await proxy.dispatch("unsetTargetInstance");
         },
     },
 });

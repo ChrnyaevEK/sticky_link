@@ -4,7 +4,9 @@
       Wall settings
     </h4>
     <div class="form-group">
-      <label v-scope:for.title>Title <span class="text-secondary">{{ 200 - wall.title.length }}/200</span></label>
+      <label v-scope:for.title>Title <span class="text-secondary">{{
+          200 - (wall.title ? wall.title.length : 0)
+        }}/200</span></label>
       <input
           :disabled="$env.state.changesLock"
           v-model="wall.title"
@@ -16,7 +18,7 @@
     </div>
     <div class="form-group">
       <label v-scope:for.description>Description <span class="text-secondary">{{
-          500 - wall.description.length
+          500 - (wall.description ? wall.description.length : 0)
         }}/500</span></label>
       <textarea
           v-scope:id.description
@@ -56,7 +58,9 @@
     </div>
     <div class="form-group d-flex justify-content-end">
       <router-link class="btn btn-outline-danger mr-1" :to="{name: 'wallOverview'}">Close</router-link>
-      <button class="btn btn-outline-success" @click.stop="$proxy.dispatch('updateWall', $el)">Save</button>
+      <button class="btn btn-outline-success" @click.stop="$proxy.dispatch('updateWall', {wall, warningTarget: $el})">
+        Save
+      </button>
     </div>
   </div>
 </template>
@@ -71,7 +75,7 @@ async function setupRoutine(to, from, next) {
 export default {
   computed: {
     wall() {
-      return this.$proxy.getters.getWallById(this.$route.params.wallId)
+      return this.$store.getters.getWallById(this.$route.params.wallId)
     }
   },
   beforeRouteEnter: setupRoutine,

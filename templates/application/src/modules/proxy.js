@@ -4,7 +4,7 @@ import store from "./store";
 import io from "./io";
 import router from "./router";
 import env from "./env";
-import {fitWidget, getById, getByUid} from "../common";
+import {fitWidget, getReactiveCopy} from "../common";
 
 Vue.use(VueX);
 
@@ -16,21 +16,10 @@ export default new VueX.Store({
     },
     mutations: {
         setTargetInstance(state, instance) {
-            state.targetInstance = instance ? Object.assign({}, instance) : instance;
+            state.targetInstance = getReactiveCopy(instance);
         },
-    },
-    getters: {
-        getWallById: () => (id) => {
-            return getById(store.state.walls, id)
-        },
-        getPortById: () => (id) => {
-            return getById(store.state.ports, id)
-        },
-        getContainerById: () => (id) => {
-            return getById(store.state.containers, id)
-        },
-        getWidgetByUid: () => (uid) => {
-            return getByUid(store.state.widgets, uid)
+        unsetTargetInstance(state) {
+            state.targetInstance = null;
         },
     },
     actions: {
@@ -45,7 +34,8 @@ export default new VueX.Store({
                 type: "success",
             });
         },
-        async createWall() {
+        async createWall(context, open) {
+            open = open === undefined ? true : open
             await env.dispatch("lockChanges");
             let wall = await store.dispatch("createInstance", {
                 type: "wall",
@@ -55,10 +45,12 @@ export default new VueX.Store({
                 text: `Wall ${wall.title || "Untitled"} was created!`,
                 type: "success",
             });
-            await router.push({
-                name: "wallEdit",
-                params: {wallId: wall.id}
-            });
+            if (open) {
+                await router.push({
+                    name: "wallEdit",
+                    params: {wallId: wall.id}
+                });
+            }
         },
         async createContainer(context, wall) {
             await env.dispatch("lockChanges");
@@ -209,6 +201,9 @@ export default new VueX.Store({
         },
         setTargetInstance(context, instance) {
             context.commit('setTargetInstance', instance)
+        },
+        unsetTargetInstance(context) {
+            context.commit('unsetTargetInstance')
         },
         async deleteTargetInstance(context) {
             if (context.state.targetInstance) {

@@ -25,7 +25,7 @@ export default {
   },
   computed: {
     widget() {
-      return this.$proxy.getters.getWidgetByUid(this.widgetUid)
+      return this.$store.getters.getWidgetByUid(this.widgetUid)
     },
     title() {
       return this.widget.title || (this.widget.source ? this.widget.source.name : "Not chosen");

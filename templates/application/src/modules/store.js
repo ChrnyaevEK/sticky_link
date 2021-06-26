@@ -1,4 +1,4 @@
-import {difference, fitWidget} from "../common";
+import {difference, fitWidget, getById, getByUid, getReactiveCopy} from "../common";
 import Vuex from "vuex";
 import Vue from "vue";
 import api from "./api";
@@ -19,17 +19,31 @@ function determineSource(instance) {
     }
 }
 
-function getInstanceByUid(uid) {
-    return [
-        ...store.state.walls,
-        ...store.state.widgets,
-        ...store.state.ports,
-        ...store.state.containers,
-    ].filter((instance) => instance.uid === uid)[0];
-}
 
 const store = new Vuex.Store({
-    strict: true,
+    strict: false,
+    getters: {
+        getWallById: (state) => (id) => {
+            return getById(state.walls, id)
+        },
+        getPortById: (state) => (id) => {
+            return getById(state.ports, id)
+        },
+        getContainerById: (state) => (id) => {
+            return getById(state.containers, id)
+        },
+        getWidgetByUid: (state) => (uid) => {
+            return getByUid(state.widgets, uid)
+        },
+        getInstanceByUid: (state) => (uid) => {
+            return getReactiveCopy([
+                ...state.walls,
+                ...state.widgets,
+                ...state.ports,
+                ...state.containers,
+            ].filter((i) => i.uid === uid)[0]);
+        }
+    },
     state: {
         user: null,
         meta: null,
@@ -99,7 +113,7 @@ const store = new Vuex.Store({
             await Promise.all(update);
         },
         async updateOrAddInstance(context, instance) {
-            let local = getInstanceByUid(instance.uid) || {};
+            let local = context.getters.getInstanceByUid(instance.uid) || {};
             let update = difference(local, instance);
             if (Object.keys(update).length) {
                 context.commit("updateOrAddInstance", instance);

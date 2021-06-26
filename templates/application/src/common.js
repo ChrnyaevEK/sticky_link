@@ -1,3 +1,5 @@
+import Vue from "vue";
+
 const transform = require("lodash.transform");
 const isEqual = require("lodash.isequal");
 const isArray = require("lodash.isarray");
@@ -5,13 +7,14 @@ const isObject = require("lodash.isobject");
 
 export function difference(origObj, newObj) {
     function changes(newObj, origObj) {
-        return transform(newObj, function(result, value, key) {
+        return transform(newObj, function (result, value, key) {
             if (!isEqual(value, origObj[key])) {
                 result[key] =
                     !isArray(value) && isObject(value) && isObject(origObj[key]) ? changes(value, origObj[key]) : value;
             }
         });
     }
+
     return changes(newObj, origObj);
 }
 
@@ -33,9 +36,9 @@ export function copyToClipboard(text) {
 }
 
 export function timeFormatted(utc) {
-    var x = new Date(utc);
-    var y = "dd.MM.yyyy hh:mm";
-    var z = {
+    let x = new Date(utc);
+    let y = "dd.MM.yyyy hh:mm";
+    let z = {
         M: x.getMonth() + 1,
         d: x.getDate(),
         h: x.getHours(),
@@ -44,11 +47,11 @@ export function timeFormatted(utc) {
     };
     z;
     x = new Date(Date.UTC(x.getFullYear(), x.getMonth(), x.getDate(), x.getHours(), x.getMinutes(), x.getSeconds()));
-    y = y.replace(/(M+|d+|h+|m+|s+)/g, function(v) {
+    y = y.replace(/(M+|d+|h+|m+|s+)/g, function (v) {
         return ((v.length > 1 ? "0" : "") + eval("z." + v.slice(-1))).slice(-2);
     });
 
-    return y.replace(/(y+)/g, function(v) {
+    return y.replace(/(y+)/g, function (v) {
         return x
             .getFullYear()
             .toString()
@@ -72,10 +75,15 @@ export function fitWidget(widget, container) {
 }
 
 export function getById(source, id) {
-    return source ? Object.assign({}, source.filter((i) => i.id === id)[0]) : null;
+    return source ? getReactiveCopy(source.filter((i) => i.id === id)[0]) : null;
 }
+
 export function getByUid(source, uid) {
-    return source ? Object.assign({}, source.filter((i) => i.uid === uid)[0]) : null;
+    return source ? getReactiveCopy(source.filter((i) => i.uid === uid)[0]) : null;
+}
+
+export function getReactiveCopy(obj) {
+    return Vue.observable(Object.assign({}, obj))
 }
 
 export const types = {
@@ -104,6 +112,7 @@ export default {
     difference,
     sleep,
     getByUid,
+    getReactiveCopy,
     getById,
     fitWidget,
     timeFormatted,

@@ -55,9 +55,9 @@ export default new Vue({
                 await this.resolveNewVersion(event.instance);
             }
         },
-        async populateRemoteDestroy(event) {
+        populateRemoteDestroy(event) {
             io.change(true);
-            let local = await store.dispatch("getInstanceByUid", event.instance.uid);
+            let local = store.getters.getInstanceByUid(event.instance.uid);
             if (local !== undefined) {
                 store.commit("deleteInstance", local);
             }

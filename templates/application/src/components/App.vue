@@ -18,10 +18,15 @@
             > Ports
             </router-link>
           </li>
-          <li class="nav-item ml-4">
-            <a class="nav-link" :href="$store.state.user.is_authenticated ? logoutUrl : loginUrl">{{
-                $store.state.user.is_authenticated ? "Logout" : "Login"
-              }}</a>
+          <li class="nav-item" v-if="$store.state.user.is_authenticated">
+            <router-link
+                class="nav-link"
+                :to="{ name: 'profile'}"
+            > Profile
+            </router-link>
+          </li>
+          <li class="nav-item" v-else>
+            <a :href="loginUrl">Login</a>
           </li>
         </ul>
       </div>
@@ -54,7 +59,6 @@ export default {
     return {
       homeUrl: process.env.VUE_APP_HOME,
       loginUrl: process.env.VUE_APP_LOGIN,
-      logoutUrl: process.env.VUE_APP_LOGOUT,
     };
   },
   components: {

@@ -101,7 +101,7 @@ export default {
   },
   computed: {
     container() {
-      return this.$proxy.getters.getContainerById(this.containerId)
+      return this.$store.getters.getContainerById(this.containerId)
     }
   },
   methods: {

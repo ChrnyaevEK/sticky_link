@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import App from "../components/App";
 import Error from "../components/Error";
+import Profile from "../components/Profile";
 import store from "./store";
 import env from "./env";
 import $ from "jquery";
@@ -98,6 +99,11 @@ const router = new VueRouter({
                     name: "error",
                     path: "/error",
                     component: Error,
+                },
+                {
+                    name: "profile",
+                    path: "/profile",
+                    component: Profile,
                 },
                 {
                     path: "*",

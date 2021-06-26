@@ -70,7 +70,7 @@ export default {
   },
   computed: {
     widget() {
-      return this.$proxy.getters.getWidgetByUid(this.widgetUid)
+      return this.$store.getters.getWidgetByUid(this.widgetUid)
     }
   },
   methods: {

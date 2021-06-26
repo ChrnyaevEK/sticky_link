@@ -1,18 +1,18 @@
 <template>
   <div class="btn-outline-light my-1 p-1">
     <div class="d-flex align-items-center">
-      <span class=" flex-grow-1">
-        <span class="text-dark">
-          {{ port.title }}
-        </span>
-        <span class="text-truncate text-secondary">
+      <div class="d-flex flex-grow-1 text-truncate">
+        <div class="text-dark mr-1" :class="{'text-muted': !port.title}">
+          {{ port.title || 'No title' }}
+        </div>
+        <div class="text-secondary">
           {{ port.description }}
-        </span>
-      </span>
+        </div>
+      </div>
       <span class="mr-1 font-weight-bold text-dark" title="Visited">
         {{ port.visited }}
       </span>
-      <button class="btn btn-sm text-danger mr-1" @click="$proxy.dispatch('deletePort', this.port)">
+      <button class="btn btn-sm text-danger mr-1" @click="$proxy.dispatch('deletePort', port)">
         <i class="fas fa-trash"></i>
       </button>
       <router-link class="btn btn-sm text-dark" :to="{name: 'portSettings', params: { portId }}">
@@ -32,7 +32,7 @@ export default {
   },
   computed: {
     port() {
-      return this.$proxy.getters.getPortById(this.portId)
+      return this.$store.getters.getPortById(this.portId)
     }
   }
 }
