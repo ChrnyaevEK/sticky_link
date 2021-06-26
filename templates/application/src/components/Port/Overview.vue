@@ -5,11 +5,11 @@
       Port is a static link to wall. You should use ports for any external navigation, to be able to change
       target wall online
     </p>
-    <div v-if="$store.state.ports && $store.state.ports.length" class="my-3 py-2">
+    <div v-if="$store.state.ports.length" class="my-3 py-2">
       <overview-item
           v-for="port of $store.state.ports"
           :key="port.id"
-          :port="port"
+          :portId="port.id"
       ></overview-item>
     </div>
     <p v-else class="text-secondary">
@@ -18,7 +18,7 @@
     <div class="d-flex justify-content-end">
       <button
           class="btn btn-outline-success"
-          @click="$env.dispatch('handleCreatePort')"
+          @click="$proxy.dispatch('createPort')"
           :disabled="$env.state.changesLock"
       >
         Create port

@@ -25,8 +25,8 @@ export default new Vue({
             await this.waiter[instance.uid]; // Wait for pending ajax
         },
         async proposeUpdate(update, instance) {
-            if (env.state.changesLock) return;
             this.handler[instance.uid] = Object.assign({}, this.handler[instance.uid], update); // Merge updates
+            if (env.state.changesLock) return;
             if (!this.waiter[instance.uid]) {
                 // Already waiting to push update?
                 this.waiter[instance.uid] = (async () => {
@@ -58,7 +58,7 @@ export default new Vue({
         async populateRemoteDestroy(event) {
             io.change(true);
             let local = await store.dispatch("getInstanceByUid", event.instance.uid);
-            if (local != undefined) {
+            if (local !== undefined) {
                 store.commit("deleteInstance", local);
             }
             io.change(false);

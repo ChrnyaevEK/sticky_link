@@ -1,5 +1,6 @@
 import Vue from "vue";
 import VueX from "vuex";
+import proxy from "./proxy";
 
 Vue.use(VueX);
 
@@ -51,11 +52,11 @@ export default new VueX.Store({
         unlockWidgets(context) {
             context.commit("setWidgetsLock", false);
         },
-        openOptions(context, instance) {
-            context.commit("setTargetInstance", instance);
+        async openOptions(context, instance) {
+            await proxy.dispatch("setTargetInstance", instance);
         },
-        closeOptions(context) {
-            context.commit("setTargetInstance", null);
+        async closeOptions() {
+            await proxy.dispatch("setTargetInstance", null);
         },
     },
 });

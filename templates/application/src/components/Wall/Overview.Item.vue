@@ -15,6 +15,9 @@
       <button class="btn btn-sm text-danger" @click="deleteWall">
         <i class="fas fa-trash"></i>
       </button>
+      <router-link class="btn btn-sm text-dark" :to="{name: 'wallSettings', params: { wallId: wall.id }}">
+        <i class="fas fa-ellipsis-v"></i>
+      </router-link>
     </div>
   </div>
 </template>

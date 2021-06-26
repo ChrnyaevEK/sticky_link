@@ -1,10 +1,10 @@
 <template>
   <div class="container py-3">
     <div class="form-group">
-      <label v-scope:for.title>Title</label>
+      <label v-scope:for.title>Title <span class="text-secondary">{{ 200 - port.title.length }}/200</span></label>
       <input
           v-scope:id.title
-          v-model="$proxy.state.port.title"
+          v-model="port.title"
           :disabled="$env.state.changesLock"
           class="form-control"
           maxlength="200"
@@ -15,10 +15,9 @@
       <v-select
           class="w-100 bg-white"
           v-scope:id.authenticated_wall
-          v-model="$proxy.state.port.authenticated_wall"
+          v-model="port.authenticated_wall"
           :options="walls_as_options"
           :reduce="(wall) => wall.code"
-          :key="$proxy.state.port.authenticated_wall"
           :disabled="$env.state.changesLock"
       ></v-select>
       <small class="form-text">Select wall to open for authenticated users</small>
@@ -28,10 +27,9 @@
       <v-select
           class="w-100 bg-white"
           v-scope:id.anonymous_wall
-          v-model="$proxy.state.port.anonymous_wall"
+          v-model="port.anonymous_wall"
           :options="walls_as_options"
           :reduce="(wall) => wall.code"
-          :key="$proxy.state.port.anonymous_wall"
           :disabled="$env.state.changesLock"
       ></v-select>
       <small class="form-text">Select wall to open for not authenticated users</small>
@@ -41,7 +39,7 @@
       <input
           type="url"
           v-scope:id.redirect_url
-          v-model="$proxy.state.port.redirect_url"
+          v-model="port.redirect_url"
           :disabled="$env.state.changesLock"
           class="form-control"
       />
@@ -49,9 +47,9 @@
     </div>
     <div class="form-group">
       <div class="d-flex align-items-center justify-content-between">
-        <a :href="`/ext/${$proxy.state.port.id}/`" target="_blank" class="mr-1"> {{ url }}</a>
+        <a :href="url" target="_blank" class="mr-1"> {{ url }}</a>
         <span>
-          <a @click.stop.prevent="copyToClipboard(`${origin}/port/${$proxy.state.port.id}/`)" class="cursor-pointer">
+          <a @click.stop.prevent="copyToClipboard(url)" class="cursor-pointer">
             <i class="fas fa-copy mr-1 text-muted"></i>
           </a>
         <button class="btn text-success" @click="saveQR">
@@ -63,6 +61,12 @@
         <canvas id="port-qr" class="border"></canvas>
       </div>
     </div>
+    <div class="form-group d-flex justify-content-end">
+      <router-link class="btn btn-outline-danger mr-1" :to="{name: 'portOverview'}">Close</router-link>
+      <button class="btn btn-outline-success" @click.stop="$proxy.dispatch('updatePort', {port, warningTarget: $el})">
+        Save
+      </button>
+    </div>
   </div>
 </template>
 <script>
@@ -70,20 +74,8 @@
 import vSelect from "vue-select";
 import {copyToClipboard, downloadImage} from "../../common"
 import QRCode from "qrcode";
-import proxy from "../../modules/proxy";
-
-async function setupRoutine(to, from, next) {
-  await proxy.dispatch("setPortById", to.params.portId);
-  if (!proxy.state.port) {
-    return next({name: "home"});
-  }
-  next();
-}
 
 export default {
-  name: "WallOptions",
-  beforeRouteEnter: setupRoutine,
-  beforeRouteUpdate: setupRoutine,
   data() {
     return {
       width: 200,
@@ -93,11 +85,14 @@ export default {
     };
   },
   computed: {
+    port() {
+      return this.$proxy.getters.getPortById(this.$route.params.portId)
+    },
     canvas() {
       return document.getElementById("port-qr");
     },
     url() {
-      return window.location.origin + "/port/" + this.$proxy.state.port.id + "/";
+      return window.location.origin + "/port/" + this.port.id + "/";
     },
     walls_as_options() {
       if (!this.$store.state.walls) {
@@ -130,7 +125,7 @@ export default {
     let height = this.canvas.height;
     let width = this.canvas.width;
     ctx.fillText(this.$store.state.app.url, width - 145, 14);
-    ctx.fillText(this.$proxy.state.port.id, 70, height - 6);
+    ctx.fillText(this.port.id, 70, height - 6);
   },
   methods: {
     copyToClipboard(text) {
@@ -139,7 +134,7 @@ export default {
     },
     saveQR() {
       let dataURL = this.canvas.toDataURL("image/png");
-      downloadImage(dataURL, "port_" + this.$proxy.state.port.id + ".png");
+      downloadImage(dataURL, "port_" + this.port.id + ".png");
     },
   },
   components: {

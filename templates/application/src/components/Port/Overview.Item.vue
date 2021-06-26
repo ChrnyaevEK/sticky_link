@@ -2,19 +2,22 @@
   <div class="btn-outline-light my-1 p-1">
     <div class="d-flex align-items-center">
       <span class=" flex-grow-1">
-        <router-link :to="{name: 'portEdit', params: { portId: port.id }}">
+        <span class="text-dark">
           {{ port.title }}
-        </router-link>
+        </span>
         <span class="text-truncate text-secondary">
           {{ port.description }}
         </span>
       </span>
-      <strong class="mr-1 text-dark">
+      <span class="mr-1 font-weight-bold text-dark" title="Visited">
         {{ port.visited }}
-      </strong>
-      <button class="btn btn-sm text-danger" @click="deletePort">
+      </span>
+      <button class="btn btn-sm text-danger mr-1" @click="$proxy.dispatch('deletePort', this.port)">
         <i class="fas fa-trash"></i>
       </button>
+      <router-link class="btn btn-sm text-dark" :to="{name: 'portSettings', params: { portId }}">
+        <i class="fas fa-ellipsis-v"></i>
+      </router-link>
     </div>
   </div>
 </template>
@@ -22,17 +25,15 @@
 export default {
   name: 'PortOverviewItem',
   props: {
-    port: {
-      type: Object,
+    portId: {
+      type: String,
       required: true,
     }
   },
-  methods: {
-    deletePort() {
-      if (confirm("Are you sure?")) {
-        this.$store.dispatch("deleteInstance", this.port);
-      }
-    },
+  computed: {
+    port() {
+      return this.$proxy.getters.getPortById(this.portId)
+    }
   }
 }
 </script>

@@ -1,4 +1,4 @@
-import {difference} from "../common";
+import {difference, fitWidget} from "../common";
 import Vuex from "vuex";
 import Vue from "vue";
 import api from "./api";
@@ -17,21 +17,6 @@ function determineSource(instance) {
         default:
             return "widgets";
     }
-}
-
-function fitWidget(widget, container) {
-    if (widget.x + widget.w >= container.w) {
-        let x = container.w - widget.w;
-        widget.x = x < 0 ? 0 : x;
-    }
-    if (widget.y + widget.h >= container.h) {
-        let y = container.h - widget.h;
-        widget.y = y < 0 ? 0 : y;
-    }
-    if (widget.h >= container.h) {
-        widget.h = container.h;
-    }
-    return widget;
 }
 
 function getInstanceByUid(uid) {
@@ -103,32 +88,6 @@ const store = new Vuex.Store({
             await api.delete(instance.type, instance.id, instance.uid); // Perform delete
             context.commit("deleteInstance", instance); // Delete local copy
         },
-        async updateOrAddInstance(context, instance) {
-            let local = getInstanceByUid(instance.uid) || {};
-            let update = difference(local, instance);
-            if (Object.keys(update).length) {
-                context.commit("updateOrAddInstance", instance);
-                instance = await um.proposeUpdate(update, instance);
-            }
-            return instance;
-        },
-        async copyWidget(context, widget) {
-            widget = {
-                ...widget,
-                x: widget.x + context.state.app.grid,
-                y: widget.y + context.state.app.grid,
-            };
-            for (let container of context.state.containers) {
-                if (widget.container === container.id) {
-                    widget = fitWidget(widget, container);
-                    break;
-                }
-            }
-            widget = await api.create(widget.type, widget);
-            context.commit("updateOrAddInstance", widget);
-            return widget;
-        },
-
         async recalculateWidgets(context, container) {
             let update = [];
             for (let widget of context.state.widgets) {
@@ -138,6 +97,15 @@ const store = new Vuex.Store({
                 }
             }
             await Promise.all(update);
+        },
+        async updateOrAddInstance(context, instance) {
+            let local = getInstanceByUid(instance.uid) || {};
+            let update = difference(local, instance);
+            if (Object.keys(update).length) {
+                context.commit("updateOrAddInstance", instance);
+                instance = await um.proposeUpdate(update, instance);
+            }
+            return instance;
         },
         async uploadSource(context, {data, name, instance}) {
             return await api.upload(instance.source.id, name, data);

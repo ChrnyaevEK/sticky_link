@@ -4,62 +4,36 @@ import store from "./store";
 import io from "./io";
 import router from "./router";
 import env from "./env";
+import {fitWidget, getById, getByUid} from "../common";
 
 Vue.use(VueX);
 
-async function nextTick() {
-    await new Promise((resolve) => {
-        Vue.nextTick(resolve);
-    });
-}
-
-function getById(source, id) {
-    return source ? source.filter((i) => i.id === id)[0] : null;
-}
 
 export default new VueX.Store({
     strict: false,
     state: {
-        port: null,
-        wall: null,
-        container: null,
-        widget: null,
         targetInstance: null,  // Options
     },
     mutations: {
-        setWallById(state, id) {
-            state.wall = getById(store.state.walls, id);
-        },
-        setContainerById(state, id) {
-            state.container = getById(store.state.containers, id);
-        },
-        setPortById(state, id) {
-            state.port = getById(store.state.ports, id);
-        },
-        setWidgetById(state, id) {
-            state.widget = getById(store.state.widgets, id);
-        },
         setTargetInstance(state, instance) {
-            state.targetInstance = instance;
+            state.targetInstance = instance ? Object.assign({}, instance) : instance;
+        },
+    },
+    getters: {
+        getWallById: () => (id) => {
+            return getById(store.state.walls, id)
+        },
+        getPortById: () => (id) => {
+            return getById(store.state.ports, id)
+        },
+        getContainerById: () => (id) => {
+            return getById(store.state.containers, id)
+        },
+        getWidgetByUid: () => (uid) => {
+            return getByUid(store.state.widgets, uid)
         },
     },
     actions: {
-        async setWallById(context, id) {
-            context.commit("setWallById", id);
-            await nextTick();
-        },
-        async setPortById(context, id) {
-            context.commit("setPortById", id);
-            await nextTick();
-        },
-        async setContainerById(context, id) {
-            context.commit("setContainerById", id);
-            await nextTick();
-        },
-        async setWidgetById(context, id) {
-            context.commit("setWidgetById", id);
-            await nextTick();
-        },
         async createPort() {
             await env.dispatch("lockChanges");
             let port = await store.dispatch("createInstance", {
@@ -86,7 +60,7 @@ export default new VueX.Store({
                 params: {wallId: wall.id}
             });
         },
-        async createContainer(context) {
+        async createContainer(context, wall) {
             await env.dispatch("lockChanges");
             let index = 0;
             for (let container of store.state.containers) {
@@ -96,7 +70,7 @@ export default new VueX.Store({
             }
             let container = await store.dispatch("createInstance", {
                 type: "container",
-                wall: context.state.wall.id,
+                wall: wall.id,
                 index,
             });
             await env.dispatch("unlockChanges");
@@ -105,66 +79,67 @@ export default new VueX.Store({
                 type: "success",
             });
         },
-        async createWidget(context, type) {  // handleCreateWidget
+        async createWidget(context, {type, container,}) {  // handleCreateWidget
             await env.dispatch("lockChanges");
             let widget = await store.dispatch("createInstance", {
                 type,
-                container: context.state.container.id,
+                container: container.id,
             });
-            await store.dispatch("recalculateWidgets", context.state.container);
+            await store.dispatch("recalculateWidgets", container);
             await env.dispatch("unlockChanges");
             Vue.notify({
                 text: `Widget ${widget.type} ${widget.title} was created!`,
                 type: "success",
             });
         },
-        async updatePort(context, warningTarget) {
+        async updatePort(context, {port, warningTarget}) {
             io.save(true);
             await context.dispatch('$_update', {
-                instance: context.state.port,
+                instance: port,
                 warningTarget,
             })
             io.save(false);
 
         },
-        async updateWall(context, warningTarget) {
+        async updateWall(context, {wall, warningTarget}) {
             io.save(true);
             await context.dispatch('$_update', {
-                instance: context.state.wall,
+                instance: wall,
                 warningTarget,
             })
+            await env.dispatch(wall.lock_widgets ? 'lockWidgets' : 'unlockWidgets');
             io.save(false);
         },
-        async updateContainer(context, warningTarget) {
+        async updateContainer(context, {container, warningTarget}) {
             io.save(true);
             await context.dispatch('$_update', {
-                instance: context.state.container,
+                instance: container,
                 warningTarget,
             })
             io.save(false);
 
         },
-        async updateWidget(context, warningTarget) {
+        async updateWidget(context, {widget, warningTarget}) {
             io.save(true);
             await context.dispatch('$_update', {
-                instance: context.state.widget,
+                instance: widget,
                 warningTarget,
             })
             io.save(false);
         },
-        async deletePort(context) {
-            if (context.state.port && confirm("Are you sure?")) {
+        async deletePort(context, port) {
+            if (confirm("Are you sure?")) {
                 await env.dispatch("lockChanges"); // Lock changes to prevent update for deleted instance
-                await this.$store.dispatch("deleteInstance", context.state.port);
+                await store.dispatch("deleteInstance", port);
                 await env.dispatch("closeOptions");
                 await env.dispatch("unlockChanges"); // Unlock changes
             }
         },
-        async deleteWall(context) {
-            if (context.state.wall && confirm("Are you sure?")) {
+        async deleteWall(context, wall) {
+            if (confirm("Are you sure?")) {
                 await env.dispatch("lockChanges"); // Lock changes to prevent update for deleted instance
-                let id = context.state.wall.id
-                await this.$store.dispatch("deleteInstance", context.state.wall);
+                let id = wall.id
+                await store.dispatch("deleteInstance", wall);
                 await env.dispatch("closeOptions");
                 if (router.currentRoute.params.wallId === id) {
                     await router.push({name: "home"});
@@ -172,25 +147,42 @@ export default new VueX.Store({
                 await env.dispatch("unlockChanges"); // Unlock changes
             }
         },
-        async deleteContainer(context) {
-            if (context.state.container && confirm("Are you sure?")) {
+        async deleteContainer(context, container) {
+            if (confirm("Are you sure?")) {
                 await env.dispatch("lockChanges"); // Lock changes to prevent update for deleted instance
-                await this.$store.dispatch("deleteInstance", context.state.container);
+                await store.dispatch("deleteInstance", container);
                 await env.dispatch("closeOptions");
                 await env.dispatch("unlockChanges"); // Unlock changes
             }
         },
-        async deleteWidget(context) {
-            if (context.state.widget && confirm("Are you sure?")) {
+        async deleteWidget(context, widget) {
+            if (confirm("Are you sure?")) {
                 await env.dispatch("lockChanges"); // Lock changes to prevent update for deleted instance
-                await this.$store.dispatch("deleteInstance", context.state.widget);
+                await store.dispatch("deleteInstance", widget);
                 await env.dispatch("closeOptions");
                 await env.dispatch("unlockChanges"); // Unlock changes
             }
+        },
+        async copyWidget(context, widget) {
+            widget = {
+                ...widget,
+                x: widget.x + store.state.app.grid,
+                y: widget.y + store.state.app.grid,
+            };
+            for (let container of store.state.containers) {
+                if (widget.container === container.id) {
+                    widget = fitWidget(widget, container);
+                    break;
+                }
+            }
+            await store.dispatch("createInstance", {
+                type: widget.type,
+                container: widget.container,
+            });
         },
         async $_update(context, {instance, warningTarget}) {
             try {
-                await this.$store.dispatch("updateOrAddInstance", instance);
+                await store.dispatch("updateOrAddInstance", instance);
             } catch (e) {
                 return io.setWarning(e, warningTarget);
             }
@@ -220,17 +212,11 @@ export default new VueX.Store({
         },
         async deleteTargetInstance(context) {
             if (context.state.targetInstance) {
-                switch (context.state.targetInstance) {
-                    case context.state.wall:
-                        await context.dispatch('deleteWall')
-                        break;
-                    case context.state.port:
-                        await context.dispatch('deletePort')
-                        break;
-                    case context.state.container:
+                switch (context.state.targetInstance.type) {
+                    case 'container':
                         await context.dispatch('deleteContainer')
                         break;
-                    case context.state.widget:
+                    default:
                         await context.dispatch('deleteWidget')
                         break;
                 }
@@ -238,18 +224,18 @@ export default new VueX.Store({
         },
         async updateTargetInstance(context, warningTarget) {
             if (context.state.targetInstance) {
-                switch (context.state.targetInstance) {
-                    case context.state.wall:
-                        await context.dispatch('updateWall', warningTarget)
+                switch (context.state.targetInstance.type) {
+                    case 'container':
+                        await context.dispatch('updateContainer', {
+                            conrainer: context.state.targetInstance,
+                            warningTarget
+                        })
                         break;
-                    case context.state.port:
-                        await context.dispatch('updatePort', warningTarget)
-                        break;
-                    case context.state.container:
-                        await context.dispatch('updateContainer', warningTarget)
-                        break;
-                    case context.state.widget:
-                        await context.dispatch('updateWidget', warningTarget)
+                    default:
+                        await context.dispatch('updateWidget', {
+                            widget: context.state.targetInstance,
+                            warningTarget
+                        })
                         break;
                 }
             }

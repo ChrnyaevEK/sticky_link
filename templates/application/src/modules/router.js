@@ -8,8 +8,9 @@ import $ from "jquery";
 
 import WallEditor from "../components/Wall/Editor";
 import WallOverview from "../components/Wall/Overview";
+import WallSettings from "../components/Wall/Settings";
 
-import PortEditor from "../components/Port/Editor";
+import PortSettings from "../components/Port/Settings";
 import PortOverview from "../components/Port/Overview";
 
 
@@ -74,14 +75,19 @@ const router = new VueRouter({
                     },
                 },
                 {
+                    name: "wallSettings",
+                    path: "wall/settings/:wallId",
+                    component: WallSettings,
+                },
+                {
                     name: 'wallOverview',
                     path: 'wall/overview',
                     component: WallOverview,
                 },
                 {
-                    name: 'portEdit',
-                    path: 'port/edit/:portId',
-                    component: PortEditor,
+                    name: 'portSettings',
+                    path: 'port/settings/:portId',
+                    component: PortSettings,
                 },
                 {
                     name: 'portOverview',

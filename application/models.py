@@ -206,9 +206,10 @@ class Port(SyncManager):
     title = models.CharField(max_length=200, blank=True, default='Untitled')
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     visited = models.IntegerField(default=0)
-    authenticated_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL,
+    authenticated_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL, default=None,
                                            related_name='authenticated_wall')
-    anonymous_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL, related_name='anonymous_wall')
+    anonymous_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL, default=None,
+                                       related_name='anonymous_wall')
     redirect_url = models.URLField(null=True, default=None)
 
     def __str__(self):

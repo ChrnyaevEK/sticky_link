@@ -1,5 +1,5 @@
 <template>
-  <widget-options :instance="instance">
+  <widget-options :instance="instance" @push="$emit('push')">
     <div class="form-group">
       <options-item :isHeader="true">
         <span slot="title">Content</span>

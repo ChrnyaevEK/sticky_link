@@ -52,9 +52,11 @@ export default new Vue({
             }
         },
         setWarning(response, target) {
+            if (!target) return
+            target = $(target)
             this.unsetWarning(target);
             for (var [field, error] of Object.entries(response.responseJSON)) {
-                error = $(`<p class="${this.warning.class} col-12 text-danger">${error[0]}</p>`);
+                error = $(`<div class="${this.warning.class} text-danger p-1"><small>${error[0]}</small></div>`);
                 target.find(`[for*="${field}"]`)
                     .addClass(`text-danger ${this.warning.class}`)
                     .closest("div")
@@ -62,8 +64,10 @@ export default new Vue({
             }
         },
         unsetWarning(target) {
-            target.find(`.${this.warning.class}`).removeClass("text-danger").removeClass(this.warning.class);
+            if (!target) return
+            target = $(target)
             target.find(`p.${this.warning.class}`).remove();
+            target.find(`.${this.warning.class}`).removeClass("text-danger").removeClass(this.warning.class);
         },
     },
 });

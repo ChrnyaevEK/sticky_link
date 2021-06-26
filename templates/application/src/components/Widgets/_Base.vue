@@ -1,160 +1,137 @@
 <template>
-    <vue-draggable-resizable
-        :draggable="!$env.state.changesLock && $env.state.editMode"
-        :resizable="!$env.state.changesLock && $env.state.editMode"
-        @resizestop="onResizeStop"
-        @dragstop="onDrag"
-        @activated="onActivated"
-        class="widget"
-        :class="[
-            widget.border ? 'widget-border' : 'no-border',
-            $env.state.targetInstance &&
-            $env.state.targetInstance.id == widget.id &&
-            $env.state.targetInstance.type == widget.type
-                ? 'shadow'
-                : '',
-        ]"
-        :style="style"
-        :parent="true"
-        :w="widget.w"
-        :h="widget.h"
-        :y="widget.y"
-        :x="widget.x"
-        :z="widget.z"
-        :minHeight="50"
-        :minWidth="100"
-        :grid="[$store.state.app.grid, $store.state.app.grid]"
-        ref="base"
-    >
-        <div class="quick-access widget-quick-access hidden" v-if="$env.state.editMode">
-            <button
-                v-if="widget.sync_id || widget.is_referenced"
-                :title="
-                    widget.sync_id
-                        ? `This widget is synchronized with ${widget.sync_id}`
-                        : 'This widget is referenced by at least one widget'
+  <vue-draggable-resizable
+      :draggable="!$env.state.changesLock && $env.state.editMode"
+      :resizable="!$env.state.changesLock && $env.state.editMode"
+      @resizestop="resizeStop"
+      @dragstop="drag"
+      @activated="activated"
+      class="widget"
+      :class="{ 'widget-border': widget.border,  'no-border': !widget.border }"
+      :style="style"
+      :parent="true"
+      :w="widget.w"
+      :h="widget.h"
+      :y="widget.y"
+      :x="widget.x"
+      :z="widget.z"
+      :minHeight="50"
+      :minWidth="100"
+      :grid="[$store.state.app.grid, $store.state.app.grid]"
+      ref="base"
+  >
+    <div class="bg-white quick-access widget-quick-access" v-if="$env.state.editMode">
+      <button
+          v-if="widget.sync_id || widget.is_referenced"
+          :title="
+                widget.sync_id
+                    ? `This widget is synchronized with ${widget.sync_id}`
+                    : 'This widget is referenced by at least one widget'
                 "
-                :disabled="$env.state.changesLock || !widget.sync_id"
-                class="btn btn-sm btn-light border"
-                @click="copySyncWidget"
-            >
-                <i class="fas fa-link"></i>
-            </button>
-            <button :disabled="$env.state.changesLock" class="btn btn-sm btn-danger" @click="deleteWidget">
-                <i class="fas fa-trash"></i>
-            </button>
-            <button
-                :disabled="$env.state.changesLock"
-                class="btn btn-sm btn-light border"
-                @click="$store.dispatch('copyWidget', widget)"
-            >
-                <i class="fas fa-copy"></i>
-            </button>
-            <button class="btn btn-sm btn-light border d-none d-md-block" @click.stop="onOpenOptions">
-                <i class="fas fa-ellipsis-v"></i>
-            </button>
-        </div>
-        <slot></slot>
-    </vue-draggable-resizable>
+          :disabled="$env.state.changesLock || !widget.sync_id"
+          class="btn btn-sm btn-outline-secondary"
+          @click="copySyncWidget"
+      >
+        <i class="fas fa-link"></i>
+      </button>
+      <button :disabled="$env.state.changesLock" class="btn btn-sm btn-outline-danger"
+              @click="$proxy.dispatch('deleteWidget')">
+        <i class="fas fa-trash"></i>
+      </button>
+      <button
+          :disabled="$env.state.changesLock"
+          class="btn btn-sm btn-outline-secondary"
+          @click="$proxy.dispatch('copyWidget')"
+      >
+        <i class="fas fa-copy"></i>
+      </button>
+      <button class="btn btn-sm  btn-outline-secondary d-none d-md-block" @click.stop="openOptions">
+        <i class="fas fa-ellipsis-v"></i>
+      </button>
+    </div>
+    <slot></slot>
+  </vue-draggable-resizable>
 </template>
 
 <script>
-    import VueDraggableResizable from "vue-draggable-resizable";
-    import "vue-draggable-resizable/dist/VueDraggableResizable.css";
-    import $ from "jquery";
-    import { copyToClipboard } from "../../common";
+import VueDraggableResizable from "vue-draggable-resizable";
+import "vue-draggable-resizable/dist/VueDraggableResizable.css";
+import {copyToClipboard} from "../../common";
 
-    export default {
-        name: "WidgetBaseResizable",
-        props: {
-            widget: {
-                type: Object,
-                required: true,
-            },
-        },
-        beforeUpdate() {
-            this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
-        },
-        methods: {
-            onResizeStop(x, y, w, h) {
-                this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
-                if (!this.$env.state.changesLock) {
-                    this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { w, h }));
-                }
-            },
-            onDrag(x, y) {
-                this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
-                if (!this.$env.state.changesLock) {
-                    this.$store.dispatch("updateOrAddInstance", Object.assign({}, this.widget, { x, y }));
-                }
-            },
-            deleteWidget() {
-                if (confirm("Are you sure?")) {
-                    this.$env.dispatch("closeOptions");
-                    this.$store.dispatch("deleteInstance", this.widget);
-                }
-            },
-            onActivated() {
-                this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
-                if (this.$env.state.editMode) {
-                    window.dispatchEvent(new Event("resize"));
-                    $(".widget-quick-access").addClass("hidden");
-                    $(this.$el)
-                        .find(".widget-quick-access")
-                        .removeClass("hidden");
-                }
-            },
-            onOpenOptions() {
-                if (this.$env.state.editMode) {
-                    this.$env.dispatch("openOptions", this.widget);
-                }
-            },
-            copySyncWidget() {
-                copyToClipboard(this.widget.sync_id);
-                this.$notify({ text: "Copied to clipboard!", type: "success" });
-            },
-        },
-        components: {
-            VueDraggableResizable,
-        },
-        computed: {
-            style() {
-                return `
-                    background-color: ${this.widget.background_color};
-                    color: ${this.widget.text_color};
-                    font-size:${this.widget.font_size}px;
-                    font-weight:${this.widget.font_weight};
-                    touch-action: ${this.$env.state.editMode ? "none" : "initial"};
-                `;
-            },
-            title() {
-                return this.widget.help || "";
-            },
-        },
-    };
+export default {
+  name: "WidgetBaseResizable",
+  props: {
+    widget: {
+      type: Object,
+      required: true,
+    },
+  },
+  beforeUpdate() {
+    this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
+  },
+  methods: {
+    resizeStop(x, y, w, h) {
+      this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
+      this.widget.h = h
+      this.widget.w = w
+      this.$proxy.dispatch("updateWidget", {
+        widget: this.widget
+      });
+    },
+    drag(x, y) {
+      this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
+      this.widget.x = x
+      this.widget.y = y
+      this.$proxy.dispatch("updateWidget", {
+        widget: this.widget
+      });
+    },
+    activated() {
+      this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
+      window.dispatchEvent(new Event("resize"))
+    },
+    openOptions() {
+      if (this.$env.state.editMode) {
+        this.$env.dispatch("openOptions", this.widget);
+      }
+    },
+    copySyncWidget() {
+      copyToClipboard(this.widget.sync_id);
+      this.$notify({text: "Copied to clipboard!", type: "success"});
+    },
+  },
+  components: {
+    VueDraggableResizable,
+  },
+  computed: {
+    style() {
+      return `
+        background-color: ${this.widget.background_color};
+        color: ${this.widget.text_color};
+        font-size:${this.widget.font_size}px;
+        font-weight:${this.widget.font_weight};
+        touch-action: ${this.$env.state.editMode ? "none" : "initial"};
+      `;
+    },
+  },
+};
 </script>
 
 <style scoped>
-    .control-area {
-        width: 100%;
-        height: 100%;
-        position: absolute;
-    }
-    .widget-quick-access {
-        right: 0;
-        top: 0;
-        position: absolute;
-        display: flex;
-        justify-content: flex-end;
-        padding: 2px 2px 0 2px;
-        z-index: 2;
-    }
-    .widget-quick-access > * {
-        margin: 0 0 0 2px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 2rem;
-        width: 2rem;
-    }
+.widget-quick-access {
+  right: 0;
+  top: 0;
+  position: absolute;
+  display: flex;
+  justify-content: flex-end;
+  z-index: 2;
+}
+
+.widget-quick-access > * {
+  margin: 0 0 0 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 2rem;
+  width: 2rem;
+}
 </style>

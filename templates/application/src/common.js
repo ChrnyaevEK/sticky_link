@@ -56,6 +56,28 @@ export function timeFormatted(utc) {
     });
 }
 
+export function fitWidget(widget, container) {
+    if (widget.x + widget.w >= container.w) {
+        let x = container.w - widget.w;
+        widget.x = x < 0 ? 0 : x;
+    }
+    if (widget.y + widget.h >= container.h) {
+        let y = container.h - widget.h;
+        widget.y = y < 0 ? 0 : y;
+    }
+    if (widget.h >= container.h) {
+        widget.h = container.h;
+    }
+    return widget;
+}
+
+export function getById(source, id) {
+    return source ? Object.assign({}, source.filter((i) => i.id === id)[0]) : null;
+}
+export function getByUid(source, uid) {
+    return source ? Object.assign({}, source.filter((i) => i.uid === uid)[0]) : null;
+}
+
 export const types = {
     Wall: "wall",
     Container: "container",
@@ -81,6 +103,9 @@ export default {
     types,
     difference,
     sleep,
+    getByUid,
+    getById,
+    fitWidget,
     timeFormatted,
     downloadImage,
 };

@@ -21,21 +21,18 @@
 </template>
 
 <script>
-import CounterOptions from "Options/Counter";
-import SimpleListOptions from "Options/SimpleList";
-import SimpleTextOptions from "Options/SimpleText";
-import UrlOptions from "Options/Url";
-import DocumentOptions from "Options/Document";
-import WallOptions from "./Options/Wall";
+import CounterOptions from "./Options/Counter";
+import SimpleListOptions from "./Options/SimpleList";
+import SimpleTextOptions from "./Options/SimpleText";
+import UrlOptions from "./Options/Url";
+import DocumentOptions from "./Options/Document";
 import ContainerOptions from "./Options/Container";
 
 export default {
   name: "Options",
   computed: {
     component() {
-      switch (this.instance.type) {
-        case 'wall':
-          return WallOptions;
+      switch (this.$proxy.state.targetInstance.type) {
         case 'container':
           return ContainerOptions;
         case 'counter':
@@ -54,7 +51,6 @@ export default {
     }
   },
   components: {
-    WallOptions,
     ContainerOptions,
     CounterOptions,
     SimpleListOptions,
