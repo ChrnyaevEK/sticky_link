@@ -4,14 +4,14 @@
       <a class="navbar-brand" :href="homeUrl">{{ $store.state.app.title }}</a>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav">
-          <li class="nav-item">
+          <li class="nav-item" v-if="$store.state.user.is_authenticated">
             <router-link
                 class="nav-link"
                 :to="{ name: 'wallOverview'}"
             > Walls
             </router-link>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" v-if="$store.state.user.is_authenticated">
             <router-link
                 class="nav-link"
                 :to="{ name: 'portOverview'}"
@@ -24,9 +24,6 @@
                 :to="{ name: 'profile'}"
             > Account
             </router-link>
-          </li>
-          <li class="nav-item" v-else>
-            <a :href="loginUrl">Login</a>
           </li>
         </ul>
       </div>

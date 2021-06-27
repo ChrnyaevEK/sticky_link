@@ -172,7 +172,7 @@ if env.DEBUG:
         return User.objects.get(username="dev_user1")  # Choose any dev user
 
 
-    REST_FRAMEWORK['UNAUTHENTICATED_USER'] = get_user
+    # REST_FRAMEWORK['UNAUTHENTICATED_USER'] = get_user
 
 # Site settings
 SITE_ID = 2

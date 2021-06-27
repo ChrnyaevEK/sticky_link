@@ -238,10 +238,11 @@ class Port(SyncManager):
 
     @classmethod
     def pq(cls, user):
-        q = Q()
         if not user.is_anonymous:
             q = Q(owner=user)
-        return cls.objects.filter(q)
+            return cls.objects.filter(q)
+        else:
+            return cls.objects.none()
 
 
 class Source(Base):

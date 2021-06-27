@@ -13,6 +13,7 @@ import WallSettings from "../components/Wall/Settings";
 
 import PortSettings from "../components/Port/Settings";
 import PortOverview from "../components/Port/Overview";
+import NotAuthenticated from "../components/NotAuthenticated";
 
 async function guardEditable(to, from, next, key, route, source) {
     if (to.params[key] !== undefined) {
@@ -35,10 +36,9 @@ async function guardEditable(to, from, next, key, route, source) {
             }
         }
     } else {
-        if (!store.state.user.is_authenticated) {
-            location.href = process.env.VUE_APP_LOGIN;
-            return;
-        }
+        return next({
+            name: "notAuthenticated",
+        })
     }
     await env.dispatch("setEditMode");
     next();
@@ -58,6 +58,15 @@ async function guardViewable(to, from, next) {
     }
     await env.dispatch("setViewMode");
     next();
+}
+
+function guardAuthenticated(to, from, next) {
+    if (!store.state.user.is_authnticated) {
+        return next({
+            name: "notAuthenticated",
+        })
+    }
+    return next()
 }
 
 
@@ -100,6 +109,9 @@ const router = new VueRouter({
                     name: 'wallOverview',
                     path: 'wall/overview',
                     component: WallOverview,
+                    beforeEnter(to, from, next) {
+                        guardAuthenticated(to, from, next)
+                    }
                 },
                 {
                     name: 'portSettings',
@@ -113,6 +125,9 @@ const router = new VueRouter({
                     name: 'portOverview',
                     path: 'port/overview',
                     component: PortOverview,
+                    beforeEnter(to, from, next) {
+                        guardAuthenticated(to, from, next)
+                    }
                 },
                 {
                     name: "error",
@@ -120,9 +135,17 @@ const router = new VueRouter({
                     component: Error,
                 },
                 {
+                    name: "notAuthenticated",
+                    path: "/continue",
+                    component: NotAuthenticated,
+                },
+                {
                     name: "profile",
                     path: "/profile",
                     component: Profile,
+                    beforeEnter(to, from, next) {
+                        guardAuthenticated(to, from, next)
+                    }
                 },
                 {
                     path: "*",
