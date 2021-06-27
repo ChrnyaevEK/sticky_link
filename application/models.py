@@ -116,9 +116,9 @@ class SyncManager(Base):
                     instance.save()
 
     @classmethod
-    def sync_id_is_valid(cls, user, sync_id=None):  # Empty sync_id is valid
+    def has_any_sync_widget(cls, user, sync_id=None):  # Empty sync_id is valid
         # Validate sync_id. Find any object that belong to user and has id equal to requested sync_id
-        return not sync_id or cls.pq(user).filter(pk=sync_id, container__wall__owner=user).exists()
+        return not sync_id or cls.pq(user).filter(pk=sync_id).exists()
 
 
 class Wall(SyncManager):
@@ -245,16 +245,11 @@ class Source(Base):
         except ValueError:
             return None
 
-    def delete(self, *args, **kwargs):
-        self.delete_file()
-        super().delete(*args, **kwargs)
-
     def delete_file(self):
         try:
             os.remove(self.file.path)
         except (ValueError, TypeError, OSError):
             pass
-        self.file = None
         self.save()
 
     def __str__(self):
@@ -378,6 +373,15 @@ class Document(Widget):
     sync_id = models.ForeignKey('Document', blank=True, null=True, on_delete=models.SET_NULL)
 
     source = models.ForeignKey(Source, blank=True, on_delete=models.SET_NULL, null=True, related_name='parent')
+
+    def delete(self, *args, **kwargs):
+        if not self.has_any_sync_widget:
+            self.source.delete_file()
+        try:
+            self.source.delete()
+        except AttributeError:
+            pass  # Source has been deleted
+        super().delete(*args, **kwargs)
 
 
 class Meta:

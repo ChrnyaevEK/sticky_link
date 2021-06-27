@@ -35,7 +35,7 @@ import WidgetOptions from "./_WidgetOptions";
 import $ from "jquery";
 
 export default {
-  name: "FileOptions",
+  name: "DocumentOptions",
   components: {
     OptionsItem,
     WidgetOptions,
@@ -60,18 +60,19 @@ export default {
     };
   },
   methods: {
-    upload() {
+    async upload() {
       let file = $("#" + this._("content")).get(0).files[0];
       if (file !== undefined) {
         if (file.size <= this.$store.state.meta.file_size_max) {
           this.error = null;
           var data = new FormData(); //Create form data objects to facilitate file transfer to the back end
           data.append("file", file); //To add (encapsulate) a file object to a formdata object
-          return this.$store.dispatch("uploadSource", {
+          await this.$store.dispatch("uploadSource", {
             instance: this.instance,
             name: file.name,
             data,
           });
+          return
         }
         return (this.error = "File is larger than 10Mb");
       }

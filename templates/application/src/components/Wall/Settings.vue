@@ -57,7 +57,7 @@
       <small class="form-text">Lock widgets to prevent miss-click in wall editor</small>
     </div>
     <div class="form-group d-flex justify-content-end">
-      <router-link class="btn btn-outline-danger mr-1" :to="{name: 'wallOverview'}">Close</router-link>
+      <button class="btn btn-outline-danger mr-1" @click="$router.go(-1)">Close</button>
       <button class="btn btn-outline-success" @click.stop="$proxy.dispatch('updateWall', {wall, warningTarget: $el})">
         Save
       </button>

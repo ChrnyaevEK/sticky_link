@@ -1,6 +1,6 @@
 <template>
   <div class="container py-3">
-    <h4> Your profile at Sticky Link </h4>
+    <h4> Your account at Sticky Link </h4>
     <div class="form-group">
       <div class="row">
         <div class="col-12 col-sm-3">

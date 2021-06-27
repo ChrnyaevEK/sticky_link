@@ -3,13 +3,13 @@
     <div class="text-right">
       <a class="btn" @click="$env.dispatch('closeOptions')"><i class="fas fa-times"></i></a>
     </div>
-    <component :is="component" :instance="$proxy.state.targetInstance"
-               @push="$proxy.dispatch('updateTargetInstance', $el)"></component>
+    <component :is="component" :instance="instance"
+               @push="$proxy.dispatch('updateTargetInstance', {instance, warningTarget: $el})"></component>
     <div class="form-group">
       <button
           class="btn btn-sm btn-outline-danger w-100"
           :disabled="$env.state.changesLock"
-          @click.stop="$proxy.dispatch('deleteTargetInstance')"
+          @click.stop="$proxy.dispatch('deleteTargetInstance', instance)"
       >
         Delete
       </button>
@@ -27,12 +27,13 @@ import SimpleTextOptions from "./Options/SimpleText";
 import UrlOptions from "./Options/Url";
 import DocumentOptions from "./Options/Document";
 import ContainerOptions from "./Options/Container";
+import WidgetsOptions from "./Options/_WidgetOptions";
 
 export default {
   name: "Options",
   computed: {
     component() {
-      switch (this.$proxy.state.targetInstance.type) {
+      switch (this.instance.type) {
         case 'container':
           return ContainerOptions;
         case 'counter':
@@ -46,9 +47,12 @@ export default {
         case 'document':
           return DocumentOptions
         default:
-          throw 'Options not found'
+          return WidgetsOptions
       }
-    }
+    },
+    instance() {
+      return this.$store.getters.getInstanceByUid(this.$proxy.state.targetInstanceUid)
+    },
   },
   components: {
     ContainerOptions,
@@ -57,6 +61,7 @@ export default {
     SimpleTextOptions,
     UrlOptions,
     DocumentOptions,
+    WidgetsOptions,
   },
 };
 </script>

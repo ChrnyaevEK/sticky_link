@@ -117,9 +117,8 @@ const store = new Vuex.Store({
             let update = difference(local, instance);
             if (Object.keys(update).length) {
                 context.commit("updateOrAddInstance", instance);
-                instance = await um.proposeUpdate(update, instance);
+                await um.proposeUpdate(update, instance);
             }
-            return instance;
         },
         async uploadSource(context, {data, name, instance}) {
             return await api.upload(instance.source.id, name, data);

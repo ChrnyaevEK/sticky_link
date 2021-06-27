@@ -27,8 +27,8 @@
           <i class="fa fa-chevron-left"></i>
         </button>
         <span class="text-truncate text-wrap text-break cursor-default">
-                    {{ widget.value }}
-                </span>
+          {{ widget.value }}
+        </span>
         <button
             v-if="widget.vertical"
             key="fa-chevron-down"

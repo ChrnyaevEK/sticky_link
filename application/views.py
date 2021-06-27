@@ -205,7 +205,7 @@ class SourceViewSet(ProtectedModelViewSet):
 class SyncViewSet(ProtectedModelViewSet):
 
     def update(self, request, pk=None, *args, **kwargs):
-        if not self.model_class.sync_id_is_valid(request.user, request.data.get('sync_id')):
+        if not self.model_class.has_any_sync_widget(request.user, request.data.get('sync_id')):
             return JsonResponse({
                 'sync_id': ['Make sure the sync ID belong to user and widgets have the same type.']
             }, status=400)
@@ -255,8 +255,3 @@ class DocumentViewSet(SyncViewSet):
         document.source = source
         document.save()
         return response
-
-    def destroy(self, request, *args, **kwargs):
-        document = self.get_queryset().get(id=kwargs['pk'])
-        document.source.delete()
-        return super().destroy(request, *args, **kwargs)

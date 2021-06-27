@@ -4,7 +4,7 @@ import store from "./store";
 import io from "./io";
 import router from "./router";
 import env from "./env";
-import {fitWidget, getReactiveCopy} from "../common";
+import {fitWidget} from "../common";
 
 Vue.use(VueX);
 
@@ -12,14 +12,14 @@ Vue.use(VueX);
 export default new VueX.Store({
     strict: false,
     state: {
-        targetInstance: null,  // Options
+        targetInstanceUid: null,  // Options
     },
     mutations: {
-        setTargetInstance(state, instance) {
-            state.targetInstance = getReactiveCopy(instance);
+        setTargetInstance(state, uid) {
+            state.targetInstanceUid = uid;
         },
         unsetTargetInstance(state) {
-            state.targetInstance = null;
+            state.targetInstanceUid = null;
         },
     },
     actions: {
@@ -167,10 +167,7 @@ export default new VueX.Store({
                     break;
                 }
             }
-            await store.dispatch("createInstance", {
-                type: widget.type,
-                container: widget.container,
-            });
+            await store.dispatch("createInstance", widget);
         },
         async $_update(context, {instance, warningTarget}) {
             try {
@@ -199,36 +196,36 @@ export default new VueX.Store({
             });
             io.save(false);
         },
-        setTargetInstance(context, instance) {
-            context.commit('setTargetInstance', instance)
+        setTargetInstanceUid(context, uid) {
+            context.commit('setTargetInstance', uid)
         },
-        unsetTargetInstance(context) {
+        unsetTargetInstanceUid(context) {
             context.commit('unsetTargetInstance')
         },
-        async deleteTargetInstance(context) {
-            if (context.state.targetInstance) {
-                switch (context.state.targetInstance.type) {
+        async deleteTargetInstance(context, instance) {
+            if (instance) {
+                switch (instance.type) {
                     case 'container':
-                        await context.dispatch('deleteContainer')
+                        await context.dispatch('deleteContainer', instance)
                         break;
                     default:
-                        await context.dispatch('deleteWidget')
+                        await context.dispatch('deleteWidget', instance)
                         break;
                 }
             }
         },
-        async updateTargetInstance(context, warningTarget) {
-            if (context.state.targetInstance) {
-                switch (context.state.targetInstance.type) {
+        async updateTargetInstance(context, {instance, warningTarget}) {
+            if (instance) {
+                switch (instance.type) {
                     case 'container':
                         await context.dispatch('updateContainer', {
-                            conrainer: context.state.targetInstance,
+                            container: instance,
                             warningTarget
                         })
                         break;
                     default:
                         await context.dispatch('updateWidget', {
-                            widget: context.state.targetInstance,
+                            widget: instance,
                             warningTarget
                         })
                         break;

@@ -5,6 +5,7 @@
       @resizestop="resizeStop"
       @dragstop="drag"
       @activated="activated"
+      @deactivated="deactivated"
       class="widget"
       :class="{ 'widget-border': widget.border,  'no-border': !widget.border }"
       :style="style"
@@ -19,7 +20,7 @@
       :grid="[$store.state.app.grid, $store.state.app.grid]"
       ref="base"
   >
-    <div class="bg-white quick-access widget-quick-access" v-if="$env.state.editMode">
+    <div class="bg-white quick-access widget-quick-access" v-if="$env.state.editMode && active">
       <button
           v-if="widget.sync_id || widget.is_referenced"
           :title="
@@ -34,17 +35,17 @@
         <i class="fas fa-link"></i>
       </button>
       <button :disabled="$env.state.changesLock" class="btn btn-sm btn-outline-danger"
-              @click="$proxy.dispatch('deleteWidget')">
+              @click="$proxy.dispatch('deleteWidget', widget)">
         <i class="fas fa-trash"></i>
       </button>
       <button
           :disabled="$env.state.changesLock"
           class="btn btn-sm btn-outline-secondary"
-          @click="$proxy.dispatch('copyWidget')"
+          @click="$proxy.dispatch('copyWidget', widget)"
       >
         <i class="fas fa-copy"></i>
       </button>
-      <button class="btn btn-sm  btn-outline-secondary d-none d-md-block" @click.stop="openOptions">
+      <button class="btn btn-sm btn-outline-secondary d-none d-md-block" @click.stop="openOptions">
         <i class="fas fa-ellipsis-v"></i>
       </button>
     </div>
@@ -64,6 +65,11 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  data() {
+    return {
+      active: false
+    }
   },
   beforeUpdate() {
     this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
@@ -85,7 +91,11 @@ export default {
         widget: this.widget
       });
     },
+    deactivated(){
+      this.active = false
+    },
     activated() {
+      this.active = true
       this.$refs.base.checkParentSize(); // Solve problem with component disappearing after update
       window.dispatchEvent(new Event("resize"))
     },

@@ -43,6 +43,7 @@
 
 <script>
 import WidgetBaseResizable from "./_Base";
+import {deepCopy} from "../../common";
 
 export default {
   type: "simple_list",
@@ -72,6 +73,7 @@ export default {
           this.widget.items = []
         }
         this.widget.items.push(this.item);
+        this.widget.items = deepCopy(this.widget.items)
         this.item = undefined;
         this.$proxy.dispatch("updateWidget", {
           widget: this.widget
@@ -81,6 +83,7 @@ export default {
     removeItem(i) {
       if (this.widget.items) {
         this.widget.items.splice(i, 1);
+        this.widget.items = deepCopy(this.widget.items)
         this.$proxy.dispatch("updateWidget", {
           widget: this.widget
         });

@@ -66,7 +66,7 @@
       </div>
     </div>
     <div class="row d-flex justify-content-end">
-      <router-link class="btn btn-outline-danger mr-1" :to="{name: 'portOverview'}">Close</router-link>
+      <button class="btn btn-outline-danger mr-1" @click="$router.go(-1)">Close</button>
       <button class="btn btn-outline-success" @click.stop="$proxy.dispatch('updatePort', {port, warningTarget: $el})">
         Save
       </button>

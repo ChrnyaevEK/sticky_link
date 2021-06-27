@@ -47,10 +47,10 @@ export default new VueX.Store({
             context.commit("setWidgetsLock", false);
         },
         async openOptions(context, instance) {
-            await proxy.dispatch("setTargetInstance", instance);
+            await proxy.dispatch("setTargetInstanceUid", instance.uid);
         },
         async closeOptions() {
-            await proxy.dispatch("unsetTargetInstance");
+            await proxy.dispatch("unsetTargetInstanceUid");
         },
     },
 });

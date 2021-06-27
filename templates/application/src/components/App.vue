@@ -22,7 +22,7 @@
             <router-link
                 class="nav-link"
                 :to="{ name: 'profile'}"
-            > Profile
+            > Account
             </router-link>
           </li>
           <li class="nav-item" v-else>

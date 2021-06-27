@@ -33,7 +33,6 @@
             :key="container.id"
             :containerId="container.id"
         >
-
         </container>
         <div v-if="$env.state.editMode" class="d-flex justify-content-end p-2">
           <button
@@ -50,7 +49,7 @@
     <!-- Sidebar -->
     <div
         class="w-25 border-left px-2 overflow-auto d-none d-md-block"
-        v-if="$env.state.editMode && $proxy.state.targetInstance"
+        v-if="$env.state.editMode && $proxy.state.targetInstanceUid"
     >
       <Options></Options>
     </div>
@@ -62,10 +61,13 @@ import Options from "../Utils/Options";
 import Container from '../Widgets/Container'
 
 import env from "../../modules/env";
+import store from "../../modules/store";
 import ws from "../../modules/ws";
 
 async function setupRoutine(to, from, next) {
   await env.dispatch("closeOptions");
+  let wall = store.getters.getWallById(to.params.wallId)
+  await env.dispatch(wall.lock_widgets && env.state.editMode ? "lockWidgets" : 'unlockWidgets');
   ws.open(to.params.wallId);
   next();
 }
@@ -79,11 +81,6 @@ export default {
   computed: {
     wall() {
       return this.$store.getters.getWallById(this.$route.params.wallId)
-    }
-  },
-  async updated() {
-    if (this.$env.editMode) {
-      await this.$env.dispatch(this.wall.lock_widgets ? "lockWidgets" : 'unlockWidgets');
     }
   },
   beforeRouteEnter: setupRoutine,

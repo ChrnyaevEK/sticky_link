@@ -1,6 +1,6 @@
 <template>
   <div
-      class="d-flex flex-column bg-white"
+      class="d-flex flex-column bg-white mb-2"
       :class="{ 'border-top border-bottom': $env.state.editMode }"
   >
     <div class="px-2 d-flex justify-content-between">
@@ -19,8 +19,8 @@
     </div>
     <div class="overflow-auto" style="-webkit-overflow-scrolling: touch;">
       <vue-draggable-resizable
-          @resizing="containerResizing"
-          @activated="containerActivated"
+          @resizing="resizing"
+          @activated="activated"
           :resizable="$env.state.editMode && !$env.state.changesLock"
           :draggable="false"
           :parent="false"
@@ -30,8 +30,7 @@
           :minHeight="100"
           class="position-relative wall-only content-box overflow-hidden"
           :class="{
-                    'border-top border-bottom border-left-0 border-right-0':
-                    $env.state.editMode && !container.grid,
+                    'border-top border-bottom border-left-0 border-right-0': $env.state.editMode && !container.grid,
                     'grid no-border': $env.state.editMode && container.grid,
                     'no-border': !$env.state.editMode,
                   }"
@@ -49,18 +48,15 @@
         </template>
       </vue-draggable-resizable>
     </div>
-    <div class="px-2 py-1 d-flex align-items-center">
-      <div
-          v-if="$env.state.editMode"
-          class="flex-grow-1 d-flex justify-content-end align-items-center"
-      >
+    <div v-if="$env.state.editMode" class="px-2 py-1 d-flex align-items-center">
+      <div class="flex-grow-1 d-flex justify-content-end align-items-center">
         <button
             v-for="type of Object.keys(mapping)"
-            @click.stop="containerActivated(); $proxy.dispatch('createWidget', {type, container});"
+            @click.stop="activated(); $proxy.dispatch('createWidget', {type, container});"
             :key="type"
             :disabled="$env.state.changesLock"
             :title="'Add new widget, ' + mapping[type]"
-            class="mr-1 btn btn-sm bg-white border text-nowrap"
+            class="mr-1 btn btn-sm btn-outline-secondary text-nowrap"
         >
           {{ mapping[type] }}
         </button>
@@ -105,14 +101,14 @@ export default {
     }
   },
   methods: {
-    containerResizing(x, y, w, h) {
+    resizing(x, y, w, h) {
       this.container.h = h;
       this.$store.dispatch("recalculateWidgets", this.container);
       this.$proxy.dispatch("updateContainer", {
         container: this.container
       });
     },
-    containerActivated() {
+    activated() {
       window.dispatchEvent(new Event("resize"));
     },
     getComponent(widget) {
