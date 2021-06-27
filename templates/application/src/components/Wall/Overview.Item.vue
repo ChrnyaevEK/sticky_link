@@ -1,17 +1,17 @@
 <template>
-  <div class="btn-outline-light my-1 p-1">
-    <div class="d-flex align-items-center">
-      <div class="d-flex flex-grow-1 text-truncate">
-        <strong class="text-dark mr-1 d-none d-sm-block">
-          {{ wall.allow_anonymous_view ? 'Public' : 'Private' }}
-        </strong>
-        <div class="mr-1" :class="wall.title ? 'text-dark' : 'text-muted'">
-          {{ wall.title || 'No title' }}
-        </div>
-        <div v-show="wall.description" class="text-secondary mr-1">
-          {{ wall.description }}
-        </div>
+  <div class="btn-outline-light my-1 p-1 row no-gutters">
+    <div class="col-12 col-md-8 d-md-flex align-items-center">
+      <div class="w-25 text-dark font-weight-bold d-none d-sm-block mr-1">
+        {{ wall.allow_anonymous_view ? 'Public' : 'Private' }}
       </div>
+      <div class="w-25 text-truncate mr-1" :class="wall.title ? 'text-dark' : 'text-muted'">
+        {{ wall.title || 'No title' }}
+      </div>
+      <div class="w-50 text-truncate text-secondary">
+        {{ wall.description }}
+      </div>
+    </div>
+    <div class="col-12 col-md-4 d-flex justify-content-end align-items-center">
       <router-link class="mr-2" :to="{name: 'wallEdit', params: { wallId: wall.id }}">
         Edit
       </router-link>
@@ -25,6 +25,7 @@
         <i class="fas fa-ellipsis-v"></i>
       </router-link>
     </div>
+
   </div>
 </template>
 <script>

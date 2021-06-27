@@ -1,15 +1,16 @@
 <template>
-  <div class="btn-outline-light my-1 p-1">
-    <div class="d-flex align-items-center">
-      <div class="d-flex flex-grow-1 text-truncate">
-        <div class="text-dark mr-1" :class="{'text-muted': !port.title}">
-          {{ port.title || 'No title' }}
-        </div>
-        <div class="text-secondary">
-          {{ port.description }}
-        </div>
+  <div class="btn-outline-light my-1 p-1 row no-gutters">
+
+    <div class="col-12 col-md-8 d-md-flex align-items-center">
+      <div class="w-25 text-dark text-truncate mr-1" :class="{'text-muted': !port.title}">
+        {{ port.title || 'No title' }}
       </div>
-      <span class="mr-1 font-weight-bold text-dark" title="Visited">
+      <div class="w-75 text-secondary text-truncate">
+        {{ port.description }}
+      </div>
+    </div>
+    <div class="col-12 col-md-4 d-flex justify-content-end align-items-center">
+        <span class="mr-1 font-weight-bold text-dark" title="Visited">
         {{ port.visited }}
       </span>
       <button class="btn btn-sm text-danger mr-1" @click="$proxy.dispatch('deletePort', port)">
