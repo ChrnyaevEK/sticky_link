@@ -22,6 +22,7 @@
       </div>
     </div>
     <div class="form-group d-flex justify-content-end">
+      <a class="btn btn-outline-dark mr-1" :href="passwordResetUrl"> Reset password </a>
       <a class="btn btn-outline-dark" :href="logoutUrl"> Logout </a>
     </div>
   </div>
@@ -32,6 +33,8 @@ export default {
   data() {
     return {
       logoutUrl: process.env.VUE_APP_LOGOUT,
+      homeUrl: process.env.VUE_APP_HOME,
+      passwordResetUrl: process.env.VUE_APP_PASSWORD_RESET,
     };
   },
 }
