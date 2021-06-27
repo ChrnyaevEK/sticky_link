@@ -19,6 +19,9 @@ def _to_hash(sting):
 
 
 class Base(models.Model):
+    edit_permission = False
+    view_permission = False
+
     type = None
     id = HashidAutoField(primary_key=True)
 
@@ -61,6 +64,16 @@ class Base(models.Model):
     @classmethod
     def pq(cls, user):  # Protected queryset
         raise NotImplemented(f'Protected query set not implemented for {cls.__name__}')
+
+    def has_edit_permission(self, user):
+        raise NotImplemented(f'Permissions are not defined for {self.__class__.__name__}')
+
+    def has_view_permission(self, user):
+        raise NotImplemented(f'Permissions are not defined for {self.__class__.__name__}')
+
+    def resolve_permission(self, user):
+        self.edit_permission = self.has_edit_permission(user)
+        self.view_permission = self.has_view_permission(user)
 
 
 class SyncManager(Base):
@@ -387,6 +400,6 @@ class Document(Widget):
 class Meta:
     file_size_max = 10485760
 
-    def __init__(self, wall, user):
-        self.edit_permission = wall.has_edit_permission(user)
-        self.view_permission = wall.has_view_permission(user)
+    def __init__(self, instance, user):
+        self.edit_permission = instance.has_edit_permission(user)
+        self.view_permission = instance.has_view_permission(user)

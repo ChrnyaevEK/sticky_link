@@ -14,6 +14,52 @@ import WallSettings from "../components/Wall/Settings";
 import PortSettings from "../components/Port/Settings";
 import PortOverview from "../components/Port/Overview";
 
+async function guardEditable(to, from, next, key, route, source) {
+    if (to.params[key] !== undefined) {
+        if (store.state.meta) {
+            if (
+                !store.state.meta.edit_permission &&
+                store.state.meta.view_permission
+            ) {
+                return next({
+                    name: route,
+                    params: to.params,
+                });
+            }
+        } else {
+            if (!source.filter((i) => i.id === to.params[key])[0]) {
+                return next({
+                    name: route,
+                    params: to.params,
+                });
+            }
+        }
+    } else {
+        if (!store.state.user.is_authenticated) {
+            location.href = process.env.VUE_APP_LOGIN;
+            return;
+        }
+    }
+    await env.dispatch("setEditMode");
+    next();
+}
+
+async function guardViewable(to, from, next) {
+    if (store.state.meta) {
+        if (!store.state.meta.view_permission) {
+            return next({
+                name: "home",
+            });
+        }
+    } else {
+        return next({
+            name: "home",
+        });
+    }
+    await env.dispatch("setViewMode");
+    next();
+}
+
 
 Vue.use(VueRouter);
 const router = new VueRouter({
@@ -31,28 +77,7 @@ const router = new VueRouter({
                     path: "wall/edit/:wallId?",
                     component: WallEditor,
                     async beforeEnter(to, from, next) {
-                        if (to.params.wallId !== undefined) {
-                            if (
-                                store.state.meta &&
-                                !store.state.meta.edit_permission &&
-                                store.state.meta.view_permission
-                            ) {
-                                return next({
-                                    name: "wallView",
-                                    params: {
-                                        wallId: to.params.wallId,
-                                    },
-                                });
-                            }
-                        } else {
-                            if (!store.state.user.is_authenticated) {
-                                location.href = process.env.VUE_APP_LOGIN;
-                                return;
-                            }
-                        }
-
-                        await env.dispatch("setEditMode");
-                        next();
+                        await guardEditable(to, from, next, 'wallId', 'wallView', store.state.walls)
                     },
                 },
                 {
@@ -60,25 +85,16 @@ const router = new VueRouter({
                     path: "wall/view/:wallId",
                     component: WallEditor,
                     async beforeEnter(to, from, next) {
-                        if (store.state.meta) {
-                            if (!store.state.meta.view_permission) {
-                                return next({
-                                    name: "home",
-                                });
-                            }
-                        } else {
-                            return next({
-                                name: "home",
-                            });
-                        }
-                        await env.dispatch("setViewMode");
-                        next();
+                        await guardViewable(to, from, next)
                     },
                 },
                 {
                     name: "wallSettings",
                     path: "wall/settings/:wallId",
                     component: WallSettings,
+                    async beforeEnter(to, from, next) {
+                        await guardEditable(to, from, next, 'wallId', 'home', store.state.walls)
+                    },
                 },
                 {
                     name: 'wallOverview',
@@ -89,6 +105,9 @@ const router = new VueRouter({
                     name: 'portSettings',
                     path: 'port/settings/:portId',
                     component: PortSettings,
+                    async beforeEnter(to, from, next) {
+                        await guardEditable(to, from, next, 'portId', 'home', store.state.ports)
+                    },
                 },
                 {
                     name: 'portOverview',

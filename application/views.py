@@ -52,14 +52,12 @@ class App:
         meta = None
         containers = []
         widgets = []
-        ports = []
 
         try:
             wall = models.Wall.pq(user).get(pk=wall_id)
         except models.Wall.DoesNotExist:
             pass
         else:
-            meta = serializers.Meta(models.Meta(wall, user)).data
             for container in models.Container.objects.filter(wall=wall):
                 for model, serializer in (
                         (models.SimpleText, serializers.SimpleTextSerializer),
@@ -76,6 +74,7 @@ class App:
                 container = models.Container(wall=wall, index=0)
                 container.save()
                 containers = [serializers.ContainerSerializer(container).data]
+            meta = serializers.Meta(models.Meta(wall, request.user)).data
             wall = serializers.WallSerializer(wall).data
 
         ports = serializers.PortSerializer(models.Port.pq(user), many=True).data
@@ -85,11 +84,11 @@ class App:
 
         return JsonResponse({
             'user': serializers.UserSerializer(user).data,
-            'meta': meta,
             'containers': containers,
             'ports': ports,
             'widgets': widgets,
-            'walls': walls
+            'walls': walls,
+            'meta': meta,
         })
 
 
