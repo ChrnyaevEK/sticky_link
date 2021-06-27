@@ -61,7 +61,7 @@ async function guardViewable(to, from, next) {
 }
 
 function guardAuthenticated(to, from, next) {
-    if (!store.state.user.is_authnticated) {
+    if (!store.state.user.is_authenticated) {
         return next({
             name: "notAuthenticated",
         })
