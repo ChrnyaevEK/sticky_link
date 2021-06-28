@@ -61,8 +61,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-if DEBUG:
-    MIDDLEWARE.append('sticky_link.middleware.login_debug_user')
 
 ROOT_URLCONF = 'sticky_link.urls'
 
@@ -168,6 +166,13 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ],
 }
+if env.DEBUG:
+    def get_user():
+        from django.contrib.auth.models import User
+        return User.objects.get(username=env.DEBUG_USER_USERNAME)
+
+
+    REST_FRAMEWORK['UNAUTHENTICATED_USER'] = get_user
 
 # Site settings
 SITE_ID = 2

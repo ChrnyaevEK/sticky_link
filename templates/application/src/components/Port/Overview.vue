@@ -14,7 +14,7 @@
         Create port
       </button>
     </div>
-    <div v-if="$store.state.ports.length" class="my-3 py-2">
+    <div v-if="$store.state.ports.length" class="my-3 py-2 overflow-auto">
       <overview-item
           v-for="port of $store.state.ports"
           :key="port.id"

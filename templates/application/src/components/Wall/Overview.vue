@@ -17,7 +17,7 @@
         Create and open wall
       </button>
     </div>
-    <div v-if="$store.state.walls.length" class="my-3 py-2">
+    <div v-if="$store.state.walls.length" class="my-3 py-2 overflow-auto">
       <overview-item
           v-for="wall of $store.state.walls"
           :key="wall.id"
