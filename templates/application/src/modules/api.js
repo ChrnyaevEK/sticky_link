@@ -23,7 +23,7 @@ export default {
                 ...settings,
                 crossDomain: true,
                 processData: false,
-                url: process.env.VUE_APP_API_HOST + "/" + settings.url + "/",
+                url: process.env.VUE_APP_API_HOST + "/" + settings.url,
                 headers: {
                     "X-CSRFToken": csrfToken,
                     ...(settings.headers || {}),
@@ -53,13 +53,13 @@ export default {
         });
     },
     get(type) {
-        return this.ajaxJSON({ url: type });
+        return this.ajaxJSON({url: type});
     },
     retrieve(type, id) {
-        return this.ajaxJSON({ url: type + "/" + id });
+        return this.ajaxJSON({url: type + "/" + id});
     },
     list(type) {
-        return this.ajaxJSON({ url: type });
+        return this.ajaxJSON({url: type});
     },
     create(type, data) {
         return this.ajaxJSON({

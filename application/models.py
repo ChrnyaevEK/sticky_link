@@ -142,6 +142,7 @@ class Wall(SyncManager):
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     allow_anonymous_view = models.BooleanField(default=False)
+    trusted_users = models.ManyToManyField(User, related_name='foreign_walls')
 
     title = models.CharField(max_length=200, default='Untitled', null=True, blank=True)
     description = models.CharField(max_length=500, blank=True, null=True)

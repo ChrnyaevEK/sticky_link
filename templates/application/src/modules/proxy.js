@@ -231,6 +231,27 @@ export default new VueX.Store({
                         break;
                 }
             }
+        },
+        async fetchTrustedUser(context, username) {
+            return await store.dispatch('fetchTrustedUser', username)
+        },
+        async addTrustedUser(context, {username, wall}) {
+            await env.dispatch("lockChanges");
+            await store.dispatch('addTrustedUser', {username, wall})
+            await env.dispatch("unlockChanges");
+            Vue.notify({
+                text: "User has been added!",
+                type: "success",
+            });
+        },
+        async deleteTrustedUser(context, {username, wall}) {
+            await env.dispatch("lockChanges");
+            await store.dispatch('deleteTrustedUser', {username, wall})
+            await env.dispatch("unlockChanges");
+            Vue.notify({
+                text: "User has been removed!",
+                type: "success",
+            });
         }
     },
 })

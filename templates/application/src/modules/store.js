@@ -84,7 +84,7 @@ const store = new Vuex.Store({
     },
     actions: {
         async fetchState(context, wallId) {
-            let state = wallId === undefined ? await api.get("state") : await api.retrieve("state", wallId);
+            let state = wallId === undefined ? await api.ajaxJSON({url: "state"}) : await api.retrieve("state", wallId);
             context.commit("setState", state);
         },
         async fetchInstance(context, instance) {
@@ -126,6 +126,15 @@ const store = new Vuex.Store({
         async removeSource(context, instance) {
             await api.delete("source", instance.source.id);
         },
+        async fetchTrustedUser(context, username) {
+            return await api.ajaxJSON({url: 'trusted_user?username=' + username})
+        },
+        async addTrustedUser(context, {username, wall}) {
+            return await api.create('trusted_user?username=' + username + '&wall=' + wall)
+        },
+        async deleteTrustedUser(context, {username, wall}) {
+            return await api.ajaxJSON({url: 'trusted_user?username=' + username + '&wall=' + wall, type: 'DELETE'})
+        }
     },
 });
 

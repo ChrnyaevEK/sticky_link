@@ -4,7 +4,7 @@ from application import views
 from django.conf import settings
 from django.conf.urls.static import static
 
-router = routers.DefaultRouter()
+router = routers.DefaultRouter(trailing_slash=False)
 router.register('wall', views.WallViewSet, basename='wall')
 router.register('container', views.ContainerViewSet, basename='container')
 router.register('simple_text', views.SimpleTextViewSet, basename='simple_text')
@@ -14,14 +14,15 @@ router.register('counter', views.CounterViewSet, basename='counter')
 router.register('simple_switch', views.SimpleSwitchViewSet, basename='simple_switch')
 router.register('document', views.DocumentViewSet, basename='document')
 router.register('port', views.PortViewSet, basename='port')
-router.register('user', views.UserViewSet, basename='user')
 router.register('source', views.SourceViewSet, basename='source')
 
 urlpatterns = [
     path('', views.App.enter, name="enter"),
+    # Slash should be here - catch both with slash and without with APPEND_SLASH setting
     path('port/<str:pk>/', views.App.port, name="port"),
-    path('api/state/', views.App.state, name="state"),
-    path('api/state/<str:wall_id>/', views.App.state, name="state"),
+    path('api/state', views.App.state, name="state"),
+    path('api/state/<str:wall_id>', views.App.state, name="state"),
+    path('api/trusted_user', views.App.trusted_user),
     path('api/', include(router.urls), name="api"),
     *static(settings.STATIC_URL, document_root='templates/application/dist/static'),
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),

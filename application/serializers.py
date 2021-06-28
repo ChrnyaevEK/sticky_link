@@ -58,9 +58,10 @@ class UserSerializer(CustomModelSerializer):
     email = serializers.ReadOnlyField()
     is_anonymous = serializers.ReadOnlyField()
     is_authenticated = serializers.ReadOnlyField()
+    id = serializers.ReadOnlyField()
 
     class Meta:
-        fields = ['type', 'username', 'email', 'is_anonymous', 'is_authenticated']
+        fields = ['type', 'username', 'email', 'is_anonymous', 'is_authenticated', 'id']
         model = User
 
 
@@ -106,6 +107,8 @@ class ContainerSerializer(CustomModelSerializer):
 
 
 class WallSerializer(CustomModelSerializer):
+    trusted_users = UserSerializer(many=True, read_only=True)
+
     class Meta:
         fields = '__all__'
         model = models.Wall

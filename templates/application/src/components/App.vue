@@ -42,8 +42,8 @@
         </button>
       </div>
     </nav>
-    <notifications class="notification" :duration="5000" position="bottom left"></notifications>
-    <div class="overflow-auto">
+    <notifications class="notification" :duration="3000" position="bottom left"></notifications>
+    <div class="overflow-auto h-100">
       <router-view></router-view>
     </div>
   </div>
