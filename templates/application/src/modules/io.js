@@ -12,7 +12,7 @@ export default new Vue({
                 idle: "Auto save",
             },
             timeoutId: null,
-            timeoutDuration: 5000,
+            timeoutDuration: 3000,
         },
         changeUtil: {
             state: false,

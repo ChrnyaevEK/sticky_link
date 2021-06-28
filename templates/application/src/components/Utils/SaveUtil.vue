@@ -1,9 +1,8 @@
 <template id="save-util-template">
     <span
-        class="mx-1 small font-weight-bold d-flex"
+        class="mx-1 small font-weight-bold d-flex align-items-center"
         :class="io.saveUtil.type ? 'text-' + io.saveUtil.type : 'text-secondary'"
     >
-        <span class="d-flex bg-primary mx-1 change-sync" v-if="io.changeUtil.state"></span>
         {{ io.saveUtil.state }}
     </span>
 </template>
