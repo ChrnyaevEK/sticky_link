@@ -138,6 +138,9 @@ export default {
             return true
           }
         }
+        if (this.$store.state.user.id === user.id){
+          return true
+        }
       }
       return false
     },
@@ -158,7 +161,7 @@ export default {
       }
       if (this.isTrusted(this.user)) {
         return this.$notify({
-          text: "User is already on the list",
+          text: "User is already trusted",
           type: "warn",
         })
       }
@@ -172,6 +175,7 @@ export default {
         username: this.user.username,
         wall: this.$route.params.wallId,
       })
+      this.unsetUser()
     },
     async deleteTrustedUser(user) {
       await this.$proxy.dispatch('deleteTrustedUser', {

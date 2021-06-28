@@ -55,7 +55,7 @@ class App:
         try:
             wall = models.Wall.pq(user).get(pk=wall_id)
         except models.Wall.DoesNotExist:
-            walls = serializers.WallSerializer(models.Wall.get_available_walls(user), many=True).data
+            walls = serializers.WallSerializer(models.Wall.pq(user), many=True).data
         else:
             for container in models.Container.objects.filter(wall=wall):
                 for model, serializer in (
@@ -96,9 +96,10 @@ class App:
             except models.User.DoesNotExist:
                 return None
 
-        def get_wall(user):
+        def get_wall():
             try:
-                return models.Wall.get_available_walls(user).get(pk=request.GET.get('wall'))
+                # Only trusted user (owner is trusted) may add trusted users!
+                return models.Wall.get_owned_walls(request.user).get(pk=request.GET.get('wall'))
             except models.Wall.DoesNotExist:
                 return None
 
@@ -111,20 +112,20 @@ class App:
         elif request.method == 'POST':
             user = get_user()
             if user is None:
-                return HttpResponseBadRequest('')
-            wall = get_wall(user)
+                return HttpResponseBadRequest('No user specified')
+            wall = get_wall()
             if wall is None:
-                return HttpResponseBadRequest()
+                return HttpResponseBadRequest('No wall specified')
             wall.trusted_users.add(user)
             wall.save()
             return JsonResponse(serializers.WallSerializer(wall).data)
         elif request.method == 'DELETE':
             user = get_user()
             if user is None:
-                return JsonResponse(None, safe=False)
-            wall = get_wall(user)
+                return HttpResponseBadRequest('No user specified')
+            wall = get_wall()
             if wall is None:
-                return HttpResponseBadRequest()
+                return HttpResponseBadRequest('No wall specified')
             wall.trusted_users.remove(user)
             wall.save()
             return JsonResponse(serializers.WallSerializer(wall).data)
@@ -155,7 +156,7 @@ class WallViewSet(ProtectedModelViewSet):
     model_class = models.Wall
 
     def list(self, request, *args, **kwargs):
-        return JsonResponse(self.serializer_class(self.model_class.get_available_walls(request.user), many=True).data,
+        return JsonResponse(self.serializer_class(self.model_class.pq(request.user), many=True).data,
                             safe=False)
 
     def create(self, request, *args, **kwargs):

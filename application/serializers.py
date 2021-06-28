@@ -61,7 +61,7 @@ class UserSerializer(CustomModelSerializer):
     id = serializers.ReadOnlyField()
 
     class Meta:
-        fields = ['type', 'username', 'email', 'is_anonymous', 'is_authenticated', 'id']
+        fields = ['type', 'username', 'email', 'is_anonymous', 'is_authenticated', 'id', 'trusted_walls']
         model = User
 
 

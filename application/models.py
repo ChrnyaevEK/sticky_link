@@ -142,7 +142,7 @@ class Wall(SyncManager):
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     allow_anonymous_view = models.BooleanField(default=False)
-    trusted_users = models.ManyToManyField(User, related_name='foreign_walls')
+    trusted_users = models.ManyToManyField(User, related_name='trusted_walls')
 
     title = models.CharField(max_length=200, default='Untitled', null=True, blank=True)
     description = models.CharField(max_length=500, blank=True, null=True)
@@ -160,23 +160,30 @@ class Wall(SyncManager):
         super().delete(*args, **kwargs)
 
     def has_edit_permission(self, user):
-        return self.owner == user
+        return self.owner == user or user in self.trusted_users.all()
 
     def has_view_permission(self, user):
-        return self.allow_anonymous_view or self.owner == user
+        return self.allow_anonymous_view or self.has_edit_permission(user)
 
     @classmethod
     def pq(cls, user):
         q = Q(allow_anonymous_view=True)
         if not user.is_anonymous:
             q.add(Q(owner=user), Q.OR)
+            q.add(Q(trusted_users__in=[user]), Q.OR)
         return cls.objects.filter(q)
 
     @classmethod
-    def get_available_walls(cls, user):
+    def get_owned_walls(cls, user):
         if not user.is_authenticated:
             return []
         return cls.pq(user).filter(owner=user)
+
+    @classmethod
+    def get_trusted_walls(cls, user):
+        if not user.is_authenticated:
+            return []
+        return cls.pq(user).filter(trusted_users__in=[user])
 
 
 class Container(SyncManager):
@@ -210,6 +217,7 @@ class Container(SyncManager):
         q = Q(wall__allow_anonymous_view=True)
         if not user.is_anonymous:
             q.add(Q(wall__owner=user), Q.OR)
+            q.add(Q(wall__trusted_users__in=[user]), Q.OR)
         return cls.objects.filter(q)
 
 
@@ -275,6 +283,7 @@ class Source(Base):
         q = Q(parent__container__wall__allow_anonymous_view=True)
         if not user.is_anonymous:
             q.add(Q(parent__container__wall__owner=user), Q.OR)
+            q.add(Q(parent__container__wall__trusted_users__in=[user]), Q.OR)
         return cls.objects.filter(q)
 
 
@@ -332,6 +341,7 @@ class Widget(SyncManager):
         q = Q(container__wall__allow_anonymous_view=True)
         if not user.is_anonymous:
             q.add(Q(container__wall__owner=user), Q.OR)
+            q.add(Q(container__wall__trusted_users__in=[user]), Q.OR)
         return cls.objects.filter(q)
 
     class Meta:
