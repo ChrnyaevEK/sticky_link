@@ -56,7 +56,7 @@ class App:
         try:
             wall = models.Wall.pq(user).get(pk=wall_id)
         except models.Wall.DoesNotExist:
-            pass
+            walls = serializers.WallSerializer(models.Wall.get_available_walls(user), many=True).data
         else:
             for container in models.Container.objects.filter(wall=wall):
                 for model, serializer in (
@@ -76,12 +76,9 @@ class App:
                 containers = [serializers.ContainerSerializer(container).data]
             meta = serializers.Meta(models.Meta(wall, request.user)).data
             wall = serializers.WallSerializer(wall).data
-
-        ports = serializers.PortSerializer(models.Port.pq(user), many=True).data
-        walls = serializers.WallSerializer(models.Wall.get_available_walls(user), many=True).data
-        if not walls and wall:
             walls = [wall]
 
+        ports = serializers.PortSerializer(models.Port.pq(user), many=True).data
         return JsonResponse({
             'user': serializers.UserSerializer(user).data,
             'containers': containers,
