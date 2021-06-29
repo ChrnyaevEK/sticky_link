@@ -29,7 +29,6 @@ async function guardOwned(to, from, next, key, route, source) {
     if (!checkExist(source, to.params[key]) || (store.state.reference && !store.state.reference.owner_permission)) {
         return next({
             name: route,
-            params: to.params,
         });
     }
     await env.dispatch("setEditMode");
