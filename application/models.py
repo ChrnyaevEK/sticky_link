@@ -18,17 +18,59 @@ def _to_hash(sting):
     return hashlib.md5(sting.encode('utf-8')).hexdigest()
 
 
-class Base(models.Model):
-    edit_permission = False
-    view_permission = False
+class Protected(models.Model):
+    _wall_path: str = None  # Path prefix to the wall instance (for permission check)
+    _protected_fields = {'id', 'uid', 'version', 'type', 'date_of_creation', 'last_update'}
 
+    @classmethod
+    def build_trusted_query(cls, user):
+        owner = 'owner'
+        trusted_users = 'trusted_users__in'
+        if cls._wall_path is not None:
+            owner = cls._wall_path + owner
+            trusted_users = cls._wall_path + trusted_users
+
+        q = Q(**{owner: user})
+        q.add(Q(**{trusted_users: [user]}), q.OR)
+        return q
+
+    @classmethod
+    def build_owned_query(cls, user):
+        owner = 'owner'
+        if cls._wall_path is not None:
+            owner = cls._wall_path + owner
+        return Q(**{owner: user})
+
+    @classmethod
+    def build_anonymous_query(cls, user):
+        anonymous = 'allow_anonymous_view'
+        if cls._wall_path is not None:
+            anonymous = cls._wall_path + anonymous
+        return Q(**{anonymous: True})
+
+    def has_edit_permission(self, user):
+        q = self.build_trusted_query(user)
+        return self.__class__.objects.filter(q).filter(pk=self.id).exists()
+
+    def has_view_permission(self, user):
+        q = self.build_anonymous_query(user)
+        return self.__class__.objects.filter(q).filter(pk=self.id).exists()
+
+    def has_delete_permission(self, user):
+        q = self.build_owned_query(user)
+        return self.__class__.objects.filter(q).filter(pk=self.id).exists()
+
+    @classmethod
+    def validate_anonymous_access(cls, accessed_fields):
+        return not cls._protected_fields.intersection(accessed_fields)
+
+
+class Base(Protected):
     type = None
     id = HashidAutoField(primary_key=True)
 
     date_of_creation = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
-
-    protected_fields = {'id', 'uid', 'version', 'type', 'date_of_creation', 'last_update'}
 
     def __str__(self):
         return f'{type(self).__name__}: {self.id}'
@@ -56,24 +98,6 @@ class Base(models.Model):
     @property
     def version(self):
         return _to_hash(self.last_update.isoformat())
-
-    @classmethod
-    def validate_anonymous_access(cls, accessed_fields):
-        return not cls.protected_fields.intersection(accessed_fields)
-
-    @classmethod
-    def pq(cls, user):  # Protected queryset
-        raise NotImplemented(f'Protected query set not implemented for {cls.__name__}')
-
-    def has_edit_permission(self, user):
-        raise NotImplemented(f'Permissions are not defined for {self.__class__.__name__}')
-
-    def has_view_permission(self, user):
-        raise NotImplemented(f'Permissions are not defined for {self.__class__.__name__}')
-
-    def resolve_permission(self, user):
-        self.edit_permission = self.has_edit_permission(user)
-        self.view_permission = self.has_view_permission(user)
 
 
 class SyncManager(Base):
@@ -137,8 +161,8 @@ class SyncManager(Base):
 class Wall(SyncManager):
     type = 'wall'
 
-    protected_fields = {'owner', 'allowed_users', 'allow_anonymous_view', 'title', 'description', 'lock_widgets'}
-    protected_fields.update(Base.protected_fields)
+    _protected_fields = {'owner', 'allowed_users', 'allow_anonymous_view', 'title', 'description', 'lock_widgets'}
+    _protected_fields.update(Base._protected_fields)
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     allow_anonymous_view = models.BooleanField(default=False)
@@ -159,37 +183,22 @@ class Wall(SyncManager):
         self.propagate_instance_deleted()
         super().delete(*args, **kwargs)
 
-    def has_edit_permission(self, user):
-        return self.owner == user or user in self.trusted_users.all()
-
-    def has_view_permission(self, user):
-        return self.allow_anonymous_view or self.has_edit_permission(user)
-
     @classmethod
-    def pq(cls, user):
-        q = Q(allow_anonymous_view=True)
-        if not user.is_anonymous:
-            q.add(Q(owner=user), Q.OR)
-            q.add(Q(trusted_users__in=[user]), Q.OR)
+    def get_owned_walls(cls, user):
+        q = cls.build_owned_query(user)
         return cls.objects.filter(q)
 
     @classmethod
-    def get_owned_walls(cls, user):
-        if not user.is_authenticated:
-            return []
-        return cls.pq(user).filter(owner=user)
-
-    @classmethod
     def get_trusted_walls(cls, user):
-        if not user.is_authenticated:
-            return []
-        return cls.pq(user).filter(trusted_users__in=[user])
+        q = cls.build_trusted_query(user)
+        return cls.objects.filter(q)
 
 
 class Container(SyncManager):
     type = 'container'
-    protected_fields = {'wall', 'index', 'h', 'w', 'description', 'title'}
-    protected_fields.update(Base.protected_fields)
+    _wall_path = 'wall__'
+    _protected_fields = {'wall', 'index', 'h', 'w', 'description', 'title'}
+    _protected_fields.update(Base._protected_fields)
 
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
     index = models.IntegerField(validators=[MinValueValidator(0)])
@@ -211,14 +220,6 @@ class Container(SyncManager):
     def delete(self, *args, **kwargs):
         self.propagate_instance_deleted()
         super().delete(*args, **kwargs)
-
-    @classmethod
-    def pq(cls, user):
-        q = Q(wall__allow_anonymous_view=True)
-        if not user.is_anonymous:
-            q.add(Q(wall__owner=user), Q.OR)
-            q.add(Q(wall__trusted_users__in=[user]), Q.OR)
-        return cls.objects.filter(q)
 
 
 class Port(SyncManager):
@@ -246,15 +247,20 @@ class Port(SyncManager):
         super().delete(*args, **kwargs)
 
     @classmethod
-    def pq(cls, user):
-        if not user.is_anonymous:
-            q = Q(owner=user)
-            return cls.objects.filter(q)
-        else:
-            return cls.objects.none()
+    def build_trusted_query(cls, user):
+        return Q(owner=user)
+
+    @classmethod
+    def build_owned_query(cls, user):
+        return Q(owner=user)
+
+    @classmethod
+    def build_anonymous_query(cls, user):
+        return Q(owner=user)
 
 
 class Source(Base):
+    _wall_path = 'parent__container__wall__'
     file = models.FileField(upload_to='%Y/%m/%d/', null=True)
 
     @classmethod
@@ -278,14 +284,6 @@ class Source(Base):
     def __str__(self):
         return f'{self.id} | {self.name or "Untitled source"}'
 
-    @classmethod
-    def pq(cls, user):
-        q = Q(parent__container__wall__allow_anonymous_view=True)
-        if not user.is_anonymous:
-            q.add(Q(parent__container__wall__owner=user), Q.OR)
-            q.add(Q(parent__container__wall__trusted_users__in=[user]), Q.OR)
-        return cls.objects.filter(q)
-
 
 class ColorValidator(BaseValidator):
     regex = re.compile(r'^#[0-9a-fA-F]{8}$|#[0-9a-fA-F]{6}$|#[0-9a-fA-F]{4}$|#[0-9a-fA-F]{3}$')  # ARGB hex color
@@ -295,9 +293,10 @@ class ColorValidator(BaseValidator):
 
 
 class Widget(SyncManager):
-    protected_fields = {'font_size', 'font_weight', 'background_color', 'text_color', 'border', 'help', 'w', 'h',
-                        'z', 'x', 'y', 'sync_fields', 'container', 'owner'}
-    protected_fields.update(Base.protected_fields)
+    _wall_path = 'container__wall__'
+    _protected_fields = {'font_size', 'font_weight', 'background_color', 'text_color', 'border', 'help', 'w', 'h',
+                         'z', 'x', 'y', 'sync_fields', 'container', 'owner'}
+    _protected_fields.update(Base._protected_fields)
     title = models.CharField(max_length=200, blank=True, null=True)
     description = models.CharField(max_length=500, blank=True, null=True)
 
@@ -335,14 +334,6 @@ class Widget(SyncManager):
 
     def __str__(self):
         return f'{self.id} | {self.title or "Untitled widget"}'
-
-    @classmethod
-    def pq(cls, user):
-        q = Q(container__wall__allow_anonymous_view=True)
-        if not user.is_anonymous:
-            q.add(Q(container__wall__owner=user), Q.OR)
-            q.add(Q(container__wall__trusted_users__in=[user]), Q.OR)
-        return cls.objects.filter(q)
 
     class Meta:
         abstract = True

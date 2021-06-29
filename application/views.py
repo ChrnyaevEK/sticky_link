@@ -46,14 +46,14 @@ class App:
 
     @staticmethod
     @api_view(http_method_names=['GET'])
-    def state(request, wall_id=None):
+    def state(request, pk=None):
         user = request.user
         meta = None
         containers = []
         widgets = []
 
         try:
-            wall = models.Wall.pq(user).get(pk=wall_id)
+            wall = models.Wall.pq(user).get(pk=pk)
         except models.Wall.DoesNotExist:
             walls = serializers.WallSerializer(models.Wall.pq(user), many=True).data
         else:
