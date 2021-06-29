@@ -52,7 +52,7 @@ export default new Vue({
             }
         },
         setWarning(response, target) {
-            if (!target) return
+            if (!target || !response) return
             target = $(target)
             this.unsetWarning(target);
             for (var [field, error] of Object.entries(response.responseJSON)) {

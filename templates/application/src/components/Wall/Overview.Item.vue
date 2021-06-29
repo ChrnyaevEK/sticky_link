@@ -22,10 +22,12 @@
       <router-link class="mr-2" :to="{name: 'wallView', params: { wallId: wall.id }}">
         View
       </router-link>
-      <button class="btn btn-sm text-danger mr-1" @click="$proxy.dispatch('deleteWall', wall)">
+      <button class="btn btn-sm text-danger mr-1" v-if="wall.owner_permission"
+              @click="$proxy.dispatch('deleteWall', wall)">
         <i class="fas fa-trash"></i>
       </button>
-      <router-link class="btn btn-sm text-dark" :to="{name: 'wallSettings', params: { wallId: wall.id }}">
+      <router-link class="btn btn-sm text-dark" v-if="wall.owner_permission"
+                   :to="{name: 'wallSettings', params: { wallId: wall.id }}">
         <i class="fas fa-ellipsis-v"></i>
       </router-link>
     </div>
@@ -43,7 +45,7 @@ export default {
   },
   computed: {
     isShared() {
-      return this.$store.state.user.trusted_walls.indexOf(this.wall.id) !== -1
+      return this.wall.trusted_users.length
     },
     isPublic() {
       return this.wall.allow_anonymous_view

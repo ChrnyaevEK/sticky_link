@@ -9,6 +9,18 @@ import {fitWidget} from "../common";
 Vue.use(VueX);
 
 
+async function withChangesLock(func) {
+    await env.dispatch("lockChanges");
+    try {
+        var res = await func()
+    } catch (e) {
+        await env.dispatch("unlockChanges");
+        throw e
+    }
+    await env.dispatch("unlockChanges");
+    return res
+}
+
 export default new VueX.Store({
     strict: false,
     state: {
@@ -24,25 +36,33 @@ export default new VueX.Store({
     },
     actions: {
         async createPort() {
-            await env.dispatch("lockChanges");
-            let port = await store.dispatch("createInstance", {
-                type: "port",
-            });
-            await env.dispatch("unlockChanges");
+            try {
+                await withChangesLock(async () => {
+                    return await store.dispatch("createInstance", {
+                        type: "port",
+                    })
+                });
+            } catch (e) {
+                return
+            }
             Vue.notify({
-                text: `Port ${port.title} was created!`,
+                text: 'Port was created!',
                 type: "success",
             });
         },
         async createWall(context, open) {
             open = open === undefined ? true : open
-            await env.dispatch("lockChanges");
-            let wall = await store.dispatch("createInstance", {
-                type: "wall",
-            });
-            await env.dispatch("unlockChanges");
+            try {
+                var wall = await withChangesLock(async () => {
+                    return await store.dispatch("createInstance", {
+                        type: "wall",
+                    });
+                })
+            } catch (e) {
+                return
+            }
             Vue.notify({
-                text: `Wall ${wall.title || "Untitled"} was created!`,
+                text: `Wall was created!`,
                 type: "success",
             });
             if (open) {
@@ -53,34 +73,42 @@ export default new VueX.Store({
             }
         },
         async createContainer(context, wall) {
-            await env.dispatch("lockChanges");
             let index = 0;
             for (let container of store.state.containers) {
                 if (container.index > index) {
                     index = container.index + 1;
                 }
             }
-            let container = await store.dispatch("createInstance", {
-                type: "container",
-                wall: wall.id,
-                index,
-            });
-            await env.dispatch("unlockChanges");
+            try {
+                await withChangesLock(async () => {
+                    return await store.dispatch("createInstance", {
+                        type: "container",
+                        wall: wall.id,
+                        index,
+                    });
+                })
+            } catch (e) {
+                return
+            }
             Vue.notify({
-                text: `Container ${container.title} was created!`,
+                text: 'Container was created!',
                 type: "success",
             });
         },
         async createWidget(context, {type, container,}) {  // handleCreateWidget
-            await env.dispatch("lockChanges");
-            let widget = await store.dispatch("createInstance", {
-                type,
-                container: container.id,
-            });
+            try {
+                await withChangesLock(async () => {
+                    return await store.dispatch("createInstance", {
+                        type,
+                        container: container.id,
+                    });
+                })
+            } catch (e) {
+                return
+            }
             await store.dispatch("recalculateWidgets", container);
-            await env.dispatch("unlockChanges");
             Vue.notify({
-                text: `Widget ${widget.type} ${widget.title} was created!`,
+                text: 'Widget was created!',
                 type: "success",
             });
         },
@@ -121,18 +149,25 @@ export default new VueX.Store({
         },
         async deletePort(context, port) {
             if (confirm("Are you sure?")) {
-                await env.dispatch("lockChanges"); // Lock changes to prevent update for deleted instance
-                await store.dispatch("deleteInstance", port);
-                await env.dispatch("closeOptions");
-                await env.dispatch("unlockChanges"); // Unlock changes
+                try {
+                    await withChangesLock(async () => {
+                        await store.dispatch("deleteInstance", port);
+                    })
+                } catch (e) {
+                    return
+                }
             }
         },
         async deleteWall(context, wall) {
             if (confirm("Are you sure?")) {
-                await env.dispatch("lockChanges"); // Lock changes to prevent update for deleted instance
                 let id = wall.id
-                await store.dispatch("deleteInstance", wall);
-                await env.dispatch("closeOptions");
+                try {
+                    await withChangesLock(async () => {
+                        await store.dispatch("deleteInstance", wall);
+                    })
+                } catch (e) {
+                    return
+                }
                 if (router.currentRoute.params.wallId === id) {
                     await router.push({name: "home"});
                 }
@@ -141,18 +176,26 @@ export default new VueX.Store({
         },
         async deleteContainer(context, container) {
             if (confirm("Are you sure?")) {
-                await env.dispatch("lockChanges"); // Lock changes to prevent update for deleted instance
-                await store.dispatch("deleteInstance", container);
+                try {
+                    await withChangesLock(async () => {
+                        await store.dispatch("deleteInstance", container);
+                    })
+                } catch (e) {
+                    return
+                }
                 await env.dispatch("closeOptions");
-                await env.dispatch("unlockChanges"); // Unlock changes
             }
         },
         async deleteWidget(context, widget) {
             if (confirm("Are you sure?")) {
-                await env.dispatch("lockChanges"); // Lock changes to prevent update for deleted instance
-                await store.dispatch("deleteInstance", widget);
+                try {
+                    await withChangesLock(async () => {
+                        await store.dispatch("deleteInstance", widget);
+                    })
+                } catch (e) {
+                    return
+                }
                 await env.dispatch("closeOptions");
-                await env.dispatch("unlockChanges"); // Unlock changes
             }
         },
         async copyWidget(context, widget) {
@@ -167,7 +210,13 @@ export default new VueX.Store({
                     break;
                 }
             }
-            await store.dispatch("createInstance", widget);
+            try {
+                await withChangesLock(async () => {
+                    await store.dispatch("createInstance", widget);
+                })
+            } catch (e) {
+                return
+            }
         },
         async $_update(context, {instance, warningTarget}) {
             try {
@@ -236,18 +285,26 @@ export default new VueX.Store({
             return await store.dispatch('fetchTrustedUser', username)
         },
         async addTrustedUser(context, {username, wall}) {
-            await env.dispatch("lockChanges");
-            await store.dispatch('addTrustedUser', {username, wall})
-            await env.dispatch("unlockChanges");
+            try {
+                await withChangesLock(async () => {
+                    await store.dispatch('addTrustedUser', {username, wall})
+                })
+            } catch (e) {
+                return
+            }
             Vue.notify({
                 text: "User has been added!",
                 type: "success",
             });
         },
         async deleteTrustedUser(context, {username, wall}) {
-            await env.dispatch("lockChanges");
-            await store.dispatch('deleteTrustedUser', {username, wall})
-            await env.dispatch("unlockChanges");
+            try {
+                await withChangesLock(async () => {
+                    await store.dispatch('deleteTrustedUser', {username, wall})
+                })
+            } catch (e) {
+                return
+            }
             Vue.notify({
                 text: "User has been removed!",
                 type: "success",

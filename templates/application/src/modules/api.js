@@ -41,7 +41,7 @@ export default {
                     type: "error",
                 });
             }
-            throw response;
+            throw response
         }
     },
     ajaxJSON(settings) {

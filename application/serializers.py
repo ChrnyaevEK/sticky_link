@@ -51,6 +51,10 @@ class CustomModelSerializer(serializers.ModelSerializer):
     date_of_creation = serializers.ReadOnlyField()
     last_update = serializers.ReadOnlyField()
 
+    owner_permission = serializers.ReadOnlyField()
+    trusted_permission = serializers.ReadOnlyField()
+    anonymous_permission = serializers.ReadOnlyField()
+
 
 class UserSerializer(CustomModelSerializer):
     type = serializers.ReadOnlyField()
@@ -137,7 +141,4 @@ class DocumentSerializer(CustomModelSerializer):
 
 
 class Meta(serializers.Serializer):
-    owner_permission = serializers.ReadOnlyField(default=False)
-    trusted_permission = serializers.ReadOnlyField(default=False)
-    anonymous_permission = serializers.ReadOnlyField(default=False)
     file_size_max = serializers.ReadOnlyField(default=10485760)

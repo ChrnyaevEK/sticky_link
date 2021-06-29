@@ -15,43 +15,47 @@ import PortSettings from "../components/Port/Settings";
 import PortOverview from "../components/Port/Overview";
 import NotAuthenticated from "../components/NotAuthenticated";
 
-async function guardEditable(to, from, next, key, route, source) {
-    if (to.params[key] !== undefined) {
-        if (store.state.meta) {
-            if (
-                !store.state.meta.edit_permission &&
-                store.state.meta.view_permission
-            ) {
-                return next({
-                    name: route,
-                    params: to.params,
-                });
-            }
-        } else {
-            if (!source.filter((i) => i.id === to.params[key])[0]) {
-                return next({
-                    name: route,
-                    params: to.params,
-                });
-            }
+
+function checkExist(source, id) {
+    for (let i of source) {
+        if (i.id === id) {
+            return true
         }
-    } else {
+    }
+    return false
+}
+
+async function guardOwned(to, from, next, key, route, source) {
+    if (!checkExist(source, to.params[key]) || (store.state.reference && !store.state.reference.owner_permission)) {
         return next({
-            name: "notAuthenticated",
-        })
+            name: route,
+            params: to.params,
+        });
+    }
+    await env.dispatch("setEditMode");
+    next();
+}
+
+async function guardTrusted(to, from, next, key, route, source) {
+    if (
+        !checkExist(source, to.params[key]) ||
+        (store.state.reference && !store.state.reference.owner_permission && !store.state.reference.trusted_permission)
+    ) {
+        return next({
+            name: route,
+            params: to.params,
+        });
     }
     await env.dispatch("setEditMode");
     next();
 }
 
 async function guardViewable(to, from, next) {
-    if (store.state.meta) {
-        if (!store.state.meta.view_permission) {
-            return next({
-                name: "home",
-            });
-        }
-    } else {
+    if (
+        !store.state.reference.owner_permission &&
+        !store.state.reference.trusted_permission &&
+        !store.state.reference.anonymous_permission
+    ) {
         return next({
             name: "home",
         });
@@ -86,7 +90,7 @@ const router = new VueRouter({
                     path: "wall/edit/:wallId?",
                     component: WallEditor,
                     async beforeEnter(to, from, next) {
-                        await guardEditable(to, from, next, 'wallId', 'wallView', store.state.walls)
+                        await guardTrusted(to, from, next, 'wallId', 'wallView', store.state.walls)
                     },
                 },
                 {
@@ -102,7 +106,7 @@ const router = new VueRouter({
                     path: "wall/settings/:wallId",
                     component: WallSettings,
                     async beforeEnter(to, from, next) {
-                        await guardEditable(to, from, next, 'wallId', 'home', store.state.walls)
+                        await guardOwned(to, from, next, 'wallId', 'home', store.state.walls)
                     },
                 },
                 {
@@ -118,7 +122,7 @@ const router = new VueRouter({
                     path: 'port/settings/:portId',
                     component: PortSettings,
                     async beforeEnter(to, from, next) {
-                        await guardEditable(to, from, next, 'portId', 'home', store.state.ports)
+                        await guardOwned(to, from, next, 'portId', 'home', store.state.ports)
                     },
                 },
                 {
@@ -164,9 +168,15 @@ router.beforeEach(async (to, from, next) => {
         try {
             await store.dispatch("fetchState", to.params.wallId);
         } catch (e) {
-            return next({
-                name: "error",
-            });
+            if (e.status >= 500) {
+                return next({
+                    name: "error",
+                });
+            } else {
+                return next({
+                    name: "home",
+                });
+            }
         }
     }
     if (store.state.user) {

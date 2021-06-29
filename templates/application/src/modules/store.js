@@ -47,6 +47,7 @@ const store = new Vuex.Store({
     state: {
         user: null,
         meta: null,
+        reference: null,
 
         ports: [],
         walls: [],

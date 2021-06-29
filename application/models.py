@@ -9,6 +9,7 @@ from application.consumers import Event as ConsumerEvent, WallConsumer
 from asgiref.sync import async_to_sync
 import hashlib
 from django.db.models import Q
+from django.db.models.query import EmptyQuerySet
 
 User.type = 'user'
 AnonymousUser.username = 'anonymous'
@@ -19,6 +20,10 @@ def _to_hash(sting):
 
 
 class Protected(models.Model):
+    owner_permission = False
+    trusted_permission = False
+    anonymous_permission = False
+
     _wall_path: str = None  # Path prefix to the wall instance (for permission check)
     _protected_fields = {'id', 'uid', 'version', 'type', 'date_of_creation', 'last_update'}
 
@@ -47,23 +52,33 @@ class Protected(models.Model):
             anonymous = cls._wall_path + anonymous
         return Q(**{anonymous: True})
 
-    def has_owner_permission(self, user):
+    def set_permission(self, user):
+        self._set_has_anonymous_permission(user)
+        self._set_has_trusted_permission(user)
+        self._set_has_owner_permission(user)
+
+    def _set_has_owner_permission(self, user):
+        if user.is_anonymous:
+            return False
         q = self.build_owned_query(user)
-        return self.__class__.objects.filter(q).filter(pk=self.id).exists()
+        self.owner_permission = self.__class__.objects.filter(q).filter(pk=self.id).exists()
 
-    def has_trusted_permission(self, user):
+    def _set_has_trusted_permission(self, user):
+        if user.is_anonymous:
+            return False
         q = self.build_trusted_query(user)
-        return self.__class__.objects.filter(q).filter(pk=self.id).exists()
+        self.trusted_permission = self.__class__.objects.filter(q).filter(pk=self.id).exists()
 
-    def has_anonymous_permission(self, user):
+    def _set_has_anonymous_permission(self, user):
         q = self.build_anonymous_query(user)
-        return self.__class__.objects.filter(q).filter(pk=self.id).exists()
+        self.anonymous_permission = self.__class__.objects.filter(q).filter(pk=self.id).exists()
 
     @classmethod
     def get_reachable(cls, user):
         q = cls.build_anonymous_query(user)
-        q.add(cls.build_trusted_query(user), q.OR)
-        q.add(cls.build_owned_query(user), q.OR)
+        if not user.is_anonymous:
+            q.add(cls.build_trusted_query(user), q.OR)
+            q.add(cls.build_owned_query(user), q.OR)
         return cls.objects.filter(q)
 
     @classmethod
@@ -161,7 +176,7 @@ class SyncManager(Base):
     @classmethod
     def has_any_sync_widget(cls, user, sync_id=None):  # Empty sync_id is valid
         # Validate sync_id. Find any object that belong to user and has id equal to requested sync_id
-        return not sync_id or cls.pq(user).filter(pk=sync_id).exists()
+        return not sync_id or cls.get_reachable(user).filter(pk=sync_id).exists()
 
 
 class Wall(SyncManager):
@@ -191,11 +206,15 @@ class Wall(SyncManager):
 
     @classmethod
     def get_owned_walls(cls, user):
+        if user.is_anonymous:
+            return cls.objects.none()
         q = cls.build_owned_query(user)
         return cls.objects.filter(q)
 
     @classmethod
     def get_trusted_walls(cls, user):
+        if user.is_anonymous:
+            return cls.objects.none()
         q = cls.build_trusted_query(user)
         return cls.objects.filter(q)
 
@@ -259,7 +278,7 @@ class Port(SyncManager):
 
     def resolve_target_wall(self, user):
         if user.is_authenticated and self.authenticated_wall:
-            if self.authenticated_wall.owner == user or user in self.authenticated_wall.trusted_users:
+            if self.authenticated_wall.owner == user or user in self.authenticated_wall.trusted_users.all():
                 return self.authenticated_wall
         else:
             return self.anonymous_wall
@@ -277,13 +296,15 @@ class Port(SyncManager):
         return Q()  # All
 
     @classmethod
-    def get_anonymous_ports(cls, user):
-        q = cls.build_anonymous_query(user)
+    def get_owned_ports(cls, user):
+        if user.is_anonymous:
+            return cls.objects.none()
+        q = cls.build_owned_query(user)
         return cls.objects.filter(q)
 
     @classmethod
-    def get_owned_ports(cls, user):
-        q = cls.build_owned_query(user)
+    def get_anonymous_ports(cls, user):
+        q = cls.build_anonymous_query(user)
         return cls.objects.filter(q)
 
 
@@ -442,6 +463,8 @@ class Document(Widget):
 class Meta:
     file_size_max = 10485760
 
+
+class Permission:
     def __init__(self, instance, user):
         self.owner_permission = instance.has_owner_permission(user)
         self.trusted_permission = instance.has_trusted_permission(user)

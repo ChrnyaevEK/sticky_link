@@ -6,15 +6,21 @@ from rest_framework.decorators import api_view
 from rest_framework.parsers import MultiPartParser
 from django.http import JsonResponse, HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import render, redirect
-from django.core.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 import logging
 import os
 from sendfile import sendfile
 from sticky_link.settings import MEDIA_BASE_PATH
+from itertools import chain
 
 logger = logging.getLogger(__name__)
+
+
+def abort(msg, status=400):
+    return JsonResponse({
+        'detail': msg
+    }, status=status)
 
 
 class App:
@@ -30,7 +36,7 @@ class App:
         # Resolve redirection to required resource
         user = request.user
         try:
-            port = models.Port.get_anonymous_ports(user).get(pk)
+            port = models.Port.get_anonymous_ports(user).get(pk=pk)
         except models.Port.DoesNotExist:
             return HttpResponseNotFound('Port does not exist')
 
@@ -41,7 +47,7 @@ class App:
         if wall is None:
             if port.redirect_url is not None:
                 return redirect(port.redirect_url)
-            return HttpResponseNotFound('Port refer invalid resource')
+            return HttpResponseNotFound('Invalid resource')
 
         return redirect(f'/wall/view/{wall.id}/')
 
@@ -51,12 +57,10 @@ class App:
         containers = []
         widgets = []
         try:
-            wall = models.Wall.get_owned_walls(user).get(pk=pk)
+            wall = models.Wall.get_reachable(user).get(pk=pk)
         except models.Wall.DoesNotExist:
-            try:
-                wall = models.Wall.get_trusted_walls(user).get(pk=pk)
-            except models.Wall.DoesNotExist:
-                return HttpResponseNotFound()
+            return abort('Wall is unreachable', 404)
+        wall.set_permission(user)
         for container in wall.container_set.all():
             for w in container.simple_text_set.all():
                 widgets.append(serializers.SimpleTextSerializer(w).data)
@@ -78,8 +82,11 @@ class App:
             containers.append(serializers.ContainerSerializer(container).data)
         if not containers:
             containers = [serializers.ContainerSerializer(wall.initiate_default_container()).data]
-        meta = serializers.Meta(models.Meta(wall, request.user)).data
-        walls = [serializers.WallSerializer(wall).data]
+
+        meta = serializers.Meta(models.Meta()).data
+        wall = serializers.WallSerializer(wall).data
+        walls = [wall]
+
         ports = serializers.PortSerializer(models.Port.get_owned_ports(user), many=True).data
         return JsonResponse({
             'user': serializers.UserSerializer(user).data,
@@ -88,19 +95,21 @@ class App:
             'widgets': widgets,
             'walls': walls,
             'meta': meta,
+            'reference': wall,
         })
 
     @classmethod
     def _list_state(cls, request):
         user = request.user
         ports = serializers.PortSerializer(models.Port.get_owned_ports(user), many=True).data
-        walls = [
-            *serializers.WallSerializer(models.Wall.get_owned_walls(user), many=True).data,
-            *serializers.WallSerializer(models.Wall.get_trusted_walls(user), many=True).data
-        ]
+        walls = []
+        for wall in chain(models.Wall.get_owned_walls(user), models.Wall.get_trusted_walls(user)):
+            wall.set_permission(user)
+            wall = serializers.WallSerializer(wall).data
+            walls.append(wall)
         containers = []
         widgets = []
-        meta = None
+        meta = serializers.Meta(models.Meta()).data
 
         return JsonResponse({
             'user': serializers.UserSerializer(user).data,
@@ -109,6 +118,7 @@ class App:
             'widgets': widgets,
             'walls': walls,
             'meta': meta,
+            'reference': None
         })
 
     @staticmethod
@@ -147,20 +157,21 @@ class App:
         elif request.method == 'POST':
             user = get_user()
             if user is None:
-                return HttpResponseBadRequest('No user specified')
+                return abort('Forbidden', 403)
             wall = get_wall()
             if wall is None:
-                return HttpResponseBadRequest('No wall specified')
-            wall.trusted_users.add(user)
-            wall.save()
+                return abort('Forbidden', 403)
+            if wall.owner != user:
+                wall.trusted_users.add(user)
+                wall.save()
             return JsonResponse(serializers.WallSerializer(wall).data)
         elif request.method == 'DELETE':
             user = get_user()
             if user is None:
-                return HttpResponseBadRequest('No user specified')
+                return abort('Forbidden', 403)
             wall = get_wall()
             if wall is None:
-                return HttpResponseBadRequest('No wall specified')
+                return abort('Forbidden', 403)
             wall.trusted_users.remove(user)
             wall.save()
             return JsonResponse(serializers.WallSerializer(wall).data)
@@ -176,10 +187,17 @@ class ProtectedModelViewSet(ModelViewSet):
         if not instance.has_anonymous_permission(user) and \
                 not instance.has_trusted_permission(user) and \
                 not instance.has_owner_permission(user):
-            return HttpResponseForbidden()
+            return abort('Forbidden', 403)
         if user.is_anonymous and not instance.validate_anonymous_access(request.data.keys()):
-            return HttpResponseForbidden()
+            return abort('Forbidden', 403)
         return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        user = request.user
+        instance = self.model_class.objects.get(pk=self.kwargs['pk'])
+        if not instance.has_trusted_permission(user) and not instance.has_owner_permission(user):
+            return abort('Forbidden', 403)
+        return super().destroy(request, *args, **kwargs)
 
     def get_permissions(self):
         return [] if self.action in self.anonymous_actions else [IsAuthenticated()]
@@ -187,14 +205,35 @@ class ProtectedModelViewSet(ModelViewSet):
     def get_queryset(self):
         return self.model_class.get_reachable(self.request.user)
 
+    def get_object(self):
+        obj = super().get_object()
+        obj.set_permission()
+        return obj
+
 
 class WallViewSet(ProtectedModelViewSet):
     serializer_class = serializers.WallSerializer
     model_class = models.Wall
 
+    def update(self, request, *args, **kwargs):
+        user = request.user
+        wall = self.model_class.objects.get(pk=self.kwargs['pk'])
+        if not wall.has_owner_permission(user):
+            return abort('Forbidden', 403)
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        user = request.user
+        wall = self.model_class.objects.get(pk=self.kwargs['pk'])
+        if not wall.has_owner_permission(user):
+            return abort('Forbidden', 403)
+        return super().destroy(request, *args, **kwargs)
+
     def list(self, request, *args, **kwargs):
-        return JsonResponse(self.serializer_class(self.model_class.pq(request.user), many=True).data,
-                            safe=False)
+        return JsonResponse([
+            *serializers.WallSerializer(self.model_class.get_owned_walls(request.user), many=True).data,
+            *serializers.WallSerializer(self.model_class.get_trusted_walls(request.user), many=True).data
+        ], safe=False)
 
     def create(self, request, *args, **kwargs):
         request.data['owner'] = request.user.id  # Trust only inside user id
@@ -209,6 +248,9 @@ class ContainerViewSet(ProtectedModelViewSet):
 class PortViewSet(ProtectedModelViewSet):
     serializer_class = serializers.PortSerializer
     model_class = models.Port
+
+    def get_queryset(self):
+        return self.model_class.get_owned_ports(self.request.user)
 
     def create(self, request, *args, **kwargs):
         request.data['owner'] = request.user.id  # Trust only inside user id
@@ -234,17 +276,20 @@ class SourceViewSet(ProtectedModelViewSet):
         try:
             source = self.get_object()
         except self.model_class.DoesNotExist:
-            return HttpResponseNotFound()
+            return abort('Not found', 404)
         if source.file is None:
-            return HttpResponseNotFound()
+            return abort('Not found', 404)
         return sendfile(request, MEDIA_BASE_PATH + '/' + source.file.name, attachment=request.GET.get('attachment'))
 
     def update(self, request, *args, **kwargs):
+        user = request.user
         # Replace stored file
         try:
             source = self.get_object()
         except self.model_class.DoesNotExist:
-            return HttpResponseNotFound()
+            return abort('Not found', 404)
+        if not source.has_trusted_permission(user) and not source.has_owner_permission(user):
+            return abort('Forbidden', 403)
 
         try:  # Get path before update - if update fail, do not delete file
             old_path = source.file.path
@@ -264,10 +309,14 @@ class SourceViewSet(ProtectedModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         # Delete file, not source object. Source will be deleted simultaneously with parent
+        user = request.user
+        source = self.model_class.objects.get(pk=self.kwargs['pk'])
+        if not source.has_trusted_permission(user) and not source.has_owner_permission(user):
+            return abort('Forbidden', 403)
         try:
             source = self.get_object()
         except self.model_class.DoesNotExist:
-            return HttpResponseNotFound()
+            return abort('Not found', 404)
         source.delete_file()
         for parent in source.parent.all():
             parent.propagate_instance_updated()

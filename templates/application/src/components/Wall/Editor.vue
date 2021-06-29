@@ -20,7 +20,7 @@
         > View
         </router-link>
         <router-link
-            v-if="$env.state.editMode"
+            v-if="$env.state.editMode && wall.owner_permission"
             :to="{name: 'wallSettings', params: {wallId: wall.id}}"
             class="btn btn-sm btn-outline-secondary d-none d-md-block"
         > Settings
