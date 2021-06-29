@@ -28,15 +28,16 @@ class App:
     @staticmethod
     def port(request, pk):
         # Resolve redirection to required resource
+        user = request.user
         try:
-            port = models.Port.objects.get(pk=pk)
+            port = models.Port.get_anonymous_ports(user).get(pk)
         except models.Port.DoesNotExist:
             return HttpResponseNotFound('Port does not exist')
 
         port.visited += 1  # Update port statistics
         port.save()
 
-        wall = port.authenticated_wall if request.user.is_authenticated else port.anonymous_wall
+        wall = port.resolve_target_wall(user)
         if wall is None:
             if port.redirect_url is not None:
                 return redirect(port.redirect_url)
@@ -44,40 +45,63 @@ class App:
 
         return redirect(f'/wall/view/{wall.id}/')
 
-    @staticmethod
-    @api_view(http_method_names=['GET'])
-    def state(request, pk=None):
+    @classmethod
+    def _retrieve_state(cls, request, pk):
         user = request.user
-        meta = None
         containers = []
         widgets = []
-
         try:
-            wall = models.Wall.pq(user).get(pk=pk)
+            wall = models.Wall.get_owned_walls(user).get(pk=pk)
         except models.Wall.DoesNotExist:
-            walls = serializers.WallSerializer(models.Wall.pq(user), many=True).data
-        else:
-            for container in models.Container.objects.filter(wall=wall):
-                for model, serializer in (
-                        (models.SimpleText, serializers.SimpleTextSerializer),
-                        (models.URL, serializers.URLSerializer),
-                        (models.SimpleList, serializers.SimpleListSerializer),
-                        (models.Counter, serializers.CounterSerializer),
-                        (models.SimpleSwitch, serializers.SimpleSwitchSerializer),
-                        (models.Document, serializers.DocumentSerializer),
-                ):
-                    for widget in model.objects.filter(container=container):
-                        widgets.append(serializer(widget).data)
-                containers.append(serializers.ContainerSerializer(container).data)
-            if not containers:
-                container = models.Container(wall=wall, index=0)
-                container.save()
-                containers = [serializers.ContainerSerializer(container).data]
-            meta = serializers.Meta(models.Meta(wall, request.user)).data
-            wall = serializers.WallSerializer(wall).data
-            walls = [wall]
+            try:
+                wall = models.Wall.get_trusted_walls(user).get(pk=pk)
+            except models.Wall.DoesNotExist:
+                return HttpResponseNotFound()
+        for container in wall.container_set.all():
+            for w in container.simple_text_set.all():
+                widgets.append(serializers.SimpleTextSerializer(w).data)
 
-        ports = serializers.PortSerializer(models.Port.pq(user), many=True).data
+            for w in container.url_set.all():
+                widgets.append(serializers.URLSerializer(w).data)
+
+            for w in container.simple_list_set.all():
+                widgets.append(serializers.SimpleListSerializer(w).data)
+
+            for w in container.counter_set.all():
+                widgets.append(serializers.CounterSerializer(w).data)
+
+            for w in container.simple_switch_set.all():
+                widgets.append(serializers.SimpleSwitchSerializer(w).data)
+
+            for w in container.document_set.all():
+                widgets.append(serializers.DocumentSerializer(w).data)
+            containers.append(serializers.ContainerSerializer(container).data)
+        if not containers:
+            containers = [serializers.ContainerSerializer(wall.initiate_default_container()).data]
+        meta = serializers.Meta(models.Meta(wall, request.user)).data
+        walls = [serializers.WallSerializer(wall).data]
+        ports = serializers.PortSerializer(models.Port.get_owned_ports(user), many=True).data
+        return JsonResponse({
+            'user': serializers.UserSerializer(user).data,
+            'containers': containers,
+            'ports': ports,
+            'widgets': widgets,
+            'walls': walls,
+            'meta': meta,
+        })
+
+    @classmethod
+    def _list_state(cls, request):
+        user = request.user
+        ports = serializers.PortSerializer(models.Port.get_owned_ports(user), many=True).data
+        walls = [
+            *serializers.WallSerializer(models.Wall.get_owned_walls(user), many=True).data,
+            *serializers.WallSerializer(models.Wall.get_trusted_walls(user), many=True).data
+        ]
+        containers = []
+        widgets = []
+        meta = None
+
         return JsonResponse({
             'user': serializers.UserSerializer(user).data,
             'containers': containers,
@@ -88,18 +112,29 @@ class App:
         })
 
     @staticmethod
+    @api_view(http_method_names=['GET'])
+    def state(request, pk=None):
+        if pk is None:
+            return App._list_state(request)
+        else:
+            return App._retrieve_state(request, pk)
+
+    @staticmethod
     @api_view(http_method_names=['GET', 'POST', 'DELETE'])
     def trusted_user(request):
+        username = request.GET.get('username')
+        pk = request.GET.get('wall')
+
         def get_user():
             try:
-                return models.User.objects.get(username=request.GET.get('username'))
+                return models.User.objects.get(username=username)
             except models.User.DoesNotExist:
                 return None
 
         def get_wall():
             try:
                 # Only trusted user (owner is trusted) may add trusted users!
-                return models.Wall.get_owned_walls(request.user).get(pk=request.GET.get('wall'))
+                return models.Wall.get_owned_walls(request.user).get(pk=pk)
             except models.Wall.DoesNotExist:
                 return None
 
@@ -136,19 +171,21 @@ class ProtectedModelViewSet(ModelViewSet):
     anonymous_actions = ['list', 'retrieve', 'partial_update', 'update']
 
     def update(self, request, *args, **kwargs):
+        user = request.user
         instance = self.model_class.objects.get(pk=self.kwargs['pk'])
-        user = self.request.user
-        owner = instance.related_wall_instance.owner
-        if user.is_anonymous or user != owner:
-            if not instance.validate_anonymous_access(self.request.data.keys()):
-                raise PermissionDenied()  # User has no right to change any of accessed fields
+        if not instance.has_anonymous_permission(user) and \
+                not instance.has_trusted_permission(user) and \
+                not instance.has_owner_permission(user):
+            return HttpResponseForbidden()
+        if user.is_anonymous and not instance.validate_anonymous_access(request.data.keys()):
+            return HttpResponseForbidden()
         return super().update(request, *args, **kwargs)
 
     def get_permissions(self):
         return [] if self.action in self.anonymous_actions else [IsAuthenticated()]
 
     def get_queryset(self):
-        return self.model_class.pq(self.request.user)
+        return self.model_class.get_reachable(self.request.user)
 
 
 class WallViewSet(ProtectedModelViewSet):

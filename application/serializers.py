@@ -137,6 +137,7 @@ class DocumentSerializer(CustomModelSerializer):
 
 
 class Meta(serializers.Serializer):
-    edit_permission = serializers.ReadOnlyField(default=False)
-    view_permission = serializers.ReadOnlyField(default=False)
+    owner_permission = serializers.ReadOnlyField(default=False)
+    trusted_permission = serializers.ReadOnlyField(default=False)
+    anonymous_permission = serializers.ReadOnlyField(default=False)
     file_size_max = serializers.ReadOnlyField(default=10485760)

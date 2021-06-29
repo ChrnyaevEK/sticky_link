@@ -22,17 +22,16 @@ class Protected(models.Model):
     _wall_path: str = None  # Path prefix to the wall instance (for permission check)
     _protected_fields = {'id', 'uid', 'version', 'type', 'date_of_creation', 'last_update'}
 
+    class Meta:
+        abstract = True
+
     @classmethod
     def build_trusted_query(cls, user):
-        owner = 'owner'
         trusted_users = 'trusted_users__in'
         if cls._wall_path is not None:
-            owner = cls._wall_path + owner
             trusted_users = cls._wall_path + trusted_users
 
-        q = Q(**{owner: user})
-        q.add(Q(**{trusted_users: [user]}), q.OR)
-        return q
+        return Q(**{trusted_users: [user]})
 
     @classmethod
     def build_owned_query(cls, user):
@@ -48,17 +47,24 @@ class Protected(models.Model):
             anonymous = cls._wall_path + anonymous
         return Q(**{anonymous: True})
 
-    def has_edit_permission(self, user):
+    def has_owner_permission(self, user):
+        q = self.build_owned_query(user)
+        return self.__class__.objects.filter(q).filter(pk=self.id).exists()
+
+    def has_trusted_permission(self, user):
         q = self.build_trusted_query(user)
         return self.__class__.objects.filter(q).filter(pk=self.id).exists()
 
-    def has_view_permission(self, user):
+    def has_anonymous_permission(self, user):
         q = self.build_anonymous_query(user)
         return self.__class__.objects.filter(q).filter(pk=self.id).exists()
 
-    def has_delete_permission(self, user):
-        q = self.build_owned_query(user)
-        return self.__class__.objects.filter(q).filter(pk=self.id).exists()
+    @classmethod
+    def get_reachable(cls, user):
+        q = cls.build_anonymous_query(user)
+        q.add(cls.build_trusted_query(user), q.OR)
+        q.add(cls.build_owned_query(user), q.OR)
+        return cls.objects.filter(q)
 
     @classmethod
     def validate_anonymous_access(cls, accessed_fields):
@@ -72,11 +78,11 @@ class Base(Protected):
     date_of_creation = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f'{type(self).__name__}: {self.id}'
-
     class Meta:
         abstract = True
+
+    def __str__(self):
+        return f'{type(self).__name__}: {self.id}'
 
     @property
     def related_wall_instance(self):
@@ -166,7 +172,7 @@ class Wall(SyncManager):
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     allow_anonymous_view = models.BooleanField(default=False)
-    trusted_users = models.ManyToManyField(User, related_name='trusted_walls')
+    trusted_users = models.ManyToManyField(User, related_name='trusted_walls', blank=True)
 
     title = models.CharField(max_length=200, default='Untitled', null=True, blank=True)
     description = models.CharField(max_length=500, blank=True, null=True)
@@ -192,6 +198,11 @@ class Wall(SyncManager):
     def get_trusted_walls(cls, user):
         q = cls.build_trusted_query(user)
         return cls.objects.filter(q)
+
+    def initiate_default_container(self):
+        container = Container(wall=self, index=0)
+        container.save()
+        return container
 
 
 class Container(SyncManager):
@@ -246,6 +257,13 @@ class Port(SyncManager):
         self.propagate_instance_deleted()
         super().delete(*args, **kwargs)
 
+    def resolve_target_wall(self, user):
+        if user.is_authenticated and self.authenticated_wall:
+            if self.authenticated_wall.owner == user or user in self.authenticated_wall.trusted_users:
+                return self.authenticated_wall
+        else:
+            return self.anonymous_wall
+
     @classmethod
     def build_trusted_query(cls, user):
         return Q(owner=user)
@@ -256,7 +274,17 @@ class Port(SyncManager):
 
     @classmethod
     def build_anonymous_query(cls, user):
-        return Q(owner=user)
+        return Q()  # All
+
+    @classmethod
+    def get_anonymous_ports(cls, user):
+        q = cls.build_anonymous_query(user)
+        return cls.objects.filter(q)
+
+    @classmethod
+    def get_owned_ports(cls, user):
+        q = cls.build_owned_query(user)
+        return cls.objects.filter(q)
 
 
 class Source(Base):
@@ -300,7 +328,6 @@ class Widget(SyncManager):
     title = models.CharField(max_length=200, blank=True, null=True)
     description = models.CharField(max_length=500, blank=True, null=True)
 
-    container = models.ForeignKey(Container, on_delete=models.CASCADE)
     help = models.CharField(max_length=200, null=True, blank=True)
 
     w = models.IntegerField(default=200, validators=[MinValueValidator(50)])
@@ -344,6 +371,8 @@ class SimpleText(Widget):
     sync_fields = ['text_content']
     sync_id = models.ForeignKey('SimpleText', blank=True, null=True, on_delete=models.SET_NULL)
 
+    container = models.ForeignKey(Container, on_delete=models.CASCADE, related_name='simple_text_set')
+
     text_content = models.TextField(null=True, blank=True)
 
 
@@ -351,6 +380,8 @@ class URL(Widget):
     type = 'url'
     sync_fields = ['href', 'text', 'open_in_new_window']
     sync_id = models.ForeignKey('URL', blank=True, null=True, on_delete=models.SET_NULL)
+
+    container = models.ForeignKey(Container, on_delete=models.CASCADE, related_name='url_set')
 
     href = models.URLField(null=True, blank=True)
     open_in_new_window = models.BooleanField(default=True)
@@ -361,6 +392,8 @@ class SimpleList(Widget):
     sync_fields = ['items', 'inner_border']
     sync_id = models.ForeignKey('SimpleList', blank=True, null=True, on_delete=models.SET_NULL)
 
+    container = models.ForeignKey(Container, on_delete=models.CASCADE, related_name='simple_list_set')
+
     items = models.JSONField(default=list)
     inner_border = models.BooleanField(default=True)
 
@@ -369,6 +402,8 @@ class Counter(Widget):
     type = 'counter'
     sync_fields = ['value', 'vertical', 'step']
     sync_id = models.ForeignKey('Counter', blank=True, null=True, on_delete=models.SET_NULL)
+
+    container = models.ForeignKey(Container, on_delete=models.CASCADE, related_name='counter_set')
 
     value = models.BigIntegerField(default=0)
     vertical = models.BooleanField(default=True)
@@ -380,6 +415,8 @@ class SimpleSwitch(Widget):
     sync_fields = ['value']
     sync_id = models.ForeignKey('SimpleSwitch', blank=True, null=True, on_delete=models.SET_NULL)
 
+    container = models.ForeignKey(Container, on_delete=models.CASCADE, related_name='simple_switch_set')
+
     value = models.BooleanField(default=False)
 
 
@@ -387,6 +424,8 @@ class Document(Widget):
     type = 'document'
     sync_fields = ['source']
     sync_id = models.ForeignKey('Document', blank=True, null=True, on_delete=models.SET_NULL)
+
+    container = models.ForeignKey(Container, on_delete=models.CASCADE, related_name='document_set')
 
     source = models.ForeignKey(Source, blank=True, on_delete=models.SET_NULL, null=True, related_name='parent')
 
@@ -404,5 +443,6 @@ class Meta:
     file_size_max = 10485760
 
     def __init__(self, instance, user):
-        self.edit_permission = instance.has_edit_permission(user)
-        self.view_permission = instance.has_view_permission(user)
+        self.owner_permission = instance.has_owner_permission(user)
+        self.trusted_permission = instance.has_trusted_permission(user)
+        self.anonymous_permission = instance.has_anonymous_permission(user)
