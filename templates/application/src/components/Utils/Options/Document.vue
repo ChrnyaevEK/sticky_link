@@ -49,7 +49,7 @@ export default {
   computed: {
     sourceURL() {
       if (this.instance.source && this.instance.source.file) {
-        return this.$store.state.app.sourceURL + this.instance.source.id + "/";
+        return this.$store.state.app.sourceURL + this.instance.source.id;
       }
       return false;
     },
