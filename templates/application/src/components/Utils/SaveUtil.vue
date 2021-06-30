@@ -1,7 +1,8 @@
 <template id="save-util-template">
     <span
-        class="mx-1 small font-weight-bold d-flex align-items-center"
+        class="small font-weight-bold d-flex align-items-center"
         :class="io.saveUtil.type ? 'text-' + io.saveUtil.type : 'text-secondary'"
+        v-show="io.saveUtil.state"
     >
         {{ io.saveUtil.state }}
     </span>

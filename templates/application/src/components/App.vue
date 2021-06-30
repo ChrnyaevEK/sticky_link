@@ -27,7 +27,8 @@
           </li>
         </ul>
       </div>
-      <div class="d-flex align-items-center">
+      <a :href="loginUrl" v-if="$store.state.user.is_anonymous">Login</a>
+      <div class="d-flex align-items-center" v-if="$store.state.user.is_authenticated">
         <SaveUtil></SaveUtil>
         <button
             class="navbar-toggler ml-2"
