@@ -22,7 +22,7 @@
       <router-link class="mr-2" :to="{name: 'wallView', params: { wallId: wall.id }}">
         View
       </router-link>
-      <button class="btn btn-sm text-danger mr-1" v-if="wall.owner_permission"
+      <button :disabled="$env.state.changesLock" class="btn btn-sm text-danger mr-1" v-if="wall.owner_permission"
               @click="$proxy.dispatch('deleteWall', wall)">
         <i class="fas fa-trash"></i>
       </button>

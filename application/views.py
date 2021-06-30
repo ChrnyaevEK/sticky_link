@@ -183,19 +183,16 @@ class ProtectedModelViewSet(ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         user = request.user
-        instance = self.model_class.objects.get(pk=self.kwargs['pk'])
-        if not instance.has_anonymous_permission(user) and \
-                not instance.has_trusted_permission(user) and \
-                not instance.has_owner_permission(user):
+        instance = self.get_object()
+        if not instance.anonymous_permission and not instance.trusted_permission and not instance.owner_permission:
             return abort('Forbidden', 403)
         if user.is_anonymous and not instance.validate_anonymous_access(request.data.keys()):
             return abort('Forbidden', 403)
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        user = request.user
-        instance = self.model_class.objects.get(pk=self.kwargs['pk'])
-        if not instance.has_trusted_permission(user) and not instance.has_owner_permission(user):
+        instance = self.get_object()
+        if not instance.trusted_permission and not instance.owner_permission:
             return abort('Forbidden', 403)
         return super().destroy(request, *args, **kwargs)
 
@@ -207,7 +204,7 @@ class ProtectedModelViewSet(ModelViewSet):
 
     def get_object(self):
         obj = super().get_object()
-        obj.set_permission()
+        obj.set_permission(self.request.user)
         return obj
 
 
@@ -216,16 +213,14 @@ class WallViewSet(ProtectedModelViewSet):
     model_class = models.Wall
 
     def update(self, request, *args, **kwargs):
-        user = request.user
-        wall = self.model_class.objects.get(pk=self.kwargs['pk'])
-        if not wall.has_owner_permission(user):
+        wall = self.get_object()
+        if not wall.owner_permission:
             return abort('Forbidden', 403)
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        user = request.user
-        wall = self.model_class.objects.get(pk=self.kwargs['pk'])
-        if not wall.has_owner_permission(user):
+        wall = self.get_object()
+        if not wall.owner_permission:
             return abort('Forbidden', 403)
         return super().destroy(request, *args, **kwargs)
 
@@ -282,13 +277,12 @@ class SourceViewSet(ProtectedModelViewSet):
         return sendfile(request, MEDIA_BASE_PATH + '/' + source.file.name, attachment=request.GET.get('attachment'))
 
     def update(self, request, *args, **kwargs):
-        user = request.user
         # Replace stored file
         try:
             source = self.get_object()
         except self.model_class.DoesNotExist:
             return abort('Not found', 404)
-        if not source.has_trusted_permission(user) and not source.has_owner_permission(user):
+        if not source.trusted_permission and not source.owner_permission:
             return abort('Forbidden', 403)
 
         try:  # Get path before update - if update fail, do not delete file
@@ -309,9 +303,8 @@ class SourceViewSet(ProtectedModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         # Delete file, not source object. Source will be deleted simultaneously with parent
-        user = request.user
         source = self.model_class.objects.get(pk=self.kwargs['pk'])
-        if not source.has_trusted_permission(user) and not source.has_owner_permission(user):
+        if not source.trusted_permission and not source.owner_permission:
             return abort('Forbidden', 403)
         try:
             source = self.get_object()

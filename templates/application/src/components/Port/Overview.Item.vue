@@ -13,7 +13,8 @@
         <span class="mr-1 font-weight-bold text-dark" title="Visited">
         {{ port.visited }}
       </span>
-      <button class="btn btn-sm text-danger mr-1" @click="$proxy.dispatch('deletePort', port)">
+      <button :disabled="$env.state.changesLock" class="btn btn-sm text-danger mr-1"
+              @click="$proxy.dispatch('deletePort', port)">
         <i class="fas fa-trash"></i>
       </button>
       <router-link class="btn btn-sm text-dark" :to="{name: 'portSettings', params: { portId }}">

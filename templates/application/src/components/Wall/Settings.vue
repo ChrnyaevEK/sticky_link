@@ -62,8 +62,13 @@
     <h5>Trusted users</h5>
     <div class="form-group">
       <label v-scope:for.trusted_users>
-        Enter <strong>username</strong> to grant edit access on this wall
+        Enter <strong>username</strong> to grant <strong>edit</strong> access on this wall. Enter as many users as you
+        wish!
       </label>
+      <p class="alert alert-warning">
+        User will be able to edit wall (add o remove widgets). <br/>
+        User will not be able to delete the wall or change it's settings
+      </p>
       <div class="d-flex align-items-center">
         <input class="form-control mr-1 font-weight-bold" v-model="username" @input.stop="validate"
                :disabled="$env.state.changesLock"
@@ -138,7 +143,7 @@ export default {
             return true
           }
         }
-        if (this.$store.state.user.id === user.id){
+        if (this.$store.state.user.id === user.id) {
           return true
         }
       }

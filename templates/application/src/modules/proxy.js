@@ -156,6 +156,10 @@ export default new VueX.Store({
                 } catch (e) {
                     return
                 }
+                Vue.notify({
+                    text: 'Port was deleted!',
+                    type: "success",
+                });
             }
         },
         async deleteWall(context, wall) {
@@ -168,10 +172,13 @@ export default new VueX.Store({
                 } catch (e) {
                     return
                 }
+                Vue.notify({
+                    text: 'Wall was deleted!',
+                    type: "success",
+                });
                 if (router.currentRoute.params.wallId === id) {
                     await router.push({name: "home"});
                 }
-                await env.dispatch("unlockChanges"); // Unlock changes
             }
         },
         async deleteContainer(context, container) {
@@ -183,6 +190,10 @@ export default new VueX.Store({
                 } catch (e) {
                     return
                 }
+                Vue.notify({
+                    text: 'Container was deleted!',
+                    type: "success",
+                });
                 await env.dispatch("closeOptions");
             }
         },
@@ -195,6 +206,10 @@ export default new VueX.Store({
                 } catch (e) {
                     return
                 }
+                Vue.notify({
+                    text: 'Widget was created!',
+                    type: "success",
+                });
                 await env.dispatch("closeOptions");
             }
         },

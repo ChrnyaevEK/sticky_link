@@ -14,16 +14,22 @@
           <span class="text-secondary" :title="wall.description">{{ wall.description }}</span>
         </span>
         <router-link
+            v-if="$env.state.editMode && wall.owner_permission"
+            :to="{name: 'wallSettings', params: {wallId: wall.id}}"
+            class="btn btn-sm btn-outline-secondary d-none d-md-block mr-1"
+        > Settings
+        </router-link>
+        <router-link
             v-if="$env.state.editMode"
-            class="btn btn-sm btn-outline-primary mr-1"
+            class="btn btn-sm btn-outline-primary"
             :to="{ name: 'wallView', params: { wallId: wall.id }}"
         > View
         </router-link>
         <router-link
-            v-if="$env.state.editMode && wall.owner_permission"
-            :to="{name: 'wallSettings', params: {wallId: wall.id}}"
-            class="btn btn-sm btn-outline-secondary d-none d-md-block"
-        > Settings
+            v-else-if="wall.owner_permission || wall.trusted_permission"
+            class="btn btn-sm btn-outline-primary"
+            :to="{ name: 'wallEdit', params: { wallId: wall.id }}"
+        > Edit
         </router-link>
       </div>
       <!-- Container section -->
