@@ -13,6 +13,7 @@ import WallSettings from "../components/Wall/Settings";
 
 import PortSettings from "../components/Port/Settings";
 import PortOverview from "../components/Port/Overview";
+import PortActivation from "../components/Port/Activation";
 import NotAuthenticated from "../components/NotAuthenticated";
 
 
@@ -123,6 +124,14 @@ const router = new VueRouter({
                     async beforeEnter(to, from, next) {
                         await guardOwned(to, from, next, 'portId', 'home', store.state.ports)
                     },
+                },
+                {
+                    name: 'portActivation',
+                    path: 'port/activation/:portId',
+                    component: PortActivation,
+                    beforeEnter(to, from, next) {
+                        guardAuthenticated(to, from, next)
+                    }
                 },
                 {
                     name: 'portOverview',

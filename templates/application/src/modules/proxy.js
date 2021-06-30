@@ -207,7 +207,7 @@ export default new VueX.Store({
                     return
                 }
                 Vue.notify({
-                    text: 'Widget was created!',
+                    text: 'Widget was deleted!',
                     type: "success",
                 });
                 await env.dispatch("closeOptions");
@@ -324,7 +324,21 @@ export default new VueX.Store({
                 text: "User has been removed!",
                 type: "success",
             });
-        }
+        },
+        async activatePort(context, portId) {
+            try {
+                await withChangesLock(async () => {
+                    await store.dispatch('activatePort', portId)
+                })
+            } catch (e) {
+                return
+            }
+            Vue.notify({
+                text: "Port has been activated!",
+                type: "success",
+            });
+            await router.push({name: "portSettings", params: {portId}});
+        },
     },
 })
 ;

@@ -120,7 +120,7 @@ class WallSerializer(CustomModelSerializer):
 
 class PortSerializer(CustomModelSerializer):
     class Meta:
-        fields = '__all__'
+        exclude = ['activated']
         model = models.Port
 
 

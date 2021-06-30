@@ -255,14 +255,16 @@ class Port(SyncManager):
     """ Describe static link ready to be distributed - link format should not change """
     type = 'port'
 
+    activated = models.BooleanField(default=True)  # Internal use only
+
     title = models.CharField(max_length=200, blank=True, default='Untitled')
-    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     visited = models.IntegerField(default=0)
-    authenticated_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL, default=None,
+    authenticated_wall = models.ForeignKey(Wall, null=True, blank=True, on_delete=models.SET_NULL, default=None,
                                            related_name='authenticated_wall')
-    anonymous_wall = models.ForeignKey(Wall, null=True, on_delete=models.SET_NULL, default=None,
+    anonymous_wall = models.ForeignKey(Wall, null=True, blank=True, on_delete=models.SET_NULL, default=None,
                                        related_name='anonymous_wall')
-    redirect_url = models.URLField(null=True, default=None)
+    redirect_url = models.URLField(null=True, default=None, blank=True)
 
     def __str__(self):
         return f'{self.id} | {self.title or "Untitled port"}'
@@ -284,11 +286,11 @@ class Port(SyncManager):
 
     @classmethod
     def build_trusted_query(cls, user):
-        return Q(owner=user)
+        return Q(owner=user, activated=True)
 
     @classmethod
     def build_owned_query(cls, user):
-        return Q(owner=user)
+        return Q(owner=user, activated=True)
 
     @classmethod
     def build_anonymous_query(cls, user):
@@ -305,6 +307,10 @@ class Port(SyncManager):
     def get_anonymous_ports(cls, user):
         q = cls.build_anonymous_query(user)
         return cls.objects.filter(q)
+
+    def activate(self, user):
+        self.activated = True
+        self.owner = user
 
 
 class Source(Base):

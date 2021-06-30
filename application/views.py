@@ -32,6 +32,7 @@ class App:
         return HttpResponse(render(request, template))
 
     @staticmethod
+    @api_view(http_method_names=['GET', 'POST'])
     def port(request, pk):
         # Resolve redirection to required resource
         user = request.user
@@ -39,17 +40,29 @@ class App:
             port = models.Port.get_anonymous_ports(user).get(pk=pk)
         except models.Port.DoesNotExist:
             return HttpResponseNotFound('Port does not exist')
+        if request.method == 'GET':
+            if not port.activated:
+                return redirect(f'/port/activation/{port.id}')
+            port.visited += 1  # Update port statistics
+            port.save()
 
-        port.visited += 1  # Update port statistics
-        port.save()
+            wall = port.resolve_target_wall(user)
+            if wall is None:
+                if port.redirect_url is not None:
+                    return redirect(port.redirect_url)
+                return HttpResponseNotFound('Invalid resource')
 
-        wall = port.resolve_target_wall(user)
-        if wall is None:
-            if port.redirect_url is not None:
-                return redirect(port.redirect_url)
-            return HttpResponseNotFound('Invalid resource')
-
-        return redirect(f'/wall/view/{wall.id}/')
+            return redirect(f'/wall/view/{wall.id}')
+        else:
+            if user.is_authenticated:
+                if not port.activated:
+                    port.activate(user)
+                    port.save()
+                    return JsonResponse(serializers.PortSerializer(port).data)
+                else:
+                    return abort('Forbidden', 403)
+            else:
+                return abort('Not authenticated', 403)
 
     @classmethod
     def _retrieve_state(cls, request, pk):

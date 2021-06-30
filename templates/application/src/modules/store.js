@@ -135,7 +135,10 @@ const store = new Vuex.Store({
         },
         async deleteTrustedUser(context, {username, wall}) {
             return await api.ajaxJSON({url: 'trusted_user?username=' + username + '&wall=' + wall, type: 'DELETE'})
-        }
+        },
+        async activatePort(context, portId) {
+            return await api.ajaxJSON({url: '/port/' + portId + '/', type: 'POST'}, false)
+        },
     },
 });
 

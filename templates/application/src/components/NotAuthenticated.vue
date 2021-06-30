@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex justify-content-center align-items-center h-100 w-100">
-    <a :href="loginUrl" class="mr-1">Login</a> to get in!
+    <a :href="loginUrl" class="mr-1">Login</a> and try again!
   </div>
 </template>
 <script>

@@ -23,7 +23,7 @@ export default {
                 ...settings,
                 crossDomain: true,
                 processData: false,
-                url: process.env.VUE_APP_API_HOST + "/" + settings.url,
+                url: process.env.VUE_APP_API_PROTOCOL + '://' + process.env.VUE_APP_HOST + settings.url,
                 headers: {
                     "X-CSRFToken": csrfToken,
                     ...(settings.headers || {}),
@@ -44,7 +44,11 @@ export default {
             throw response
         }
     },
-    ajaxJSON(settings) {
+    ajaxJSON(settings, api) {
+        api = api === undefined
+        if (api) {
+            settings.url = process.env.VUE_APP_API + "/" + settings.url
+        }
         return this.ajax({
             ...settings,
             data: settings.data ? JSON.stringify(settings.data) : undefined,
