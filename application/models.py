@@ -78,7 +78,7 @@ class Protected(models.Model):
         if not user.is_anonymous:
             q.add(cls.build_trusted_query(user), q.OR)
             q.add(cls.build_owned_query(user), q.OR)
-        return cls.objects.filter(q)
+        return cls.objects.filter(q).distinct()
 
     @classmethod
     def validate_anonymous_access(cls, accessed_fields):
