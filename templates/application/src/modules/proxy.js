@@ -244,6 +244,17 @@ export default new VueX.Store({
                 }
             }
         },
+        async copyContainer(context, container) {
+            if (confirm("Are you sure?")) {
+                try {
+                    await withChangesLock(async () => {
+                        await store.dispatch("copyContainer", container);
+                    })
+                } catch (e) {
+                    return
+                }
+            }
+        },
         async $_update(context, {instance, warningTarget}) {
             try {
                 await store.dispatch("updateOrAddInstance", instance);

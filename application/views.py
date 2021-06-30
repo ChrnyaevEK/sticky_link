@@ -201,6 +201,18 @@ class App:
         clone.set_permission(user)
         return JsonResponse(serializers.WallSerializer(clone).data)
 
+    @staticmethod
+    @api_view(http_method_names=['POST'])
+    def copy_container(request, pk):
+        user = request.user
+        try:
+            container = models.Container.get_reachable(user).get(pk=pk)
+        except models.Container.DoesNotExist:
+            return abort('Container is unreachable', 403)
+        clone = container.copy()
+        clone.set_permission(user)
+        return JsonResponse(serializers.ContainerSerializer(clone).data)
+
 
 class ProtectedModelViewSet(ModelViewSet):
     model_class = None

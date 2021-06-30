@@ -3,18 +3,18 @@
       class="d-flex flex-column bg-white mb-2"
       :class="{ 'border-top border-bottom': $env.state.editMode }"
   >
-    <div class="px-2 d-flex justify-content-between">
-      <div class="mr-1 py-1" :class="$env.state.editMode ? 'text-truncate' : 'text-break'">
+    <div class="px-2 d-flex">
+      <div class="mr-1 py-1 flex-grow-1" :class="$env.state.editMode ? 'text-truncate' : 'text-break'">
         <strong class="mr-1 text-primary">{{ container.title }}</strong>
         <span class="text-secondary">{{ container.description }}</span>
       </div>
       <button
           v-if="$env.state.editMode"
-          class="btn btn-sm d-none d-md-block"
+          class="btn btn-sm text-secondary d-none d-md-block"
           @click.stop="$env.dispatch('openOptions', container)"
           :disabled="$env.state.changesLock"
       >
-        <i class="fas fa-ellipsis-h"></i>
+        <i class="fas fa-ellipsis-v"></i>
       </button>
     </div>
     <div class="overflow-auto" style="-webkit-overflow-scrolling: touch;">
@@ -92,7 +92,7 @@ export default {
         simple_list: 'List',
         simple_switch: 'Switch',
         document: 'Document'
-      }
+      },
     }
   },
   computed: {
