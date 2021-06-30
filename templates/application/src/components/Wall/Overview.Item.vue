@@ -26,7 +26,7 @@
               @click="$proxy.dispatch('deleteWall', wall)">
         <i class="fas fa-trash"></i>
       </button>
-      <router-link class="btn btn-sm text-dark" v-if="wall.owner_permission"
+      <router-link class="btn btn-sm text-secondary" v-if="wall.owner_permission"
                    :to="{name: 'wallSettings', params: { wallId: wall.id }}">
         <i class="fas fa-ellipsis-v"></i>
       </router-link>
