@@ -22,9 +22,17 @@
       <router-link class="mr-2" :to="{name: 'wallView', params: { wallId: wall.id }}">
         View
       </router-link>
-      <button :disabled="$env.state.changesLock" class="btn btn-sm text-danger mr-1" v-if="wall.owner_permission"
-              @click="$proxy.dispatch('deleteWall', wall)">
+      <button
+          title="Delete wall"
+          :disabled="$env.state.changesLock" class="btn btn-sm text-danger mr-1" v-if="wall.owner_permission"
+          @click="$proxy.dispatch('deleteWall', wall)">
         <i class="fas fa-trash"></i>
+      </button>
+      <button
+          title="Copy wall"
+          :disabled="$env.state.changesLock" class="btn btn-sm text-secondary mr-1" v-if="wall.owner_permission"
+          @click="$proxy.dispatch('copyWall', wall)">
+        <i class="fas fa-copy"></i>
       </button>
       <router-link class="btn btn-sm text-dark" v-if="wall.owner_permission"
                    :to="{name: 'wallSettings', params: { wallId: wall.id }}">

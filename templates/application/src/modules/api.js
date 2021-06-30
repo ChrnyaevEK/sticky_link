@@ -94,7 +94,7 @@ export default {
     },
     upload(id, name, data) {
         return this.ajax({
-            url: "source/" + id,
+            url: process.env.VUE_APP_API + "/" + "source/" + id,
             type: "PUT",
             cache: false,
             contentType: false,

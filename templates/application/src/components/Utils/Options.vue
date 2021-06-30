@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="instance">
     <div class="text-right">
       <a class="btn" @click="$env.dispatch('closeOptions')"><i class="fas fa-times"></i></a>
     </div>

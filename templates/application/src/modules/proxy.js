@@ -233,6 +233,17 @@ export default new VueX.Store({
                 return
             }
         },
+        async copyWall(context, wall) {
+            if (confirm("Are you sure?")) {
+                try {
+                    await withChangesLock(async () => {
+                        await store.dispatch("copyWall", wall);
+                    })
+                } catch (e) {
+                    return
+                }
+            }
+        },
         async $_update(context, {instance, warningTarget}) {
             try {
                 await store.dispatch("updateOrAddInstance", instance);
