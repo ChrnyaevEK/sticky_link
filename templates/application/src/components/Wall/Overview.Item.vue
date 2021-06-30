@@ -1,7 +1,7 @@
 <template>
   <div class="btn-outline-light my-1 p-1 row no-gutters">
     <div class="col-12 col-md-8 d-md-flex align-items-center">
-      <div class="w-25 text-truncate mr-1 d-flex align-items-center" :title="wall.title"
+      <div class="w-25 text-truncate mr-1" :title="wall.title"
            :class="wall.title ? 'text-dark font-weight-bold' : 'text-muted'">
         <small class="text-secondary mr-2">
           <i class="fas fa-user-friends mr-2" v-if="isShared" title="This wall is shared"></i>
