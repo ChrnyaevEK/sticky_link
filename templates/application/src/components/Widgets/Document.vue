@@ -4,7 +4,7 @@
       <strong :title="title" :class="{ 'text-muted': !title }">{{ title || "Empty" }}</strong>
       <hr class="w-75 text-secondary"/>
       <div v-if="title">
-        <a :href="sourceURL + '?attachment'" target="_blank" class="text-truncate mr-3">Download</a>
+        <a :href="sourceURL + '?attachment=true'" target="_blank" class="text-truncate mr-3">Download</a>
         <a :href="sourceURL" target="_blank" class="text-truncate">Open</a>
       </div>
       <div class="text-muted" v-if="widget.source">{{ timeFormatted(widget.source.last_update) }}</div>
