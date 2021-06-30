@@ -32,7 +32,7 @@ export default {
     },
     sourceURL() {
       if (this.widget.source && this.widget.source.file) {
-        return this.$store.state.app.sourceURL + this.widget.source.id + "/";
+        return this.$store.state.app.sourceURL + this.widget.source.id;
       }
       return false;
     },
