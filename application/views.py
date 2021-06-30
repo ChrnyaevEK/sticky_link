@@ -258,7 +258,9 @@ class SourceViewSet(ProtectedModelViewSet):
     serializer_class = serializers.SourceSerializer
 
     def get_object(self):
-        return self.get_queryset().filter(id=self.kwargs['pk']).first()
+        obj = self.get_queryset().filter(id=self.kwargs['pk']).first()
+        obj.set_permission(self.request.user)
+        return obj
 
     def create(self, request, *args, **kwargs):
         return HttpResponseForbidden()  # Sources will be managed manually
@@ -303,7 +305,7 @@ class SourceViewSet(ProtectedModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         # Delete file, not source object. Source will be deleted simultaneously with parent
-        source = self.model_class.objects.get(pk=self.kwargs['pk'])
+        source = self.get_object()
         if not source.trusted_permission and not source.owner_permission:
             return abort('Forbidden', 403)
         try:

@@ -9,7 +9,6 @@ from application.consumers import Event as ConsumerEvent, WallConsumer
 from asgiref.sync import async_to_sync
 import hashlib
 from django.db.models import Q
-from django.db.models.query import EmptyQuerySet
 
 User.type = 'user'
 AnonymousUser.username = 'anonymous'
