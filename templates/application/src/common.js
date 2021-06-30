@@ -83,7 +83,7 @@ export function getByUid(source, uid) {
 }
 
 export function getReactiveCopy(obj) {
-    return Vue.observable(Object.assign({}, obj))
+    return Vue.observable(Object.assign(deepCopy(obj)))
 }
 
 export const types = {

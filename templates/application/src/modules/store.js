@@ -21,7 +21,7 @@ function determineSource(instance) {
 
 
 const store = new Vuex.Store({
-    strict: false,
+    strict: true,
     getters: {
         getWallById: (state) => (id) => {
             return getById(state.walls, id)
