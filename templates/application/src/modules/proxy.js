@@ -72,19 +72,13 @@ export default new VueX.Store({
                 });
             }
         },
-        async createContainer(context, wall) {
-            let index = 0;
-            for (let container of store.state.containers) {
-                if (container.index > index) {
-                    index = container.index + 1;
-                }
-            }
+        async createContainer(context, {wall, next_container}) {
             try {
                 await withChangesLock(async () => {
                     return await store.dispatch("createInstance", {
                         type: "container",
                         wall: wall.id,
-                        index,
+                        next: next_container.id,
                     });
                 })
             } catch (e) {

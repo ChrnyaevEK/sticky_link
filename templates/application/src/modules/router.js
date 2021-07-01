@@ -176,14 +176,14 @@ router.beforeEach(async (to, from, next) => {
         try {
             await store.dispatch("fetchState", to.params.wallId);
         } catch (e) {
-            if (e.status >= 500) {
+            if (e.status === 0 || e.status >= 500) {
                 return next({
                     name: "error",
                 });
             } else {
                 return next({
-                    name: "home",
-                });
+                    name: 'home'
+                })
             }
         }
     }
