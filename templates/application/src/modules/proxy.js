@@ -72,13 +72,12 @@ export default new VueX.Store({
                 });
             }
         },
-        async createContainer(context, {wall, next_container}) {
+        async createContainer(context, wall) {
             try {
                 await withChangesLock(async () => {
                     return await store.dispatch("createInstance", {
                         type: "container",
                         wall: wall.id,
-                        next: next_container.id,
                     });
                 })
             } catch (e) {
