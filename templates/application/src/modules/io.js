@@ -66,7 +66,7 @@ export default new Vue({
         unsetWarning(target) {
             if (!target) return
             target = $(target)
-            target.find(`p.${this.warning.class}`).remove();
+            target.find(`div.${this.warning.class}`).remove();
             target.find(`.${this.warning.class}`).removeClass("text-danger").removeClass(this.warning.class);
         },
     },

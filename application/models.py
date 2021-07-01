@@ -224,7 +224,7 @@ class Wall(SyncManager):
         return cls.objects.filter(q)
 
     def initiate_default_container(self):
-        container = Container(wall=self, index=0)
+        container = Container(wall=self)
         container.save()
         return container
 
@@ -283,7 +283,7 @@ class Wall(SyncManager):
 class Container(SyncManager):
     type = 'container'
     _wall_path = 'wall__'
-    _protected_fields = {'wall', 'index', 'h', 'w', 'description', 'title'}
+    _protected_fields = {'wall', 'next', 'h', 'w', 'description', 'title'}
     _protected_fields.update(Base._protected_fields)
 
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
