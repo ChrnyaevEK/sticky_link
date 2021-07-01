@@ -23,6 +23,8 @@ urlpatterns = [
     path('api/state', views.App.state, name="state"),
     path('api/state/<str:pk>', views.App.state, name="state"),
     path('api/trusted_user', views.App.trusted_user),
+    path('api/wall/copy/<str:pk>', views.App.copy_wall),
+    path('api/container/copy/<str:pk>', views.App.copy_container),
     path('api/', include(router.urls), name="api"),
     *static(settings.STATIC_URL, document_root='templates/application/dist/static'),
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),

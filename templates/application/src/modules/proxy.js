@@ -72,19 +72,13 @@ export default new VueX.Store({
                 });
             }
         },
-        async createContainer(context, wall) {
-            let index = 0;
-            for (let container of store.state.containers) {
-                if (container.index > index) {
-                    index = container.index + 1;
-                }
-            }
+        async createContainer(context, {wall, next_container}) {
             try {
                 await withChangesLock(async () => {
                     return await store.dispatch("createInstance", {
                         type: "container",
                         wall: wall.id,
-                        index,
+                        next: next_container.id,
                     });
                 })
             } catch (e) {
@@ -231,6 +225,28 @@ export default new VueX.Store({
                 })
             } catch (e) {
                 return
+            }
+        },
+        async copyWall(context, wall) {
+            if (confirm("Are you sure?")) {
+                try {
+                    await withChangesLock(async () => {
+                        await store.dispatch("copyWall", wall);
+                    })
+                } catch (e) {
+                    return
+                }
+            }
+        },
+        async copyContainer(context, container) {
+            if (confirm("Are you sure?")) {
+                try {
+                    await withChangesLock(async () => {
+                        await store.dispatch("copyContainer", container);
+                    })
+                } catch (e) {
+                    return
+                }
             }
         },
         async $_update(context, {instance, warningTarget}) {

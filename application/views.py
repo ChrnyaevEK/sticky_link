@@ -72,7 +72,7 @@ class App:
         try:
             wall = models.Wall.get_reachable(user).get(pk=pk)
         except models.Wall.DoesNotExist:
-            return abort('Wall is unreachable', 404)
+            return abort('Wall is unreachable', 403)
         wall.set_permission(user)
         for container in wall.container_set.all():
             for w in container.simple_text_set.all():
@@ -189,6 +189,30 @@ class App:
             wall.save()
             return JsonResponse(serializers.WallSerializer(wall).data)
 
+    @staticmethod
+    @api_view(http_method_names=['POST'])
+    def copy_wall(request, pk):
+        user = request.user
+        try:
+            wall = models.Wall.get_owned_walls(user).get(pk=pk)
+        except models.Wall.DoesNotExist:
+            return abort('Wall is unreachable', 403)
+        clone = wall.copy()
+        clone.set_permission(user)
+        return JsonResponse(serializers.WallSerializer(clone).data)
+
+    @staticmethod
+    @api_view(http_method_names=['POST'])
+    def copy_container(request, pk):
+        user = request.user
+        try:
+            container = models.Container.get_reachable(user).get(pk=pk)
+        except models.Container.DoesNotExist:
+            return abort('Container is unreachable', 403)
+        clone = container.copy()
+        clone.set_permission(user)
+        return JsonResponse(serializers.ContainerSerializer(clone).data)
+
 
 class ProtectedModelViewSet(ModelViewSet):
     model_class = None
@@ -271,7 +295,7 @@ class SourceViewSet(ProtectedModelViewSet):
     serializer_class = serializers.SourceSerializer
 
     def get_object(self):
-        obj = self.get_queryset().filter(id=self.kwargs['pk']).first()
+        obj = self.get_queryset().get(pk=self.kwargs['pk'])
         obj.set_permission(self.request.user)
         return obj
 
@@ -286,9 +310,9 @@ class SourceViewSet(ProtectedModelViewSet):
         try:
             source = self.get_object()
         except self.model_class.DoesNotExist:
-            return abort('Not found', 404)
+            return HttpResponseNotFound('Source was not found')
         if source.file is None:
-            return abort('Not found', 404)
+            return HttpResponseNotFound('Source was not found')
         return sendfile(request, MEDIA_BASE_PATH + '/' + source.file.name, attachment=request.GET.get('attachment'))
 
     def update(self, request, *args, **kwargs):
@@ -312,12 +336,12 @@ class SourceViewSet(ProtectedModelViewSet):
         except (TypeError, OSError):
             pass
 
-        for parent in source.parent.all():
-            parent.propagate_instance_updated()
+        for document in source.document_set.all():
+            document.propagate_instance_updated()
         return response
 
     def destroy(self, request, *args, **kwargs):
-        # Delete file, not source object. Source will be deleted simultaneously with parent
+        # Delete file, not source object. Source will be deleted simultaneously with document_set
         source = self.get_object()
         if not source.trusted_permission and not source.owner_permission:
             return abort('Forbidden', 403)
@@ -326,18 +350,21 @@ class SourceViewSet(ProtectedModelViewSet):
         except self.model_class.DoesNotExist:
             return abort('Not found', 404)
         source.delete_file()
-        for parent in source.parent.all():
-            parent.propagate_instance_updated()
+        for document in source.document_set.all():
+            document.propagate_instance_updated()
         return Response('Ok')
 
 
 class SyncViewSet(ProtectedModelViewSet):
 
     def update(self, request, pk=None, *args, **kwargs):
-        if not self.model_class.has_any_sync_widget(request.user, request.data.get('sync_id')):
-            return JsonResponse({
-                'sync_id': ['Make sure the sync ID belong to user and widgets have the same type.']
-            }, status=400)
+        try:
+            if not self.model_class.has_any_sync_widget(request.data['sync_id']):
+                return JsonResponse({
+                    'sync_id': ['Make sure the sync ID belong to user and widgets have the same type.']
+                }, status=400)
+        except KeyError:
+            pass
         return super().update(request, *args, **kwargs)
 
 
@@ -383,4 +410,4 @@ class DocumentViewSet(SyncViewSet):
         source.save()
         document.source = source
         document.save()
-        return response
+        return JsonResponse(serializers.DocumentSerializer(document).data)

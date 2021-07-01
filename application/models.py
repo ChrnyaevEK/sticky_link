@@ -101,7 +101,7 @@ class Base(Protected):
     @property
     def related_wall_instance(self):
         try:
-            return self.parent.first().container.wall
+            return self.document_set.first().container.wall
         except AttributeError:
             try:  # Container or Port
                 return self.wall
@@ -118,6 +118,13 @@ class Base(Protected):
     @property
     def version(self):
         return _to_hash(self.last_update.isoformat())
+
+    def copy(self):
+        clone = self.__class__.objects.get(pk=self.pk)
+        clone.id = None
+        clone.pk = None
+        clone.save()
+        return clone
 
 
 class SyncManager(Base):
@@ -173,9 +180,8 @@ class SyncManager(Base):
                     instance.save()
 
     @classmethod
-    def has_any_sync_widget(cls, user, sync_id=None):  # Empty sync_id is valid
-        # Validate sync_id. Find any object that belong to user and has id equal to requested sync_id
-        return not sync_id or cls.get_reachable(user).filter(pk=sync_id).exists()
+    def has_any_sync_widget(cls, sync_id):
+        return cls.objects.filter(pk=sync_id).exists()
 
 
 class Wall(SyncManager):
@@ -222,6 +228,57 @@ class Wall(SyncManager):
         container.save()
         return container
 
+    def copy(self):
+        clone = super().copy()
+        for container in self.container_set.all():
+            clone.container_set.add(container.copy())
+        clone.save()
+        return clone
+
+    def chain_new_container(self, container):
+        last = self.container_set.last()
+        last.next = container
+        last.save()
+
+    def fix_container_chaining(self):
+        previous = None
+        start_list = []
+        for container in self.container_set.order('date_of_creation').all():
+            if container.wall != self:
+                raise ValueError('Unexpected foreign container')
+            # Chain all unchained containers
+            if container.next is None and container.previous is None:
+                if previous is not None:
+                    previous.next = container
+                    previous.save()
+                previous = container
+            # Collect chain starts
+            if container.next is not None and container.previous is None:  # Chain start
+                start_list.append(container)
+
+        if len(start_list) == 1:  # Nothing to chain
+            return
+
+        def chain_container(cnt, arr):
+            if cnt.next is None:
+                return
+            arr.append(cnt.next)
+            chain_container(cnt.next, arr)
+
+        chain_list = []
+        for start in start_list:
+            chain = [start]
+            chain_container(start, chain)
+            chain_list.append(chain)
+
+        # Chain chains
+        previous_chain = None
+        for chain in chain_list:
+            if previous_chain is not None:
+                previous_chain[-1].next = chain[0]
+                previous_chain[-1].save()
+            previous_chain = chain
+
 
 class Container(SyncManager):
     type = 'container'
@@ -230,7 +287,8 @@ class Container(SyncManager):
     _protected_fields.update(Base._protected_fields)
 
     wall = models.ForeignKey(Wall, on_delete=models.CASCADE)
-    index = models.IntegerField(validators=[MinValueValidator(0)])
+    next = models.OneToOneField('Container', on_delete=models.SET_NULL, null=True, default=None, blank=True,
+                                related_name='previous')
 
     h = models.IntegerField(default=100, validators=[MinValueValidator(50)])
     w = models.IntegerField(default=3000)  # Should not change (is static)
@@ -246,9 +304,38 @@ class Container(SyncManager):
         super().save(*args, **kwargs)
         self.propagate_instance_updated()
 
+    def _by_pass_next(self):
+        try:
+            self.previous.next = self.next
+        except AttributeError:
+            pass
+
     def delete(self, *args, **kwargs):
+        self._by_pass_next()
         self.propagate_instance_deleted()
         super().delete(*args, **kwargs)
+
+    def copy(self):
+        clone = super().copy()
+        for w in self.simple_text_set.all():
+            clone.simple_text_set.add(w.copy())
+
+        for w in self.url_set.all():
+            clone.url_set.add(w.copy())
+
+        for w in self.simple_list_set.all():
+            clone.simple_list_set.add(w.copy())
+
+        for w in self.counter_set.all():
+            clone.counter_set.add(w.copy())
+
+        for w in self.simple_switch_set.all():
+            clone.simple_switch_set.add(w.copy())
+
+        for w in self.document_set.all():
+            clone.document_set.add(w.copy())
+        clone.save()
+        return clone
 
 
 class Port(SyncManager):
@@ -314,7 +401,7 @@ class Port(SyncManager):
 
 
 class Source(Base):
-    _wall_path = 'parent__container__wall__'
+    _wall_path = 'document_set__container__wall__'
     file = models.FileField(upload_to='%Y/%m/%d/', null=True)
 
     @classmethod
@@ -453,15 +540,16 @@ class Document(Widget):
 
     container = models.ForeignKey(Container, on_delete=models.CASCADE, related_name='document_set')
 
-    source = models.ForeignKey(Source, blank=True, on_delete=models.SET_NULL, null=True, related_name='parent')
+    # When copy widget - refer the same source (do not copy real file)
+    source = models.ForeignKey(Source, blank=True, on_delete=models.SET_NULL, null=True, related_name='document_set')
 
     def delete(self, *args, **kwargs):
-        if not self.has_any_sync_widget:
+        if not self.has_any_sync_widget(self.sync_id) and len(self.source.document_set.all()) == 1:
             self.source.delete_file()
-        try:
-            self.source.delete()
-        except AttributeError:
-            pass  # Source has been deleted
+            try:
+                self.source.delete()
+            except AttributeError:
+                pass  # Source has been deleted
         super().delete(*args, **kwargs)
 
 

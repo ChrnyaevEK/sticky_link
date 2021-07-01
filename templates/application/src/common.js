@@ -83,6 +83,7 @@ export function getByUid(source, uid) {
 }
 
 export function getReactiveCopy(obj) {
+    if (obj === undefined) return undefined
     return Vue.observable(Object.assign(deepCopy(obj)))
 }
 

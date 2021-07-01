@@ -139,6 +139,14 @@ const store = new Vuex.Store({
         async activatePort(context, portId) {
             return await api.ajaxJSON({url: '/port/' + portId + '/', type: 'POST'}, false)
         },
+        async copyWall(context, wall) {
+            wall = await api.ajaxJSON({url: 'wall/copy/' + wall.id, type: 'POST'})
+            context.commit("updateOrAddInstance", wall);
+        },
+        async copyContainer(context, container) {
+            container = await api.ajaxJSON({url: 'container/copy/' + container.id, type: 'POST'})
+            context.commit("updateOrAddInstance", container);
+        }
     },
 });
 
