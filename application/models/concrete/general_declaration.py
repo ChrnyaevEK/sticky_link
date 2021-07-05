@@ -8,7 +8,7 @@ from django.core.validators import BaseValidator, MaxValueValidator, MinValueVal
 
 from hashid_field import HashidAutoField
 
-from application.data.abstract import BaseFactory
+from application.models.abstract import BaseFactory
 
 User.type = 'user'
 AnonymousUser.username = 'anonymous'
@@ -38,6 +38,9 @@ class ConcreteFactory(BaseFactory):
             description = models.CharField(max_length=500, blank=True, null=True)
             lock_widgets = models.BooleanField(default=True)
 
+            class Meta:
+                abstract = True
+
         return Wall
 
     @classmethod
@@ -53,6 +56,9 @@ class ConcreteFactory(BaseFactory):
 
             title = models.CharField(max_length=200, null=True, blank=True)
             description = models.CharField(max_length=500, blank=True, null=True)
+
+            class Meta:
+                abstract = True
 
         return Container
 
@@ -70,6 +76,9 @@ class ConcreteFactory(BaseFactory):
                                                related_name='anonymous_wall')
             redirect_url = models.URLField(null=True, default=None, blank=True)
 
+            class Meta:
+                abstract = True
+
         return Port
 
     @classmethod
@@ -83,6 +92,9 @@ class ConcreteFactory(BaseFactory):
                     return os.path.basename(self.file.path)
                 except ValueError:
                     return None
+
+            class Meta:
+                abstract = True
 
         return Source
 
@@ -110,6 +122,9 @@ class ConcreteFactory(BaseFactory):
             border = models.BooleanField(default=True)
 
             container = models.ForeignKey('Container', on_delete=models.CASCADE)
+
+            class Meta:
+                abstract = True
 
         return Widget
 
@@ -144,6 +159,9 @@ class ConcreteFactory(BaseFactory):
         class SimpleText(cls._get_widget_class(base)):
             text_content = models.TextField(null=True, blank=True)
 
+            class Meta:
+                abstract = True
+
         return SimpleText
 
     @classmethod
@@ -152,6 +170,9 @@ class ConcreteFactory(BaseFactory):
             href = models.URLField(null=True, blank=True)
             open_in_new_window = models.BooleanField(default=True)
 
+            class Meta:
+                abstract = True
+
         return URL
 
     @classmethod
@@ -159,6 +180,9 @@ class ConcreteFactory(BaseFactory):
         class SimpleList(cls._get_widget_class(base)):
             items = models.JSONField(default=list)
             inner_border = models.BooleanField(default=True)
+
+            class Meta:
+                abstract = True
 
         return SimpleList
 
@@ -169,12 +193,18 @@ class ConcreteFactory(BaseFactory):
             vertical = models.BooleanField(default=True)
             step = models.IntegerField(default=1)
 
+            class Meta:
+                abstract = True
+
         return Counter
 
     @classmethod
     def get_simple_switch_class(cls, base):
         class SimpleSwitch(cls._get_widget_class(base)):
             value = models.BooleanField(default=False)
+
+            class Meta:
+                abstract = True
 
         return SimpleSwitch
 
@@ -184,5 +214,8 @@ class ConcreteFactory(BaseFactory):
             # When copy widget - refer the same file (do not copy real file)
             source = models.ForeignKey('Source', blank=True, on_delete=models.SET_NULL, null=True,
                                        related_name='document_set')
+
+            class Meta:
+                abstract = True
 
         return Document

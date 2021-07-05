@@ -1,4 +1,4 @@
-import os.path
+import os
 import re
 from django.db import models
 from django.core.validators import BaseValidator, MaxValueValidator, MinValueValidator
@@ -223,7 +223,7 @@ class Wall(SyncManager):
         q = cls.build_trusted_query(user)
         return cls.objects.filter(q)
 
-    def initiate_default_container(self):
+    def initiate_default_container(self):  # TODO
         container = Container(wall=self)
         container.save()
         return container

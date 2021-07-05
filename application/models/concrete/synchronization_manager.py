@@ -1,6 +1,6 @@
 from django.db import models
 
-from application.data.abstract import BaseFactory
+from application.models.abstract import BaseFactory
 from application.consumers import Event as ConsumerEvent, WallConsumer
 
 from asgiref.sync import async_to_sync
@@ -63,6 +63,10 @@ class ConcreteFactory(BaseFactory):
                                 instance.__setattr__(field, self.__getattribute__(field))
                             instance.save()
 
+            @property
+            def is_referenced(self):
+                return self.__class__.objects.filter(sync_id=self).exists()
+
         return Base
 
     @classmethod
@@ -70,6 +74,9 @@ class ConcreteFactory(BaseFactory):
         class Wall(cls._get_base_class(base)):
             sync_fields = ['allow_anonymous_view', 'lock_widgets']
             sync_id = models.ForeignKey('Wall', blank=True, null=True, on_delete=models.SET_NULL)
+
+            class Meta:
+                abstract = True
 
         return Wall
 
@@ -79,6 +86,9 @@ class ConcreteFactory(BaseFactory):
             sync_fields = ['h', 'w']
             sync_id = models.ForeignKey('Container', blank=True, null=True, on_delete=models.SET_NULL)
 
+            class Meta:
+                abstract = True
+
         return Container
 
     @classmethod
@@ -86,6 +96,9 @@ class ConcreteFactory(BaseFactory):
         class Port(cls._get_base_class(base)):
             sync_fields = ['activated', 'authenticated_wall', 'anonymous_wall', 'redirect_url']
             sync_id = models.ForeignKey('Port', blank=True, null=True, on_delete=models.SET_NULL)
+
+            class Meta:
+                abstract = True
 
         return Port
 
@@ -95,6 +108,9 @@ class ConcreteFactory(BaseFactory):
             sync_fields = []
             sync_id = models.ForeignKey('Source', blank=True, null=True, on_delete=models.SET_NULL)
 
+            class Meta:
+                abstract = True
+
         return Source
 
     @classmethod
@@ -102,6 +118,9 @@ class ConcreteFactory(BaseFactory):
         class SimpleText(base):
             sync_fields = ['text_content']
             sync_id = models.ForeignKey('SimpleText', blank=True, null=True, on_delete=models.SET_NULL)
+
+            class Meta:
+                abstract = True
 
         return SimpleText
 
@@ -111,6 +130,9 @@ class ConcreteFactory(BaseFactory):
             sync_fields = ['href', 'text', 'open_in_new_window']
             sync_id = models.ForeignKey('URL', blank=True, null=True, on_delete=models.SET_NULL)
 
+            class Meta:
+                abstract = True
+
         return URL
 
     @classmethod
@@ -118,6 +140,9 @@ class ConcreteFactory(BaseFactory):
         class SimpleList(base):
             sync_fields = ['items', 'inner_border']
             sync_id = models.ForeignKey('SimpleList', blank=True, null=True, on_delete=models.SET_NULL)
+
+            class Meta:
+                abstract = True
 
         return SimpleList
 
@@ -127,6 +152,9 @@ class ConcreteFactory(BaseFactory):
             sync_fields = ['value', 'vertical', 'step']
             sync_id = models.ForeignKey('Counter', blank=True, null=True, on_delete=models.SET_NULL)
 
+            class Meta:
+                abstract = True
+
         return Counter
 
     @classmethod
@@ -135,6 +163,9 @@ class ConcreteFactory(BaseFactory):
             sync_fields = ['value']
             sync_id = models.ForeignKey('SimpleSwitch', blank=True, null=True, on_delete=models.SET_NULL)
 
+            class Meta:
+                abstract = True
+
         return SimpleSwitch
 
     @classmethod
@@ -142,5 +173,8 @@ class ConcreteFactory(BaseFactory):
         class Document(base):
             sync_fields = ['source']
             sync_id = models.ForeignKey('Document', blank=True, null=True, on_delete=models.SET_NULL)
+
+            class Meta:
+                abstract = True
 
         return Document

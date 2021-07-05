@@ -12,106 +12,116 @@ class Widget(models.Model):
 
 
 class Wall(Common):
-    pass
+    class Meta:
+        abstract = True
 
 
 class Container(Common):
-    pass
+    class Meta:
+        abstract = True
 
 
 class Port(Common):
-    pass
+    class Meta:
+        abstract = True
 
 
 class Source(Common):
-    pass
+    class Meta:
+        abstract = True
 
 
 class SimpleText(Widget):
-    pass
+    class Meta:
+        abstract = True
 
 
 class URL(Widget):
-    pass
+    class Meta:
+        abstract = True
 
 
 class SimpleList(Widget):
-    pass
+    class Meta:
+        abstract = True
 
 
 class Counter(Widget):
-    pass
+    class Meta:
+        abstract = True
 
 
 class SimpleSwitch(Widget):
-    pass
+    class Meta:
+        abstract = True
 
 
 class Document(Widget):
-    pass
+    class Meta:
+        abstract = True
 
 
 class BaseFactory:
     @classmethod
     def get(cls, base):
-        if isinstance(base, Wall):
+        if issubclass(base, Wall):
             return cls.get_wall_class(base)
-        if isinstance(base, Container):
+        if issubclass(base, Container):
             return cls.get_container_class(base)
-        if isinstance(base, Port):
+        if issubclass(base, Port):
             return cls.get_port_class(base)
-        if isinstance(base, Source):
+        if issubclass(base, Source):
             return cls.get_source_class(base)
-        if isinstance(base, SimpleText):
+        if issubclass(base, SimpleText):
             return cls.get_simple_text_class(base)
-        if isinstance(base, URL):
+        if issubclass(base, URL):
             return cls.get_url_class(base)
-        if isinstance(base, SimpleList):
+        if issubclass(base, SimpleList):
             return cls.get_simple_list_class(base)
-        if isinstance(base, SimpleSwitch):
+        if issubclass(base, SimpleSwitch):
             return cls.get_simple_switch_class(base)
-        if isinstance(base, Counter):
+        if issubclass(base, Counter):
             return cls.get_counter_class(base)
-        if isinstance(base, Document):
+        if issubclass(base, Document):
             return cls.get_document_class(base)
-        raise NotImplemented(f'Error! {base.__class__.__name__} has no declaration at {cls.__name__} factory')
+        raise NotImplementedError(f'Error! {base} was not found at {cls}')
 
     @classmethod
     def get_wall_class(cls, base):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @classmethod
     def get_container_class(cls, base):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @classmethod
     def get_port_class(cls, base):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @classmethod
     def get_source_class(cls, base):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @classmethod
     def get_simple_text_class(cls, base):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @classmethod
     def get_url_class(cls, base):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @classmethod
     def get_simple_list_class(cls, base):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @classmethod
     def get_counter_class(cls, base):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @classmethod
     def get_simple_switch_class(cls, base):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @classmethod
     def get_document_class(cls, base):
-        raise NotImplemented()
+        raise NotImplementedError()
