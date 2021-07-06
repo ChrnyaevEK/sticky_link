@@ -15,6 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from django.http import JsonResponse, HttpResponse, HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -154,8 +155,8 @@ class App:
 
         def get_user():
             try:
-                return models.User.objects.get(username=username)
-            except models.User.DoesNotExist:
+                return User.objects.get(username=username)
+            except User.DoesNotExist:
                 return None
 
         def get_wall():
