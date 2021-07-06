@@ -1,4 +1,5 @@
 from application.models.abstract import BaseFactory
+from django.apps import apps
 import os
 
 
@@ -34,24 +35,15 @@ class ConcreteFactory(BaseFactory):
                 self.propagate_instance_deleted()
                 super().delete(*args, **kwargs)
 
-            @classmethod
-            def get_owned_walls(cls, user):
-                if user.is_anonymous:
-                    return cls.objects.none()
-                q = cls.build_owned_query(user)
-                return cls.objects.filter(q)
-
-            @classmethod
-            def get_trusted_walls(cls, user):
-                if user.is_anonymous:
-                    return cls.objects.none()
-                q = cls.build_trusted_query(user)
-                return cls.objects.filter(q)
-
             def chain_new_container(self, container):
                 last = self.container_set.last()
                 last.next = container
                 last.save()
+
+            def initiate_default_container(self):
+                container = apps.get_model(app_label='application', model_name='Container')(wall=self)
+                container.save()
+                return container
 
             def fix_container_chaining(self):
                 previous = None
@@ -135,18 +127,6 @@ class ConcreteFactory(BaseFactory):
                 else:
                     return self.anonymous_wall
 
-            @classmethod
-            def get_owned_ports(cls, user):
-                if user.is_anonymous:
-                    return cls.objects.none()
-                q = cls.build_owned_query(user)
-                return cls.objects.filter(q)
-
-            @classmethod
-            def get_anonymous_ports(cls, user):
-                q = cls.build_anonymous_query(user)
-                return cls.objects.filter(q)
-
             def activate(self, user):
                 self.activated = True
                 self.owner = user
@@ -165,6 +145,11 @@ class ConcreteFactory(BaseFactory):
                 except (ValueError, TypeError, OSError):
                     pass
                 self.save()
+
+            def save(self, *args, **kwargs):
+                super().save(*args, **kwargs)
+                for document in self.document_set.all():
+                    document.propagate_instance_updated()
 
             class Meta:
                 abstract = True

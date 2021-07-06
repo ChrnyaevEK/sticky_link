@@ -20,6 +20,7 @@ factory_list = [
 
 
 def get(base):
+    # Iterate over managers and merge them into one big ancestor
     for factory in factory_list:
         base = factory.get(base)
     return base

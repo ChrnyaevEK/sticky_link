@@ -39,19 +39,19 @@ class ConcreteFactory(BaseFactory):
             def copy(self):
                 clone = super().copy()
                 for w in self.simple_text_set.all():
-                    clone.simple_text_set.add(w.copy())
+                    clone.simpletext_set.add(w.copy())
 
                 for w in self.url_set.all():
                     clone.url_set.add(w.copy())
 
-                for w in self.simple_list_set.all():
-                    clone.simple_list_set.add(w.copy())
+                for w in self.simplelist_set.all():
+                    clone.simplelist_set.add(w.copy())
 
                 for w in self.counter_set.all():
-                    clone.counter_set.add(w.copy())
+                    clone.counterset.add(w.copy())
 
-                for w in self.simple_switch_set.all():
-                    clone.simple_switch_set.add(w.copy())
+                for w in self.simpleswitch_set.all():
+                    clone.simpleswitch_set.add(w.copy())
 
                 for w in self.document_set.all():
                     clone.document_set.add(w.copy())

@@ -52,11 +52,38 @@ class ConcreteFactory(BaseFactory):
                 self.anonymous_permission = self.__class__.objects.filter(q).filter(pk=self.id).exists()
 
             @classmethod
+            def get_owned(cls, user):
+                if user.is_anonymous:
+                    return cls.objects.none()
+                q = cls.build_owned_query(user)
+                return cls.objects.filter(q)
+
+            @classmethod
+            def get_trusted(cls, user):
+                if user.is_anonymous:
+                    return cls.objects.none()
+                q = cls.build_trusted_query(user)
+                return cls.objects.filter(q)
+
+            @classmethod
+            def get_anonymous(cls, user):
+                q = cls.build_anonymous_query(user)
+                return cls.objects.filter(q)
+
+            @classmethod
             def get_reachable(cls, user):
                 q = cls.build_anonymous_query(user)
                 if not user.is_anonymous:
                     q.add(cls.build_trusted_query(user), q.OR)
                     q.add(cls.build_owned_query(user), q.OR)
+                return cls.objects.filter(q).distinct()
+
+            @classmethod
+            def get_editable(cls, user):
+                if user.is_anonymous:
+                    return cls.objects.none()
+                q = cls.build_trusted_query(user)
+                q.add(cls.build_owned_query(user), q.OR)
                 return cls.objects.filter(q).distinct()
 
             @classmethod

@@ -214,17 +214,20 @@ class App:
         return JsonResponse(serializers.ContainerSerializer(clone).data)
 
 
-class ProtectedModelViewSet(ModelViewSet):
-    model_class = None
-    anonymous_actions = ['list', 'retrieve', 'partial_update', 'update']
-
+class AnonymousModelViewSet(ModelViewSet):
     def update(self, request, *args, **kwargs):
-        user = request.user
         instance = self.get_object()
         if not instance.anonymous_permission and not instance.trusted_permission and not instance.owner_permission:
             return abort('Forbidden', 403)
-        if user.is_anonymous and not instance.validate_anonymous_access(request.data.keys()):
+        if request.user.is_anonymous and not instance.validate_anonymous_access(request.data.keys()):
             return abort('Forbidden', 403)
+        try:
+            if not self.model_class.exists(request.data['sync_id']):
+                return JsonResponse({
+                    'sync_id': ['Make sure the sync ID belong to user and widgets have the same type.']
+                }, status=400)
+        except KeyError:
+            pass
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
@@ -234,7 +237,7 @@ class ProtectedModelViewSet(ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
     def get_permissions(self):
-        return [] if self.action in self.anonymous_actions else [IsAuthenticated()]
+        return [] if self.action in ['list', 'retrieve', 'partial_update', 'update'] else [IsAuthenticated()]
 
     def get_queryset(self):
         return self.model_class.get_reachable(self.request.user)
@@ -245,59 +248,97 @@ class ProtectedModelViewSet(ModelViewSet):
         return obj
 
 
-class WallViewSet(ProtectedModelViewSet):
-    serializer_class = serializers.WallSerializer
-    model_class = models.Wall
-
+class TrustedModelViewSet(AnonymousModelViewSet):
     def update(self, request, *args, **kwargs):
-        wall = self.get_object()
-        if not wall.owner_permission:
+        instance = self.get_object()
+        if not instance.owner_permission and not instance.trusted_permission:
             return abort('Forbidden', 403)
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        wall = self.get_object()
-        if not wall.owner_permission:
+        instance = self.get_object()
+        if not instance.owner_permission and not instance.trusted_permission:
             return abort('Forbidden', 403)
         return super().destroy(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
         return JsonResponse([
-            *serializers.WallSerializer(self.model_class.get_owned_walls(request.user), many=True).data,
-            *serializers.WallSerializer(self.model_class.get_trusted_walls(request.user), many=True).data
+            *self.serializer_class(self.model_class.get_owned(request.user), many=True).data,
+            *self.serializer_class(self.model_class.get_trusted(request.user), many=True).data
         ], safe=False)
+
+
+class OwnedModelViewSet(TrustedModelViewSet):
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not instance.owner_permission:
+            return abort('Forbidden', 403)
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not instance.owner_permission:
+            return abort('Forbidden', 403)
+        return super().destroy(request, *args, **kwargs)
+
+
+class WallViewSet(OwnedModelViewSet):
+    serializer_class = serializers.WallSerializer
+    model_class = models.Wall
+
+    def update(self, request, *args, **kwargs):
+        try:
+            del request.data['owner']
+        except KeyError:
+            pass
+        return super().update(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         request.data['owner'] = request.user.id  # Trust only inside user id
         return super().create(request, *args, **kwargs)
 
 
-class ContainerViewSet(ProtectedModelViewSet):
+class ContainerViewSet(TrustedModelViewSet):
     serializer_class = serializers.ContainerSerializer
     model_class = models.Container
 
+    def update(self, request, *args, **kwargs):
+        try:
+            del request.data['wall']
+        except KeyError:
+            pass
+        return super().update(request, *args, **kwargs)
 
-class PortViewSet(ProtectedModelViewSet):
+    def create(self, request, *args, **kwargs):
+        try:
+            if not models.Wall.get_editable(request.user).filter(pk=request.data['wall']).exists():
+                return abort('Forbidden', 403)
+        except KeyError:
+            pass  # Wil be processed later at model creation
+        return super().create(request, *args, **kwargs)
+
+
+class PortViewSet(OwnedModelViewSet):
     serializer_class = serializers.PortSerializer
     model_class = models.Port
 
-    def get_queryset(self):
-        return self.model_class.get_owned_ports(self.request.user)
+    def update(self, request, *args, **kwargs):
+        try:
+            del request.data['owner']
+        except KeyError:
+            pass
+        return super().update(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         request.data['owner'] = request.user.id  # Trust only inside user id
         return super().create(request, *args, **kwargs)
 
 
-class SourceViewSet(ProtectedModelViewSet):
+class SourceViewSet(AnonymousModelViewSet):
     parser_classes = [MultiPartParser]
     model_class = models.Source
     serializer_class = serializers.SourceSerializer
-
-    def get_object(self):
-        obj = self.get_queryset().get(pk=self.kwargs['pk'])
-        obj.set_permission(self.request.user)
-        return obj
 
     def create(self, request, *args, **kwargs):
         return HttpResponseForbidden()  # Sources will be managed manually
@@ -306,21 +347,13 @@ class SourceViewSet(ProtectedModelViewSet):
         return HttpResponseForbidden()
 
     def retrieve(self, request, *args, **kwargs):
-        # Return file that is stored by source
-        try:
-            source = self.get_object()
-        except self.model_class.DoesNotExist:
-            return HttpResponseNotFound('Source was not found')
+        source = self.get_object()
         if source.file is None:
             return HttpResponseNotFound('Source was not found')
         return sendfile(request, MEDIA_BASE_PATH + '/' + source.file.name, attachment=request.GET.get('attachment'))
 
     def update(self, request, *args, **kwargs):
-        # Replace stored file
-        try:
-            source = self.get_object()
-        except self.model_class.DoesNotExist:
-            return abort('Not found', 404)
+        source = self.get_object()
         if not source.trusted_permission and not source.owner_permission:
             return abort('Forbidden', 403)
 
@@ -335,9 +368,6 @@ class SourceViewSet(ProtectedModelViewSet):
             os.remove(old_path)
         except (TypeError, OSError):
             pass
-
-        for document in source.document_set.all():
-            document.propagate_instance_updated()
         return response
 
     def destroy(self, request, *args, **kwargs):
@@ -345,55 +375,37 @@ class SourceViewSet(ProtectedModelViewSet):
         source = self.get_object()
         if not source.trusted_permission and not source.owner_permission:
             return abort('Forbidden', 403)
-        try:
-            source = self.get_object()
-        except self.model_class.DoesNotExist:
-            return abort('Not found', 404)
+        source = self.get_object()
         source.delete_file()
-        for document in source.document_set.all():
-            document.propagate_instance_updated()
         return Response('Ok')
 
 
-class SyncViewSet(ProtectedModelViewSet):
-
-    def update(self, request, pk=None, *args, **kwargs):
-        try:
-            if not self.model_class.has_any_sync_widget(request.data['sync_id']):
-                return JsonResponse({
-                    'sync_id': ['Make sure the sync ID belong to user and widgets have the same type.']
-                }, status=400)
-        except KeyError:
-            pass
-        return super().update(request, *args, **kwargs)
-
-
-class SimpleTextViewSet(SyncViewSet):
+class SimpleTextViewSet(AnonymousModelViewSet):
     serializer_class = serializers.SimpleTextSerializer
     model_class = models.SimpleText
 
 
-class URLViewSet(SyncViewSet):
+class URLViewSet(AnonymousModelViewSet):
     serializer_class = serializers.URLSerializer
     model_class = models.URL
 
 
-class SimpleListViewSet(SyncViewSet):
+class SimpleListViewSet(AnonymousModelViewSet):
     serializer_class = serializers.SimpleListSerializer
     model_class = models.SimpleList
 
 
-class CounterViewSet(SyncViewSet):
+class CounterViewSet(AnonymousModelViewSet):
     serializer_class = serializers.CounterSerializer
     model_class = models.Counter
 
 
-class SimpleSwitchViewSet(SyncViewSet):
+class SimpleSwitchViewSet(AnonymousModelViewSet):
     serializer_class = serializers.SimpleSwitchSerializer
     model_class = models.SimpleSwitch
 
 
-class DocumentViewSet(SyncViewSet):
+class DocumentViewSet(AnonymousModelViewSet):
     serializer_class = serializers.DocumentSerializer
     model_class = models.Document
 

@@ -1,62 +1,52 @@
 from django.db import models
 
 
-class Common(models.Model):
+class Wall(models.Model):
     class Meta:
         abstract = True
 
 
-class Widget(models.Model):
+class Container(models.Model):
     class Meta:
         abstract = True
 
 
-class Wall(Common):
+class Port(models.Model):
     class Meta:
         abstract = True
 
 
-class Container(Common):
+class Source(models.Model):
     class Meta:
         abstract = True
 
 
-class Port(Common):
+class SimpleText(models.Model):
     class Meta:
         abstract = True
 
 
-class Source(Common):
+class URL(models.Model):
     class Meta:
         abstract = True
 
 
-class SimpleText(Widget):
+class SimpleList(models.Model):
     class Meta:
         abstract = True
 
 
-class URL(Widget):
+class Counter(models.Model):
     class Meta:
         abstract = True
 
 
-class SimpleList(Widget):
+class SimpleSwitch(models.Model):
     class Meta:
         abstract = True
 
 
-class Counter(Widget):
-    class Meta:
-        abstract = True
-
-
-class SimpleSwitch(Widget):
-    class Meta:
-        abstract = True
-
-
-class Document(Widget):
+class Document(models.Model):
     class Meta:
         abstract = True
 
@@ -88,40 +78,40 @@ class BaseFactory:
 
     @classmethod
     def get_wall_class(cls, base):
-        raise NotImplementedError()
+        return base
 
     @classmethod
     def get_container_class(cls, base):
-        raise NotImplementedError()
+        return base
 
     @classmethod
     def get_port_class(cls, base):
-        raise NotImplementedError()
+        return base
 
     @classmethod
     def get_source_class(cls, base):
-        raise NotImplementedError()
+        return base
 
     @classmethod
     def get_simple_text_class(cls, base):
-        raise NotImplementedError()
+        return base
 
     @classmethod
     def get_url_class(cls, base):
-        raise NotImplementedError()
+        return base
 
     @classmethod
     def get_simple_list_class(cls, base):
-        raise NotImplementedError()
+        return base
 
     @classmethod
     def get_counter_class(cls, base):
-        raise NotImplementedError()
+        return base
 
     @classmethod
     def get_simple_switch_class(cls, base):
-        raise NotImplementedError()
+        return base
 
     @classmethod
     def get_document_class(cls, base):
-        raise NotImplementedError()
+        return base
