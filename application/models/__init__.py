@@ -64,3 +64,14 @@ class SimpleSwitch(get(abstract.SimpleSwitch)):
 
 class Document(get(abstract.Document)):
     pass
+
+
+class Meta:
+    file_size_max = 10485760
+
+
+class Permission:
+    def __init__(self, instance, user):
+        self.owner_permission = instance.has_owner_permission(user)
+        self.trusted_permission = instance.has_trusted_permission(user)
+        self.anonymous_permission = instance.has_anonymous_permission(user)

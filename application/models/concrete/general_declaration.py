@@ -69,7 +69,7 @@ class ConcreteFactory(BaseFactory):
 
             title = models.CharField(max_length=200, blank=True, default='Untitled')
             owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-            visited = models.IntegerField(default=0)
+            visited = models.IntegerField(default=0, blank=True)
             authenticated_wall = models.ForeignKey('Wall', null=True, blank=True, on_delete=models.SET_NULL,
                                                    default=None, related_name='authenticated_wall')
             anonymous_wall = models.ForeignKey('Wall', null=True, blank=True, on_delete=models.SET_NULL, default=None,

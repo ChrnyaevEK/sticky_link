@@ -115,7 +115,7 @@ class ConcreteFactory(BaseFactory):
 
     @classmethod
     def get_simple_text_class(cls, base):
-        class SimpleText(base):
+        class SimpleText(cls._get_base_class(base)):
             sync_fields = ['text_content']
             sync_id = models.ForeignKey('SimpleText', blank=True, null=True, on_delete=models.SET_NULL)
 
@@ -126,7 +126,7 @@ class ConcreteFactory(BaseFactory):
 
     @classmethod
     def get_url_class(cls, base):
-        class URL(base):
+        class URL(cls._get_base_class(base)):
             sync_fields = ['href', 'text', 'open_in_new_window']
             sync_id = models.ForeignKey('URL', blank=True, null=True, on_delete=models.SET_NULL)
 
@@ -137,7 +137,7 @@ class ConcreteFactory(BaseFactory):
 
     @classmethod
     def get_simple_list_class(cls, base):
-        class SimpleList(base):
+        class SimpleList(cls._get_base_class(base)):
             sync_fields = ['items', 'inner_border']
             sync_id = models.ForeignKey('SimpleList', blank=True, null=True, on_delete=models.SET_NULL)
 
@@ -148,7 +148,7 @@ class ConcreteFactory(BaseFactory):
 
     @classmethod
     def get_counter_class(cls, base):
-        class Counter(base):
+        class Counter(cls._get_base_class(base)):
             sync_fields = ['value', 'vertical', 'step']
             sync_id = models.ForeignKey('Counter', blank=True, null=True, on_delete=models.SET_NULL)
 
@@ -159,7 +159,7 @@ class ConcreteFactory(BaseFactory):
 
     @classmethod
     def get_simple_switch_class(cls, base):
-        class SimpleSwitch(base):
+        class SimpleSwitch(cls._get_base_class(base)):
             sync_fields = ['value']
             sync_id = models.ForeignKey('SimpleSwitch', blank=True, null=True, on_delete=models.SET_NULL)
 
@@ -170,7 +170,7 @@ class ConcreteFactory(BaseFactory):
 
     @classmethod
     def get_document_class(cls, base):
-        class Document(base):
+        class Document(cls._get_base_class(base)):
             sync_fields = ['source']
             sync_id = models.ForeignKey('Document', blank=True, null=True, on_delete=models.SET_NULL)
 

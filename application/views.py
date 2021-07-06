@@ -1,18 +1,20 @@
+import os
+import logging
+from itertools import chain
+from sendfile import sendfile
+
 from application import models
 from application import serializers
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from sticky_link.settings import MEDIA_BASE_PATH
 
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import api_view
 from rest_framework.parsers import MultiPartParser
-from django.http import JsonResponse, HttpResponse, HttpResponseNotFound, HttpResponseForbidden, HttpResponseBadRequest
-from django.shortcuts import render, redirect
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-import logging
-import os
-from sendfile import sendfile
-from sticky_link.settings import MEDIA_BASE_PATH
-from itertools import chain
+
+from django.http import JsonResponse, HttpResponse, HttpResponseNotFound, HttpResponseForbidden
+from django.shortcuts import render, redirect
 
 logger = logging.getLogger(__name__)
 
@@ -37,13 +39,14 @@ class App:
         # Resolve redirection to required resource
         user = request.user
         try:
-            port = models.Port.get_anonymous_ports(user).get(pk=pk)
+            port = models.Port.get_anonymous(user).get(pk=pk)
         except models.Port.DoesNotExist:
             return HttpResponseNotFound('Port does not exist')
         if request.method == 'GET':
             if not port.activated:
                 return redirect(f'/port/activation/{port.id}')
-            port.visited += 1  # Update port statistics
+
+            port.visited += 1
             port.save()
 
             wall = port.resolve_target_wall(user)
@@ -75,19 +78,19 @@ class App:
             return abort('Wall is unreachable', 403)
         wall.set_permission(user)
         for container in wall.container_set.all():
-            for w in container.simple_text_set.all():
+            for w in container.simpletext_set.all():
                 widgets.append(serializers.SimpleTextSerializer(w).data)
 
             for w in container.url_set.all():
                 widgets.append(serializers.URLSerializer(w).data)
 
-            for w in container.simple_list_set.all():
+            for w in container.simplelist_set.all():
                 widgets.append(serializers.SimpleListSerializer(w).data)
 
             for w in container.counter_set.all():
                 widgets.append(serializers.CounterSerializer(w).data)
 
-            for w in container.simple_switch_set.all():
+            for w in container.simpleswitch_set.all():
                 widgets.append(serializers.SimpleSwitchSerializer(w).data)
 
             for w in container.document_set.all():
@@ -100,7 +103,7 @@ class App:
         wall = serializers.WallSerializer(wall).data
         walls = [wall]
 
-        ports = serializers.PortSerializer(models.Port.get_owned_ports(user), many=True).data
+        ports = serializers.PortSerializer(models.Port.get_owned(user), many=True).data
         return JsonResponse({
             'user': serializers.UserSerializer(user).data,
             'containers': containers,
@@ -114,15 +117,16 @@ class App:
     @classmethod
     def _list_state(cls, request):
         user = request.user
-        ports = serializers.PortSerializer(models.Port.get_owned_ports(user), many=True).data
+        meta = serializers.Meta(models.Meta()).data
+        ports = serializers.PortSerializer(models.Port.get_owned(user), many=True).data
         walls = []
-        for wall in chain(models.Wall.get_owned_walls(user), models.Wall.get_trusted_walls(user)):
+        containers = []
+        widgets = []
+
+        for wall in chain(models.Wall.get_owned(user), models.Wall.get_trusted(user)):
             wall.set_permission(user)
             wall = serializers.WallSerializer(wall).data
             walls.append(wall)
-        containers = []
-        widgets = []
-        meta = serializers.Meta(models.Meta()).data
 
         return JsonResponse({
             'user': serializers.UserSerializer(user).data,
@@ -157,7 +161,7 @@ class App:
         def get_wall():
             try:
                 # Only trusted user (owner is trusted) may add trusted users!
-                return models.Wall.get_owned_walls(request.user).get(pk=pk)
+                return models.Wall.get_owned(request.user).get(pk=pk)
             except models.Wall.DoesNotExist:
                 return None
 
@@ -194,7 +198,7 @@ class App:
     def copy_wall(request, pk):
         user = request.user
         try:
-            wall = models.Wall.get_owned_walls(user).get(pk=pk)
+            wall = models.Wall.get_owned(user).get(pk=pk)
         except models.Wall.DoesNotExist:
             return abort('Wall is unreachable', 403)
         clone = wall.copy()
@@ -368,6 +372,8 @@ class SourceViewSet(AnonymousModelViewSet):
             os.remove(old_path)
         except (TypeError, OSError):
             pass
+        for document in source.document_set.all():  # Do not move to routine (propagate only when document is updated)
+            document.propagate_instance_updated()
         return response
 
     def destroy(self, request, *args, **kwargs):
@@ -377,6 +383,8 @@ class SourceViewSet(AnonymousModelViewSet):
             return abort('Forbidden', 403)
         source = self.get_object()
         source.delete_file()
+        for document in source.document_set.all():  # Do not move to routine (propagate only when document is updated)
+            document.propagate_instance_updated()
         return Response('Ok')
 
 

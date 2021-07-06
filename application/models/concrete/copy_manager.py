@@ -38,7 +38,7 @@ class ConcreteFactory(BaseFactory):
         class Container(cls._get_base_class(base)):
             def copy(self):
                 clone = super().copy()
-                for w in self.simple_text_set.all():
+                for w in self.simpletext_set.all():
                     clone.simpletext_set.add(w.copy())
 
                 for w in self.url_set.all():
