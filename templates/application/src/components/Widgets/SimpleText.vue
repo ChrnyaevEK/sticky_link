@@ -10,7 +10,6 @@ import WidgetBaseResizable from "./_Base";
 export default {
   type: "simple_text",
   name: "SimpleText",
-  template: "#simple-text-template",
   computed: {
     widget() {
       return this.$store.getters.getWidgetByUid(this.widgetUid)
