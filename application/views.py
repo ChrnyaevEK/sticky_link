@@ -381,10 +381,12 @@ class SourceViewSet(AnonymousModelViewSet):
             pass
         for document in source.document_set.all():  # Do not move to routine (propagate only when document is updated)
             document.propagate_instance_updated()
+        for image in source.image_set.all():
+            image.propagate_instance_updated()
         return response
 
     def destroy(self, request, *args, **kwargs):
-        # Delete file, not source object. Source will be deleted simultaneously with document_set
+        # Delete file, not source object. Source will be deleted simultaneously with document
         source = self.get_object()
         if not source.trusted_permission and not source.owner_permission:
             return abort('Forbidden', 403)
@@ -392,6 +394,8 @@ class SourceViewSet(AnonymousModelViewSet):
         source.delete_file()
         for document in source.document_set.all():  # Do not move to routine (propagate only when document is updated)
             document.propagate_instance_updated()
+        for image in source.image_set.all():  # Do not move to routine (propagate only when document is updated)
+            image.propagate_instance_updated()
         return Response('Ok')
 
 
@@ -408,6 +412,21 @@ class URLViewSet(AnonymousModelViewSet):
 class ImageViewSet(AnonymousModelViewSet):
     serializer_class = serializers.ImageSerializer
     model_class = models.Image
+
+    def create(self, request, *args, **kwargs):
+        try:  # Handle copy widget feature
+            del request.data['source']
+        except KeyError:
+            pass
+        response = super().create(request, *args, **kwargs)
+
+        # Add source object to store files
+        image = self.get_queryset().get(id=response.data['id'])
+        source = models.Source()
+        source.save()
+        image.source = source
+        image.save()
+        return JsonResponse(serializers.ImageSerializer(image).data)
 
 
 class VideoViewSet(AnonymousModelViewSet):

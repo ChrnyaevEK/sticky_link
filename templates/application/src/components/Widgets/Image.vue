@@ -1,6 +1,6 @@
 <template>
   <WidgetBaseResizable :widget="widget" class="center-content p-0">
-    <img v-if="widget.source" :src="widget.source" class="w-100 h-100">
+    <img v-if="sourceURL" :src="sourceURL" class="w-100 h-100">
     <div v-else class="d-flex text-secondary align-items-center text-break p-2">
       <span class="mr-3">{{ widget.title }} </span>
       <i class="fas fa-images"></i>
@@ -17,6 +17,12 @@ export default {
   computed: {
     widget() {
       return this.$store.getters.getWidgetByUid(this.widgetUid)
+    },
+    sourceURL() {
+      if (this.widget.source && this.widget.source.file) {
+        return this.$store.state.app.sourceURL + this.widget.source.id;
+      }
+      return false;
     },
   },
   components: {

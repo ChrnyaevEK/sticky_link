@@ -74,6 +74,14 @@ class CustomWidgetSerializer(CustomModelSerializer):
     pass
 
 
+class SourceSerializer(CustomModelSerializer):
+    name = serializers.ReadOnlyField()
+
+    class Meta:
+        fields = '__all__'
+        model = models.Source
+
+
 class SimpleTextSerializer(CustomWidgetSerializer):
     class Meta:
         fields = '__all__'
@@ -87,6 +95,8 @@ class URLSerializer(CustomWidgetSerializer):
 
 
 class ImageSerializer(CustomWidgetSerializer):
+    source = SourceSerializer(required=False)
+
     class Meta:
         fields = '__all__'
         model = models.Image
@@ -134,14 +144,6 @@ class PortSerializer(CustomModelSerializer):
     class Meta:
         exclude = ['activated']
         model = models.Port
-
-
-class SourceSerializer(CustomModelSerializer):
-    name = serializers.ReadOnlyField()
-
-    class Meta:
-        fields = '__all__'
-        model = models.Source
 
 
 class DocumentSerializer(CustomModelSerializer):

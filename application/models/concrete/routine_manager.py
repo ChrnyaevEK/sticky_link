@@ -162,7 +162,21 @@ class ConcreteFactory(BaseFactory):
 
     @classmethod
     def get_image_class(cls, base):
-        return cls._get_widget_class(base)
+        class Image(cls._get_widget_class(base)):
+            def delete(self, *args, **kwargs):
+                if not self.exists(self.sync_id) and len(self.source.image_set.all()) == 1:
+                    self.source.delete_file()
+                    try:
+                        self.source.delete()
+                    except AttributeError:
+                        pass  # Source has been deleted
+                self.propagate_instance_deleted()
+                super().delete(*args, **kwargs)
+
+            class Meta:
+                abstract = True
+
+        return Image
 
     @classmethod
     def get_video_class(cls, base):
@@ -183,10 +197,6 @@ class ConcreteFactory(BaseFactory):
     @classmethod
     def get_document_class(cls, base):
         class Document(cls._get_widget_class(base)):
-            def save(self, *args, **kwargs):
-                super().save(*args, **kwargs)
-                self.propagate_instance_updated()
-
             def delete(self, *args, **kwargs):
                 if not self.exists(self.sync_id) and len(self.source.document_set.all()) == 1:
                     self.source.delete_file()

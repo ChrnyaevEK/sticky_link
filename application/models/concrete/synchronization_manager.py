@@ -149,7 +149,7 @@ class ConcreteFactory(BaseFactory):
     @classmethod
     def get_video_class(cls, base):
         class Video(cls._get_base_class(base)):
-            sync_fields = ['source', 'autoplay', 'loop']
+            sync_fields = ['source', 'autoplay', 'loop', 'youtube']
             sync_id = models.ForeignKey('Video', blank=True, null=True, on_delete=models.SET_NULL)
 
             class Meta:

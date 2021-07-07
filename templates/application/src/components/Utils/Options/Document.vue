@@ -67,7 +67,7 @@ export default {
           this.error = null;
           var data = new FormData(); //Create form data objects to facilitate file transfer to the back end
           data.append("file", file); //To add (encapsulate) a file object to a formdata object
-          await this.$store.dispatch("uploadSource", {
+          await this.$proxy.dispatch("uploadSource", {
             instance: this.instance,
             name: file.name,
             data,

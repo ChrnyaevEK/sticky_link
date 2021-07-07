@@ -178,7 +178,7 @@ class ConcreteFactory(BaseFactory):
     @classmethod
     def get_image_class(cls, base):
         class Image(cls._get_widget_class(base)):
-            source = models.URLField(null=True, blank=True, max_length=2048)
+            source = models.ForeignKey('Source', blank=True, on_delete=models.SET_NULL, null=True)
             alt = models.CharField(max_length=200, default='image', blank=True, null=True)
 
             class Meta:
@@ -236,8 +236,7 @@ class ConcreteFactory(BaseFactory):
     def get_document_class(cls, base):
         class Document(cls._get_widget_class(base)):
             # When copy widget - refer the same file (do not copy real file)
-            source = models.ForeignKey('Source', blank=True, on_delete=models.SET_NULL, null=True,
-                                       related_name='document_set')
+            source = models.ForeignKey('Source', blank=True, on_delete=models.SET_NULL, null=True)
 
             class Meta:
                 abstract = True
