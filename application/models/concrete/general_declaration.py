@@ -74,7 +74,7 @@ class ConcreteFactory(BaseFactory):
                                                    default=None, related_name='authenticated_wall')
             anonymous_wall = models.ForeignKey('Wall', null=True, blank=True, on_delete=models.SET_NULL, default=None,
                                                related_name='anonymous_wall')
-            redirect_url = models.URLField(null=True, default=None, blank=True)
+            redirect_url = models.URLField(null=True, default=None, blank=True, max_length=2048)
 
             class Meta:
                 abstract = True
@@ -167,7 +167,7 @@ class ConcreteFactory(BaseFactory):
     @classmethod
     def get_url_class(cls, base):
         class URL(cls._get_widget_class(base)):
-            href = models.URLField(null=True, blank=True)
+            href = models.URLField(null=True, blank=True, max_length=2048)
             open_in_new_window = models.BooleanField(default=True)
 
             class Meta:
@@ -178,7 +178,7 @@ class ConcreteFactory(BaseFactory):
     @classmethod
     def get_image_class(cls, base):
         class Image(cls._get_widget_class(base)):
-            source = models.URLField(null=True, blank=True)
+            source = models.URLField(null=True, blank=True, max_length=2048)
             alt = models.CharField(max_length=200, default='image', blank=True, null=True)
 
             class Meta:
@@ -189,7 +189,7 @@ class ConcreteFactory(BaseFactory):
     @classmethod
     def get_video_class(cls, base):
         class Video(cls._get_widget_class(base)):
-            source = models.URLField(null=True, blank=True)
+            source = models.URLField(null=True, blank=True, max_length=2048)
             autoplay = models.BooleanField(default=False, blank=True)
             loop = models.BooleanField(default=False, blank=True)
             youtube = models.BooleanField(default=False, blank=True)

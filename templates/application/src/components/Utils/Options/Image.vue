@@ -19,7 +19,7 @@
         <label slot="title" class="form-check-label" v-scope:for.alt>Alternative text</label>
         <input
             slot="input"
-            v-scope:id.atl
+            v-scope:id.alt
             v-model="instance.alt"
             @change="$emit('push')"
             :disabled="$env.state.changesLock"
