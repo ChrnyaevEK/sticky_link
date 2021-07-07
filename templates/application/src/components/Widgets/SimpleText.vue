@@ -33,6 +33,5 @@ export default {
   width: 100%;
   overflow: hidden !important;
   min-height: unset !important;
-  white-space: pre-wrap;
 }
 </style>
