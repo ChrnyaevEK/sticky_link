@@ -1,6 +1,6 @@
 <template id="simple-text-template">
   <WidgetBaseResizable :widget="widget">
-    <span class="ql-editor editor p-0" v-html="widget.text_content"></span>
+    <div class="ql-editor editor p-0" v-html="widget.text_content"></div>
   </WidgetBaseResizable>
 </template>
 
@@ -29,6 +29,9 @@ export default {
 
 <style>
 .editor {
+  height: 100%;
+  width: 100%;
+  overflow: hidden !important;
   min-height: unset !important;
   white-space: pre;
 }
