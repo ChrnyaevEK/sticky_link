@@ -77,6 +77,14 @@ class ConcreteFactory(BaseFactory):
         return cls._get_widget_class(base)
 
     @classmethod
+    def get_image_class(cls, base):
+        return cls._get_widget_class(base)
+
+    @classmethod
+    def get_video_class(cls, base):
+        return cls._get_widget_class(base)
+
+    @classmethod
     def get_simple_list_class(cls, base):
         return cls._get_widget_class(base)
 

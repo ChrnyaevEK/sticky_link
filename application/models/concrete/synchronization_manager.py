@@ -136,6 +136,28 @@ class ConcreteFactory(BaseFactory):
         return URL
 
     @classmethod
+    def get_image_class(cls, base):
+        class Image(cls._get_base_class(base)):
+            sync_fields = ['source', 'alt']
+            sync_id = models.ForeignKey('Image', blank=True, null=True, on_delete=models.SET_NULL)
+
+            class Meta:
+                abstract = True
+
+        return Image
+
+    @classmethod
+    def get_video_class(cls, base):
+        class Video(cls._get_base_class(base)):
+            sync_fields = ['source', 'autoplay', 'loop']
+            sync_id = models.ForeignKey('Video', blank=True, null=True, on_delete=models.SET_NULL)
+
+            class Meta:
+                abstract = True
+
+        return Video
+
+    @classmethod
     def get_simple_list_class(cls, base):
         class SimpleList(cls._get_base_class(base)):
             sync_fields = ['items', 'inner_border']

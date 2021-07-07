@@ -29,18 +29,18 @@
                     : 'This widget is referenced by at least one widget'
                 "
           :disabled="$env.state.changesLock || !widget.sync_id"
-          class="btn btn-sm btn-outline-secondary"
+          class="btn btn-sm btn-outline-secondary mr-1"
           @click="copySyncWidget"
       >
         <i class="fas fa-link"></i>
       </button>
-      <button :disabled="$env.state.changesLock" class="btn btn-sm btn-outline-danger"
+      <button :disabled="$env.state.changesLock" class="btn btn-sm btn-outline-danger mr-1"
               @click="$proxy.dispatch('deleteWidget', widget)">
         <i class="fas fa-trash"></i>
       </button>
       <button
           :disabled="$env.state.changesLock"
-          class="btn btn-sm btn-outline-secondary"
+          class="btn btn-sm btn-outline-secondary mr-1"
           @click="$proxy.dispatch('copyWidget', widget)"
       >
         <i class="fas fa-copy"></i>
@@ -91,7 +91,7 @@ export default {
         widget: this.widget
       });
     },
-    deactivated(){
+    deactivated() {
       this.active = false
     },
     activated() {
@@ -137,7 +137,6 @@ export default {
 }
 
 .widget-quick-access > * {
-  margin: 0 0 0 2px;
   display: flex;
   justify-content: center;
   align-items: center;

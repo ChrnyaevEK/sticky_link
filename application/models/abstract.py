@@ -31,6 +31,16 @@ class URL(models.Model):
         abstract = True
 
 
+class Image(models.Model):
+    class Meta:
+        abstract = True
+
+
+class Video(models.Model):
+    class Meta:
+        abstract = True
+
+
 class SimpleList(models.Model):
     class Meta:
         abstract = True
@@ -66,6 +76,10 @@ class BaseFactory:
             return cls.get_simple_text_class(base)
         if issubclass(base, URL):
             return cls.get_url_class(base)
+        if issubclass(base, Image):
+            return cls.get_image_class(base)
+        if issubclass(base, Video):
+            return cls.get_video_class(base)
         if issubclass(base, SimpleList):
             return cls.get_simple_list_class(base)
         if issubclass(base, SimpleSwitch):
@@ -98,6 +112,14 @@ class BaseFactory:
 
     @classmethod
     def get_url_class(cls, base):
+        return base
+
+    @classmethod
+    def get_image_class(cls, base):
+        return base
+
+    @classmethod
+    def get_video_class(cls, base):
         return base
 
     @classmethod

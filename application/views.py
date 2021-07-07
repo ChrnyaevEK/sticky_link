@@ -85,6 +85,12 @@ class App:
             for w in container.url_set.all():
                 widgets.append(serializers.URLSerializer(w).data)
 
+            for w in container.image_set.all():
+                widgets.append(serializers.ImageSerializer(w).data)
+
+            for w in container.video_set.all():
+                widgets.append(serializers.VideoSerializer(w).data)
+
             for w in container.simplelist_set.all():
                 widgets.append(serializers.SimpleListSerializer(w).data)
 
@@ -397,6 +403,16 @@ class SimpleTextViewSet(AnonymousModelViewSet):
 class URLViewSet(AnonymousModelViewSet):
     serializer_class = serializers.URLSerializer
     model_class = models.URL
+
+
+class ImageViewSet(AnonymousModelViewSet):
+    serializer_class = serializers.ImageSerializer
+    model_class = models.Image
+
+
+class VideoViewSet(AnonymousModelViewSet):
+    serializer_class = serializers.VideoSerializer
+    model_class = models.Video
 
 
 class SimpleListViewSet(AnonymousModelViewSet):

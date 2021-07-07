@@ -176,6 +176,30 @@ class ConcreteFactory(BaseFactory):
         return URL
 
     @classmethod
+    def get_image_class(cls, base):
+        class Image(cls._get_widget_class(base)):
+            source = models.URLField(null=True, blank=True)
+            alt = models.CharField(max_length=200, default='image', blank=True, null=True)
+
+            class Meta:
+                abstract = True
+
+        return Image
+
+    @classmethod
+    def get_video_class(cls, base):
+        class Video(cls._get_widget_class(base)):
+            source = models.URLField(null=True, blank=True)
+            autoplay = models.BooleanField(default=False, blank=True)
+            loop = models.BooleanField(default=False, blank=True)
+            youtube = models.BooleanField(default=False, blank=True)
+
+            class Meta:
+                abstract = True
+
+        return Video
+
+    @classmethod
     def get_simple_list_class(cls, base):
         class SimpleList(cls._get_widget_class(base)):
             items = models.JSONField(default=list)

@@ -44,6 +44,12 @@ class ConcreteFactory(BaseFactory):
                 for w in self.url_set.all():
                     clone.url_set.add(w.copy())
 
+                for w in self.image_set.all():
+                    clone.image_set.add(w.copy())
+
+                for w in self.video_set.all():
+                    clone.video_set.add(w.copy())
+
                 for w in self.simplelist_set.all():
                     clone.simplelist_set.add(w.copy())
 
@@ -77,6 +83,14 @@ class ConcreteFactory(BaseFactory):
 
     @classmethod
     def get_url_class(cls, base):
+        return cls._get_base_class(base)
+
+    @classmethod
+    def get_image_class(cls, base):
+        return cls._get_base_class(base)
+
+    @classmethod
+    def get_video_class(cls, base):
         return cls._get_base_class(base)
 
     @classmethod

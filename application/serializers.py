@@ -86,6 +86,18 @@ class URLSerializer(CustomWidgetSerializer):
         model = models.URL
 
 
+class ImageSerializer(CustomWidgetSerializer):
+    class Meta:
+        fields = '__all__'
+        model = models.Image
+
+
+class VideoSerializer(CustomWidgetSerializer):
+    class Meta:
+        fields = '__all__'
+        model = models.Video
+
+
 class SimpleListSerializer(CustomWidgetSerializer):
     class Meta:
         fields = '__all__'

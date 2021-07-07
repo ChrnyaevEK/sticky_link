@@ -68,6 +68,8 @@
 import VueDraggableResizable from "vue-draggable-resizable";
 import SimpleText from "../Widgets/SimpleText";
 import URL from "../Widgets/URL";
+import SimpleImage from "../Widgets/Image";
+import SimpleVideo from "../Widgets/Video";
 import Counter from "../Widgets/Counter";
 import SimpleList from "../Widgets/SimpleList";
 import SimpleSwitch from "../Widgets/SimpleSwitch";
@@ -88,6 +90,8 @@ export default {
       mapping: {
         simple_text: 'Text',
         url: 'URL',
+        image: 'Image',
+        video: 'Video',
         counter: 'Counter',
         simple_list: 'List',
         simple_switch: 'Switch',
@@ -112,7 +116,7 @@ export default {
       window.dispatchEvent(new Event("resize"));
     },
     getComponent(widget) {
-      return [SimpleText, URL, Counter, SimpleList, SimpleSwitch, Document].filter(
+      return [SimpleText, URL, Counter, SimpleList, SimpleSwitch, Document, SimpleImage, SimpleVideo].filter(
           (c) => widget.type === c.type
       )[0];
     },

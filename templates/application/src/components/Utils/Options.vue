@@ -25,6 +25,8 @@ import CounterOptions from "./Options/Counter";
 import SimpleListOptions from "./Options/SimpleList";
 import SimpleTextOptions from "./Options/SimpleText";
 import UrlOptions from "./Options/Url";
+import ImageOptions from "./Options/Image";
+import VideoOptions from "./Options/Video";
 import DocumentOptions from "./Options/Document";
 import ContainerOptions from "./Options/Container";
 import WidgetsOptions from "./Options/_WidgetOptions";
@@ -44,6 +46,10 @@ export default {
           return SimpleTextOptions
         case 'url':
           return UrlOptions
+        case 'image':
+          return ImageOptions
+        case 'video':
+          return VideoOptions
         case 'document':
           return DocumentOptions
         default:
@@ -60,6 +66,8 @@ export default {
     SimpleListOptions,
     SimpleTextOptions,
     UrlOptions,
+    ImageOptions,
+    VideoOptions,
     DocumentOptions,
     WidgetsOptions,
   },

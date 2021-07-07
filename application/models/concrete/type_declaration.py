@@ -64,6 +64,26 @@ class ConcreteFactory(BaseFactory):
         return URL
 
     @classmethod
+    def get_image_class(cls, base):
+        class Image(base):
+            type = 'image'
+
+            class Meta:
+                abstract = True
+
+        return Image
+
+    @classmethod
+    def get_video_class(cls, base):
+        class Video(base):
+            type = 'video'
+
+            class Meta:
+                abstract = True
+
+        return Video
+
+    @classmethod
     def get_simple_list_class(cls, base):
         class SimpleList(base):
             type = 'simple_list'

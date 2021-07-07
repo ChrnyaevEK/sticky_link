@@ -87,18 +87,6 @@ export function getReactiveCopy(obj) {
     return Vue.observable(Object.assign(deepCopy(obj)))
 }
 
-export const types = {
-    Wall: "wall",
-    Container: "container",
-    SimpleText: "simple_text",
-    URL: "url",
-    Counter: "counter",
-    SimpleList: "simple_list",
-    SimpleSwitch: "simple_switch",
-    Port: "port",
-    Document: "document",
-};
-
 export function downloadImage(data, filename = "download.jpeg") {
     var a = document.createElement("a");
     a.href = data;
@@ -109,7 +97,6 @@ export function downloadImage(data, filename = "download.jpeg") {
 }
 
 export default {
-    types,
     difference,
     sleep,
     getByUid,

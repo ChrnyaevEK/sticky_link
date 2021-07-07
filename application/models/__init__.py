@@ -50,6 +50,14 @@ class URL(get(abstract.URL)):
     pass
 
 
+class Image(get(abstract.Image)):
+    pass
+
+
+class Video(get(abstract.Video)):
+    pass
+
+
 class SimpleList(get(abstract.SimpleList)):
     pass
 
