@@ -1,5 +1,5 @@
 <template id="simple-text-template">
-  <WidgetBaseResizable :widget="widget" class="overflow-hidden">
+  <WidgetBaseResizable :widget="widget">
     <span class="ql-editor editor p-0" v-html="widget.text_content"></span>
   </WidgetBaseResizable>
 </template>
