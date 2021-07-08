@@ -11,7 +11,7 @@
     </div>
     <div class="d-flex justify-content-between mb-1" v-if="instance.source && instance.source.file">
       <div>
-        <a :href="sourceURL + '?attachment'" target="_blank" class="text-truncate mr-3">Download</a>
+        <a :href="sourceURL + '?attachment=true'" target="_blank" class="text-truncate mr-3">Download</a>
         <a :href="sourceURL" target="_blank" class="text-truncate">Open</a>
       </div>
       <button class="btn btn-sm text-danger mx-2" @click="remove"><i class="fas fa-trash"></i></button>
