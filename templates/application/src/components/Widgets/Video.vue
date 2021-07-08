@@ -1,5 +1,5 @@
 <template>
-  <WidgetBaseResizable :widget="widget" class="center-content" :class="{ 'p-3': $env.state.editMode }">
+  <WidgetBaseResizable :widget="widget" class="center-content" :class="$env.state.editMode ? 'p-3' : 'p-0'">
     <video v-if="widget.source && !widget.youtube"
            :src="widget.source"
            type="video/mp4"
