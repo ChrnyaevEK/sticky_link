@@ -54,7 +54,7 @@ class ConcreteFactory(BaseFactory):
                     clone.simplelist_set.add(w.copy())
 
                 for w in self.counter_set.all():
-                    clone.counterset.add(w.copy())
+                    clone.counter_set.add(w.copy())
 
                 for w in self.simpleswitch_set.all():
                     clone.simpleswitch_set.add(w.copy())
