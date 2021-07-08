@@ -19,10 +19,7 @@ export default {
       return this.$store.getters.getWidgetByUid(this.widgetUid)
     },
     sourceURL() {
-      if (this.widget.source && this.widget.source.file) {
-        return this.$store.state.app.sourceURL + this.widget.source.id;
-      }
-      return false;
+      return this.$store.getters.getSourceUrl(this.widget)
     },
   },
   components: {

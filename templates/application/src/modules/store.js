@@ -42,6 +42,12 @@ const store = new Vuex.Store({
                 ...state.ports,
                 ...state.containers,
             ].filter((i) => i.uid === uid)[0]);
+        },
+        getSourceUrl: () => (instance) => {
+            if (instance.source && instance.source.file) {
+                return process.env.VUE_APP_API_HOST + "/" + instance.type + "/source/" + instance.id;
+            }
+            return null;
         }
     },
     state: {
@@ -57,7 +63,6 @@ const store = new Vuex.Store({
         app: {
             title: process.env.VUE_APP_TITLE,
             url: process.env.VUE_APP_URL,
-            sourceURL: process.env.VUE_APP_API_HOST + "/source/",
             grid: 5,
         },
     },
@@ -122,10 +127,10 @@ const store = new Vuex.Store({
             }
         },
         async uploadSource(context, {data, name, instance}) {
-            return await api.upload(instance.source.id, name, data);
+            return await api.upload(instance.id, instance.type, name, data);
         },
         async removeSource(context, instance) {
-            await api.delete("source", instance.source.id);
+            await api.delete(instance.type + "/source", instance.id);
         },
         async fetchTrustedUser(context, username) {
             return await api.ajaxJSON({url: 'trusted_user?username=' + username})

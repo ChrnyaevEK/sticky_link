@@ -88,7 +88,7 @@ export default new VueX.Store({
                 type: "success",
             });
         },
-        async createWidget(context, {type, container,}) {  // handleCreateWidget
+        async createWidget(context, {type, container}) {  // handleCreateWidget
             try {
                 await withChangesLock(async () => {
                     return await store.dispatch("createInstance", {

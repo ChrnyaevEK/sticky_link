@@ -9,13 +9,13 @@ from application.models.concrete import type_declaration
 from application.models import abstract
 
 factory_list = [
-    access_manager.ConcreteFactory,
-    copy_manager.ConcreteFactory,
     general_declaration.ConcreteFactory,
+    type_declaration.ConcreteFactory,
+    copy_manager.ConcreteFactory,
     representation_manager.ConcreteFactory,
     routine_manager.ConcreteFactory,
     synchronization_manager.ConcreteFactory,
-    type_declaration.ConcreteFactory
+    access_manager.ConcreteFactory,
 ]
 
 

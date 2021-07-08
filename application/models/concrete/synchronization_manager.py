@@ -108,6 +108,12 @@ class ConcreteFactory(BaseFactory):
             sync_fields = []
             sync_id = models.ForeignKey('Source', blank=True, null=True, on_delete=models.SET_NULL)
 
+            def propagate_instance_updated(self):
+                for document in self.document_set.all():
+                    document.propagate_instance_updated()
+                for image in self.image_set.all():
+                    image.propagate_instance_updated()
+
             class Meta:
                 abstract = True
 

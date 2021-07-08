@@ -92,9 +92,9 @@ export default {
             url: type + "/" + id,
         });
     },
-    upload(id, name, data) {
+    upload(id, type, name, data) {
         return this.ajax({
-            url: process.env.VUE_APP_API + "/" + "source/" + id,
+            url: process.env.VUE_APP_API + '/' + type + "/source/" + id,
             type: "PUT",
             cache: false,
             contentType: false,

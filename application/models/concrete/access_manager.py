@@ -193,20 +193,17 @@ class ConcreteFactory(BaseFactory):
     @classmethod
     def get_source_class(cls, base):
         class Source(cls._get_base_class(base)):
-            related_wall_path = 'document_set__container__wall__'
-            related_owner_path = 'document_set__container__wall__owner__'
-
-            @property
-            def related_wall_instance(self):
-                return self.document_set.first().related_wall_instance
-
-            @property
-            def related_owner_instance(self):
-                return self.document_set.first().related_owner_instance
+            @classmethod
+            def build_trusted_query(cls, user):
+                return Q()
 
             @classmethod
-            def validate_anonymous_access(cls, accessed_fields):
-                return False
+            def build_owned_query(cls, user):
+                return Q()
+
+            @classmethod
+            def build_anonymous_query(cls, user):
+                return Q()
 
             class Meta:
                 abstract = True
@@ -223,7 +220,18 @@ class ConcreteFactory(BaseFactory):
 
     @classmethod
     def get_image_class(cls, base):
-        return cls._get_widget_class(base)
+        class Image(cls._get_widget_class(base)):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                try:
+                    self.source.foreign_type = self.type
+                except AttributeError:  # self.source is None
+                    pass
+
+            class Meta:
+                abstract = True
+
+        return Image
 
     @classmethod
     def get_video_class(cls, base):
@@ -243,4 +251,15 @@ class ConcreteFactory(BaseFactory):
 
     @classmethod
     def get_document_class(cls, base):
-        return cls._get_widget_class(base)
+        class Document(cls._get_widget_class(base)):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                try:
+                    self.source.foreign_type = self.type
+                except AttributeError:  # self.source is None
+                    pass
+
+            class Meta:
+                abstract = True
+
+        return Document

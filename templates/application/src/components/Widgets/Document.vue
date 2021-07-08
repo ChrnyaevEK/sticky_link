@@ -1,4 +1,4 @@
-<template id="document-template">
+<template>
   <WidgetBaseResizable :widget="widget">
     <div class="h-100 center-content flex-column text-break overflow-hidden">
       <strong :title="title" :class="{ 'text-muted': !title }">{{ title || "Empty" }}</strong>
@@ -19,7 +19,6 @@ import {timeFormatted} from "../../common";
 export default {
   type: "document",
   name: "Document",
-  template: "#document-template",
   components: {
     WidgetBaseResizable,
   },
@@ -31,10 +30,7 @@ export default {
       return this.widget.title || (this.widget.source ? this.widget.source.name : "Not chosen");
     },
     sourceURL() {
-      if (this.widget.source && this.widget.source.file) {
-        return this.$store.state.app.sourceURL + this.widget.source.id;
-      }
-      return false;
+      return this.$store.getters.getSourceUrl(this.widget)
     },
   },
   methods: {

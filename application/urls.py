@@ -16,7 +16,8 @@ router.register('counter', views.CounterViewSet, basename='counter')
 router.register('simple_switch', views.SimpleSwitchViewSet, basename='simple_switch')
 router.register('document', views.DocumentViewSet, basename='document')
 router.register('port', views.PortViewSet, basename='port')
-router.register('source', views.SourceViewSet, basename='source')
+
+router.register(r'(?P<type>.*)/source', views.SourceViewSet, basename='source')
 
 urlpatterns = [
     path('', views.App.enter, name="enter"),

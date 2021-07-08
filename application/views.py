@@ -351,6 +351,28 @@ class SourceViewSet(AnonymousModelViewSet):
     model_class = models.Source
     serializer_class = serializers.SourceSerializer
 
+    type_mapping = {
+        'document': models.Document,
+        'image': models.Image,
+    }
+
+    def get_instance(self, request, *args, **kwargs):
+        type, pk = kwargs['type'], kwargs['pk']
+        try:
+            model = self.type_mapping[type]
+        except KeyError:
+            return abort('Wrong type', 400)
+        try:
+            instance = model.objects.get(pk=pk)
+        except model.DoesNotExist:
+            return abort('Not found', 404)
+
+        instance.set_permission(request.user)
+
+        if not instance.trusted_permission and not instance.owner_permission:
+            return abort('Forbidden', 403)
+        return instance
+
     def create(self, request, *args, **kwargs):
         return HttpResponseForbidden()  # Sources will be managed manually
 
@@ -358,44 +380,47 @@ class SourceViewSet(AnonymousModelViewSet):
         return HttpResponseForbidden()
 
     def retrieve(self, request, *args, **kwargs):
-        source = self.get_object()
-        if source.file is None:
+        instance = self.get_instance(request, *args, **kwargs)
+        if isinstance(instance, JsonResponse):
+            return instance
+        if instance.source.file is None:
             return HttpResponseNotFound('Source was not found')
-        return sendfile(request, MEDIA_BASE_PATH + '/' + source.file.name, attachment=request.GET.get('attachment'))
+        return sendfile(request, MEDIA_BASE_PATH + '/' + instance.source.file.name,
+                        attachment=request.GET.get('attachment'))
 
     def update(self, request, *args, **kwargs):
-        source = self.get_object()
-        if not source.trusted_permission and not source.owner_permission:
-            return abort('Forbidden', 403)
+        instance = self.get_instance(request, *args, **kwargs)
+        if isinstance(instance, JsonResponse):
+            return instance
 
         try:  # Get path before update - if update fail, do not delete file
-            old_path = source.file.path
+            old_path = instance.source.file.path
         except ValueError:
             old_path = None
 
+        kwargs['pk'] = instance.source.id
+        del kwargs['type']
+
+        self.kwargs = kwargs  # Important!
         response = super().update(request, *args, **kwargs)
 
         try:  # Remove file after update
             os.remove(old_path)
         except (TypeError, OSError):
             pass
-        for document in source.document_set.all():  # Do not move to routine (propagate only when document is updated)
-            document.propagate_instance_updated()
-        for image in source.image_set.all():
-            image.propagate_instance_updated()
+
+        instance.source.propagate_instance_updated()
         return response
 
     def destroy(self, request, *args, **kwargs):
         # Delete file, not source object. Source will be deleted simultaneously with document
-        source = self.get_object()
-        if not source.trusted_permission and not source.owner_permission:
-            return abort('Forbidden', 403)
-        source = self.get_object()
-        source.delete_file()
-        for document in source.document_set.all():  # Do not move to routine (propagate only when document is updated)
-            document.propagate_instance_updated()
-        for image in source.image_set.all():  # Do not move to routine (propagate only when document is updated)
-            image.propagate_instance_updated()
+        instance = self.get_instance(request, *args, **kwargs)
+        if isinstance(instance, JsonResponse):
+            return instance
+
+        instance.source.delete_file()
+        instance.source.propagate_instance_updated()
+
         return Response('Ok')
 
 
