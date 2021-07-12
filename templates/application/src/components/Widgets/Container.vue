@@ -3,14 +3,23 @@
       class="d-flex flex-column bg-white mb-2"
       :class="{ 'border-top border-bottom': $env.state.editMode }"
   >
-    <div class="px-2 d-flex">
+    <div class="px-2 py-1 d-flex">
       <div class="mr-1 py-1 flex-grow-1" :class="$env.state.editMode ? 'text-truncate' : 'text-break'">
         <strong class="mr-1 text-primary">{{ container.title }}</strong>
         <span class="text-secondary">{{ container.description }}</span>
       </div>
       <button
-          v-if="$env.state.editMode"
-          class="btn btn-sm text-secondary d-none d-md-block"
+          v-if="$env.state.editMode && toolbar"
+          title="Copy container"
+          class="btn btn-sm btn-outline-secondary mr-1 d-none d-md-block"
+          @click.stop="$proxy.dispatch('copyContainer', container)"
+          :disabled="$env.state.changesLock"
+      >
+        <i class="fas fa-copy"></i>
+      </button>
+      <button
+          v-if="$env.state.editMode && toolbar"
+          class="btn btn-sm btn-outline-secondary d-none d-md-block"
           @click.stop="$env.dispatch('openOptions', container)"
           :disabled="$env.state.changesLock"
       >
@@ -30,7 +39,7 @@
           :minHeight="100"
           class="position-relative wall-only content-box overflow-hidden"
           :class="{
-                    'border-top border-bottom border-left-0 border-right-0': $env.state.editMode && !container.grid,
+                    'border': $env.state.editMode && !container.grid,
                     'grid no-border': $env.state.editMode && container.grid,
                     'no-border': !$env.state.editMode,
                   }"
@@ -48,7 +57,7 @@
         </template>
       </vue-draggable-resizable>
     </div>
-    <div v-if="$env.state.editMode" class="px-2 py-1 d-flex align-items-center">
+    <div v-if="$env.state.editMode && toolbar" class="px-2 py-1 d-flex align-items-center">
       <div class="flex-grow-1 d-flex justify-content-end align-items-center">
         <button
             v-for="type of Object.keys(mapping)"
@@ -74,6 +83,7 @@ import Counter from "../Widgets/Counter";
 import SimpleList from "../Widgets/SimpleList";
 import SimpleSwitch from "../Widgets/SimpleSwitch";
 import Document from "../Widgets/Document";
+import $ from 'jquery';
 
 export default {
   components: {
@@ -87,6 +97,7 @@ export default {
   },
   data() {
     return {
+      toolbar: false,
       mapping: {
         simple_text: 'Text',
         url: 'URL',
@@ -98,6 +109,13 @@ export default {
         document: 'Document'
       },
     }
+  },
+  created() {
+    $(window).on('containerActivated', (e, data) => {
+      if (this.container && data.id !== this.container.id) {
+        this.toolbar = false
+      }
+    })
   },
   computed: {
     container() {
@@ -113,7 +131,11 @@ export default {
       });
     },
     activated() {
+      this.toolbar = true
       window.dispatchEvent(new Event("resize"));
+      $(window).trigger('containerActivated', {
+        id: this.container.id
+      })
     },
     getComponent(widget) {
       return [SimpleText, URL, Counter, SimpleList, SimpleSwitch, Document, SimpleImage, SimpleVideo].filter(

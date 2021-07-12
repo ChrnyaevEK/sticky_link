@@ -47,11 +47,10 @@ class ConcreteFactory(BaseFactory):
     def get_container_class(cls, base):
         class Container(cls._get_base_class(base)):
             wall = models.ForeignKey('Wall', on_delete=models.CASCADE)
-            next = models.OneToOneField('Container', on_delete=models.SET_NULL, null=True, default=None, blank=True,
-                                        related_name='previous')
 
             h = models.IntegerField(default=100, validators=[MinValueValidator(50)])
             w = models.IntegerField(default=3000)  # Should not change (is static)
+
             grid = models.BooleanField(default=False)
 
             title = models.CharField(max_length=200, null=True, blank=True)

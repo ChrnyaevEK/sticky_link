@@ -19,7 +19,6 @@ function determineSource(instance) {
     }
 }
 
-
 const store = new Vuex.Store({
     strict: true,
     getters: {
